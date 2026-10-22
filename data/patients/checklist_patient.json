@@ -1,0 +1,12 @@
+{
+  "fictional": true,
+  "patient_id": "synthetic-checklist",
+  "display_name": "Taylor Synthetic — checklist case",
+  "entries": [
+    {"id": "visit-1", "date": "2025-01-10", "source_type": "documented", "kind": "encounter", "text": "Synthetic encounter: hypertension recorded. No blood-pressure measurements supplied in this source."},
+    {"id": "dose-1", "date": "2025-01-10", "source_type": "documented", "kind": "medication", "text": "Synthetic prescription record: amlodipine 5 mg orally once daily.", "medication": {"name": "amlodipine", "dose": "5 mg", "frequency": "orally once daily"}},
+    {"id": "visit-2", "date": "2025-02-10", "source_type": "documented", "kind": "encounter", "text": "Synthetic follow-up encounter: the recorded amlodipine prescription dose changed from 5 mg to 10 mg once daily. No blood-pressure measurement is available."},
+    {"id": "dose-2", "date": "2025-02-10", "source_type": "documented", "kind": "medication", "text": "Synthetic prescription record: amlodipine 10 mg orally once daily; previous documented dose was 5 mg.", "medication": {"name": "amlodipine", "dose": "10 mg", "frequency": "orally once daily"}},
+    {"id": "symptom-undated", "date": null, "source_type": "patient_reported", "kind": "symptom", "text": "Synthetic patient reports lightheadedness on standing and says symptoms began after the medication change. Exact symptom onset and the report date are unavailable. No blood-pressure readings, syncope history, fluid-intake history or current warning-sign screening were supplied."}
+  ]
+}

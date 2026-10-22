@@ -1,0 +1,55 @@
+# Local environments, Python outputs and tooling caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.nox/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+build/
+dist/
+*.egg-info/
+
+# Credentials, private tool state and local configuration
+.env
+.env.*
+*.pem
+*.key
+secrets.toml
+.aws/
+.codex/
+.agents/
+
+# Runtime databases, reports and logs (never publish local accounts or exports)
+*.db
+*.db-*
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+*.log
+logs/
+/data/reports/*
+!/data/reports/.gitkeep
+/data/imports/
+/data/uploads/
+/data/backups/
+
+# Only reviewed built-in fictional fixtures are publishable by default
+/data/patients/*
+!/data/patients/fictional_patient.json
+!/data/patients/checklist_patient.json
+
+# Editor and operating-system files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*~
+*.swp

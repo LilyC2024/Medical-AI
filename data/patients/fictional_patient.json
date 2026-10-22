@@ -1,0 +1,28 @@
+{
+  "fictional": true,
+  "patient_id": "fictional-001",
+  "display_name": "Alex Example (fictional)",
+  "entries": [
+    {
+      "id": "encounter-2025-02-14",
+      "date": "2025-02-14",
+      "source_type": "documented",
+      "kind": "encounter",
+      "text": "Fictional primary-care note: intermittent tiredness discussed. No examination findings or vital signs supplied in this excerpt. Follow-up was planned; outcome not included."
+    },
+    {
+      "id": "medication-2025-02-14",
+      "date": "2025-02-14",
+      "source_type": "documented",
+      "kind": "medication",
+      "text": "Historical prescription list records cetirizine 10 mg orally once daily for seasonal allergy symptoms. Current use and subsequent changes are not documented."
+    },
+    {
+      "id": "report-2025-03-10",
+      "date": "2025-03-10",
+      "source_type": "patient_reported",
+      "kind": "symptom",
+      "text": "Fictional patient reports continued intermittent tiredness, irregular sleep during shift work, and taking an allergy tablet only on some days. Tablet name and dose not recalled. Current vital signs, allergies and emergency-symptom screening were not supplied."
+    }
+  ]
+}

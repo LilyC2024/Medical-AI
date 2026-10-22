@@ -1,0 +1,10 @@
+{
+  "version": "synthetic-workflow-v1",
+  "purpose": "Human-review routing for synthetic evaluation, not a clinical triage protocol",
+  "require_current_warning_screen": true,
+  "require_current_blood_pressure": true,
+  "screen_max_age_days": 0,
+  "reported_warning_action": "urgent_human_review_stop",
+  "missing_information_action": "uncertain_human_review_pause",
+  "model_may_override": false
+}
