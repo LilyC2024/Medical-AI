@@ -30,6 +30,11 @@ software behavior, not clinical accuracy, diagnostic validity or triage safety.
 - `python -m pip check`: no broken requirements.
 - `python -m compileall -q app.py medical_assistant scripts tests`: passed.
 - `git diff --check`: passed.
+- Published release `7863ad89ee03fcf43c772d320f2adfea1a90a6ad`: GitHub
+  [CI run #1](https://github.com/LilyC2024/Medical-AI/actions/runs/39783171014)
+  passed on **Python 3.10 and Python 3.12**, including dependency consistency,
+  compilation and the complete offline regression suite. The published source
+  tree matched the reviewed local tree exactly.
 
 The initial revised live smoke correctly held missing-data cases, then rejected
 a model response that confused documented and patient-reported evidence. No
@@ -65,8 +70,8 @@ review assistants, not runtime clinical agents or clinical validators.
   SQLite accounts/sources/audit records and saved reports persist locally.
 - Databases/exports are not encrypted; filesystem/process administrators remain
   trusted. Runtime data and credentials are excluded from publication.
-- Local verification used Python 3.10.12. The GitHub CI workflow targets Python
-  3.10 and 3.12; hosted CI has not yet been reported as successful.
+- Local verification used Python 3.10.12; hosted CI additionally passed on
+  Python 3.10 and Python 3.12. Live Ollama inference was verified locally, not in CI.
 - No project redistribution license has been selected. Model/dependency licenses
   remain applicable; model weights are not bundled.
 
