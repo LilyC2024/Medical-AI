@@ -22,6 +22,31 @@ from the four runtime specialists. They do not run inside the published app or
 replace a clinical reviewer. Their reviews and tests verify software behavior,
 not clinical validity. Normal operation does not call a hosted coding model.
 
+The implementation/review process used a primary coding agent for integration
+and separate subagents for records/UI, safety/workflow, and documentation/release
+readiness. On the illustrated README pass, these three reviewers independently
+checked source behavior while the primary agent rewrote the guide and prepared
+the publication. Their findings clarified startup seeding, fixed case snapshots,
+historical warning holds and automatic report persistence. Development-agent
+labels describe review assignments; they are not application classes or installed
+runtime services.
+
+At runtime, `MedicalHistoryOrchestrator` creates one `StateGraph(CaseState)`.
+History and medication classes return `Assessment` objects through
+`RunnableLambda`; `SafetyAgent.evaluate()` returns a Python policy decision.
+`SpecialistAgent("reasoning", inference)` alone calls the Ollama adapter, which
+returns schema-constrained JSON and is followed by Python validation. These
+specialists run sequentially and share typed graph state. Human review uses
+LangGraph interrupts/resume commands and authenticated, content-bound receipts.
+The source retains generic prompts for all four roles, but the graph uses
+inference only for reasoning.
+
+The two illustrations in [the README](../README.md#how-it-works-in-pictures)
+were generated using the built-in image tool and checked against the source.
+PNG files, generation prompts and an editable technical Mermaid diagram are in
+`docs/images/`. They document the application; they do not add cloud inference
+to its runtime.
+
 ## Work on the code
 
 Read [AGENTS.md](../AGENTS.md) before changes. Reuse the environment and inspect

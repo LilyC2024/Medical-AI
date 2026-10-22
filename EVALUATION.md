@@ -48,6 +48,17 @@ Automated model responses are scripted and are never presented as live inference
 
 ## Independent agent review and fixes
 
+Illustrated documentation review on 22 October 2026: three independent development
+subagents checked records/UI, safety/workflow and documentation/release behavior.
+The README now embeds the clinical and technical illustrations, explains runtime
+specialists separately from development subagents, and documents actual setup,
+review, import and export actions. Source review corrected wording about automatic
+fixture seeding, fixed case snapshots and historical warning flags. The full local
+suite passed again: **87 tests in 17.86 seconds**. Dependency consistency,
+compilation and whitespace checks passed. This pass changes documentation and a
+module docstring; live inference behavior is unchanged and the live smoke was not
+rerun. The earlier live-model result above remains separately identified.
+
 Separate development subagents reviewed storage/provenance, safety/approval,
 presentation, architecture and publication documentation. Their adversarial tests
 found and helped resolve forged export receipts, unrestricted report revisions,

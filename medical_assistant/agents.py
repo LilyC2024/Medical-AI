@@ -1,4 +1,8 @@
-"""Four constrained specialists, each using the same local inference adapter."""
+"""Constrained specialist prompt templates and local inference validation.
+
+The clinical graph uses this wrapper for reasoning only. History, medication
+and safety roles run through dedicated deterministic Python components.
+"""
 
 import json
 from typing import Protocol

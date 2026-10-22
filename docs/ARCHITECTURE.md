@@ -7,6 +7,11 @@ performs persistence and approval checks.
 
 ## Clinical-review graph
 
+The [README](../README.md#how-it-works-in-pictures) includes illustrated clinical
+and technical overviews. The graph below is the precise transition reference;
+its [editable technical diagram](images/mhcra-ai-technical-flow-v1.mmd) also shows
+storage, inference and supporting services.
+
 ```mermaid
 flowchart TD
     A[Validated SQLite source snapshot] --> S[Python Safety Agent]
@@ -32,6 +37,10 @@ interrupts occur before reasoning; safety also runs after reasoning and during
 completion/export. Policy and record hashes bind the decision to its inputs.
 No LLM executes after final approval. Rejected reports remain pending; fact
 corrections go through approved new source imports and a fresh assessment.
+The patient snapshot is loaded once at case start. Rechecks use that snapshot;
+later imports in SQLite are not automatically detected or included in an active
+case. Start a new case to include newly approved facts. Any structured warning
+marked present in the snapshot triggers the urgent hold, regardless of its date.
 
 ## History-management workflow
 
@@ -47,6 +56,7 @@ conflicting IDs fail. No model writes or modifies records.
 | Module | Responsibility |
 | --- | --- |
 | `app.py` | Streamlit record selection and human review forms |
+| `runtime.py` | Idempotently seed bundled fixtures and cache shared local authentication services |
 | `models.py` | Strict Pydantic records, assessments and review contracts |
 | `database.py` | stdlib SQLite transactions, immutable sources, idempotent seed and reads |
 | `grounding.py` | Compare extracted fields against original JSON entries |
@@ -81,8 +91,9 @@ unrestricted diagnostic or treatment generation. References must come from the
 supplied approved local collection. These constraints provide no clinical proof.
 
 The catalog always permits insufficient information/other unestablished causes.
-A medication entry permits a medication-related contribution hypothesis; the
-word “sleep” in a record permits a sleep-related contribution hypothesis. These
+A medication entry or structured order permits a medication-related contribution
+hypothesis; a whole-word, case-insensitive match for “sleep” permits a sleep-related
+contribution hypothesis, including a negated mention. These
 are transparent demonstration eligibility rules, not diagnostic criteria or a
 test of causation. The model selects eligible labels and complete source-entry
 excerpts. Uncertainty, follow-up considerations, missing-information statements

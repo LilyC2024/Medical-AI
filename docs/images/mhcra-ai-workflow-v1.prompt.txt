@@ -1,0 +1,50 @@
+# MHCRA AI workflow illustration
+
+Generation mode: built-in image generation (image_gen).
+Final asset: mhcra-ai-workflow-v1.png
+
+## Initial prompt
+
+Use case: infographic-diagram
+Asset type: an explanatory illustration for the MHCRA AI project, suitable for a GitHub README and presentation.
+Primary request: Draw a polished, accurate, approachable illustration explaining how MHCRA AI (Medical History & Clinical Reasoning Assistant) works.
+Style: professional editorial illustration with softly dimensional computer, database, source-document and clinician icons; crisp readable diagram labels, restrained medical visual language, ample whitespace, warm white backdrop, navy typography with teal process accents and amber human-review gates. Landscape 16:9 canvas, high resolution. This should feel like a coherent illustrated explanation, not a screenshot or a wall of text.
+
+Title exactly: "How MHCRA AI works"
+Subtitle exactly: "Local records. Traceable hypotheses. Clinician control."
+
+Composition: One large outlined area labeled "Your computer" contains the entire computational workflow. Flow arrows and numbered illustrated stations make the reading order unambiguous. Keep labels large and text concise.
+The main clinical workflow must follow this exact order:
+1. "Synthetic records" — document stack and SQLite database, small label "Original sources + extracted facts".
+2. "LangGraph orchestrator" — a coordinator icon linking the following four specialists.
+3. "Safety Agent" — shield icon; small label "Deterministic policy". Before any reasoning, branch into three clearly differentiated paths: a red stop sign "Warning reported: STOP for human assessment"; an amber clinician gate "Missing information: clinician review before continuing"; a teal path "Eligible to continue". Only the approved amber route and the teal route feed the next stage. The red route never feeds reasoning.
+4. "History Agent" — chronological record icon, small label "Facts, dates, missing information".
+5. "Medication Agent" — medication list icon, small label "Documented doses and changes".
+6. "Clinical Reasoning Agent" — local computer/model icon, small label "Ollama: hypotheses + cited excerpts". A small nearby input card "Approved local evidence" connects only here. Tiny secondary caption "May be empty".
+7. "Safety recheck" — small repeat-shield gate before "Unverified draft".
+8. "Clinician approval" — visually prominent human clinician reviewing a report, with a lock. "Approve" arrow leads to "Reviewed report"; "Request corrections" arrow loops back to the draft, labeled "Remains pending". Do not imply a model can approve a report.
+
+Along the bottom, an unobtrusive secondary strip labeled "History updates" shows: "Import JSON" → "Validate + compare sources" → "Human approval" → "Save to SQLite". Distinguish this separate approval workflow from report approval.
+
+Small legend: "History, medication and safety: Python rules" and "Clinical reasoning: local LLM".
+Footer exactly: "Synthetic data only • Educational prototype • No autonomous diagnosis or treatment"
+Small badge exactly: "Local inference • No cloud fallback"
+
+Accuracy constraints: Four specialist roles, with only Clinical Reasoning using the LLM. The orchestrator is coordination, not an autonomous physician. Missing data is never evidence of safety. Final reviewed reports require authenticated clinician approval. All record-derived findings retain source references. The entire runtime is local, with no cloud or paid API icons. Use fictional generic files only, no invented patient findings, test values, diagnostic certainty, treatment recommendations, official certification marks, vendor logos, or decorative robot doctors. Prefer fewer clear labels to dense fine print. Render all quoted text accurately; do not add spurious claims.
+
+## First refinement
+
+Edit this infographic with one targeted correction: fix ONLY the report-review flow at the far right (the area after the Clinical Reasoning Agent). Preserve the rest of the illustration, title, color palette, readable labels, icons and bottom history-updates strip exactly.
+Current wrong arrows imply approval returning to the draft and corrections returning to reasoning. Remove those arrows completely.
+Replace the far-right workflow with this exact visually unambiguous sequence:
+"Safety recheck" → "Unverified draft" → "Clinician approval" → "Reviewed report".
+Keep the shield, document, clinician and approved document as their respective icons. You may rearrange ONLY these four far-right elements into a spacious two-row layout for clarity.
+The arrow from clinician to reviewed report must be labeled "Approve".
+A single amber RETURN arrow from "Clinician approval" back to "Unverified draft" must be labeled "Request corrections".
+The text "Remains pending" belongs under the unverified draft.
+No arrow may skip the unverified draft. No arrow may run from the reviewed report back into the workflow. No corrections arrow may point to the local LLM or clinical reasoning agent. Safety recheck feeds the unverified draft, never directly the clinician or final report.
+The physician icon represents human review, not a medical diagnosis. Maintain all other accurate content and footer text unchanged.
+
+## Final refinement
+
+Edit only the amber corrections connector in the far-right report review area. Remove the entire amber arrow line currently running from underneath the Reviewed report toward the Unverified draft, including its arrowheads. Do not draw any replacement return line. Instead add a small amber text note directly beneath the clinician icon: "Corrections requested: draft remains pending". Preserve the correct teal main sequence Safety recheck → Unverified draft → Clinician approval → Reviewed report and the Approve label. No line should leave Reviewed report. Preserve all other illustration content, labels, layout, colors and footer.

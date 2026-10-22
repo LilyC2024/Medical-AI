@@ -1,0 +1,63 @@
+# MHCRA AI technical flow illustration
+
+Mode: built-in image generation (image_gen).
+Sources checked: docs/ARCHITECTURE.md, medical_assistant/workflow.py, medical_assistant/ollama_client.py, medical_assistant/runtime.py, pyproject.toml.
+
+## Initial prompt
+
+Use case: infographic-diagram
+Asset type: Technical architecture illustration for the actual MHCRA AI Python application, for GitHub documentation and presentations.
+Primary request: Draw a NEW technical flow illustration, complementary to a user-facing workflow illustration. This is a software architecture diagram with elegantly illustrated icons, precise arrows, and large readable labels. Landscape high resolution, approximately 2400 by 1600. White background, navy text, teal software flow, purple inference boundary, amber human interrupts, red hard stop. Professional restrained technical aesthetic, ample space. Avoid dense paragraphs.
+
+Title exactly: "MHCRA AI — Technical flow"
+Subtitle exactly: "Python • Streamlit • SQLite • LangGraph • Ollama"
+All components inside an outline labeled "Local application runtime". No cloud components.
+
+Layout: use an organized software architecture diagram with clear main flow, a local inference sidecar, and compact infrastructure cards. Number the main stages to preserve reading order. Use directed connectors with distinct arrowheads; avoid crossings. Use concise text labels as follows:
+
+INPUT AND STORAGE at upper left:
+"Streamlit UI" with small filename "app.py", connects to "Validated patient snapshot".
+A SQLite cylinder "SQLite" with two separate small compartments labeled "Original source JSON" and "Extracted facts" feeds that snapshot through a small box "Pydantic + source grounding".
+A compact separate import strip below SQLite reads "JSON import → Validate + compare → Human approval → SQLite". It is a source-update path, not report approval.
+
+MAIN WORKFLOW in a central large frame titled "Medical History Orchestrator · LangGraph":
+1. "Safety Agent" / "Versioned Python policy"
+   Red side exit "Urgent: STOP" ending at "Human assessment" with no continuation to reasoning.
+   Amber side interrupt "Uncertain: clinician review" with a clear approved-resume connector back to the main flow before History.
+   Direct ordinary path labeled "Eligible".
+2. "History Agent" / "Python chronology + missing dates"
+3. "Medication Agent" / "Python orders + dose changes"
+4. "Local evidence retrieval" / "Approved files · may be empty"
+5. "Clinical Reasoning Agent" / "Constrained hypotheses only"
+6. "Output validation" / "Schema + source IDs + exact excerpts"
+   Compact red side note "Invalid output: fail closed", no path to approved report.
+7. "Safety recheck" / "Python policy"
+8. "Compose unverified draft" / "Seven report sections"
+9. "Clinician review" / "Authenticated interrupt"
+10. "Guarded completion + export" / "Reviewed report"
+You may arrange main nodes in two clear ordered rows, with an explicit connector between rows; never imply parallel runtime agents. Sequence is 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10.
+At final review, an "Approve exact draft" arrow leads to guarded completion; a short amber rejection loop attaches only to the clinician-review node with label "Reject: remains pending". It must never connect to final report or imply automatic rewriting.
+A small note beside completion says "Recheck safety + signed approval".
+Do not draw a path bypassing validation or clinician approval.
+
+LOCAL MODEL SIDECAR, visually purple, connects ONLY with main step 5:
+"Ollama service" / "127.0.0.1:11434"
+"gemma4:e2b · local model"
+One clearly labeled outward arrow from reasoning to Ollama: "Prompt + JSON Schema"
+One clearly labeled return arrow: "Structured JSON"
+Small caption: "No model tools or database access"
+No other specialist connects to Ollama.
+
+INFRASTRUCTURE CARDS along bottom, not extra workflow steps:
+"Graph state" / "InMemorySaver · interrupts + resume"
+"LocalAuth + audit" / "Sessions · signed receipts · SQLite audit"
+"Source traceability" / "Source IDs · exact excerpts · content hashes"
+Link the authentication card to clinician-review gates with subtle dotted connectors or a small key symbol, not misleading record-data flow arrows.
+
+Footer exactly: "Synthetic records only • Educational prototype • Local inference only • No cloud fallback"
+
+Accuracy constraints: This is an illustration of source code, not a proposed future system. No paid services, cloud storage, vector database, autonomous prescribing, unimplemented API server, or external medical data retrieval. SQLite is persistent storage; graph checkpoints are in memory. Only reasoning invokes the local LLM. Safety holds cannot be overridden by the model. Authenticated human approval is required for record import and final report review. No LLM call occurs after final approval. Keep all rendered labels legible; simplify decorative illustrations to protect information accuracy.
+
+## Refinement
+
+undefined

@@ -1,0 +1,38 @@
+flowchart TD
+  subgraph LOCAL["Local application runtime"]
+    UI["Streamlit UI · app.py"] --> SNAP["Validated patient snapshot"]
+    DB[("SQLite: immutable sources + extracted facts")] --> GROUND["Pydantic + source grounding"]
+    GROUND --> SNAP
+    IMPORT["Synthetic JSON import"] --> COMPARE["Validate + compare sources"]
+    COMPARE --> HUMAN["Authenticated human approval"]
+    HUMAN -->|Append transactionally| DB
+
+    subgraph GRAPH["Medical History Orchestrator · LangGraph"]
+      SAFE["Safety Agent · versioned Python policy"]
+      SAFE -->|Urgent| STOP["STOP · human assessment; cannot resume reasoning"]
+      SAFE -->|Uncertain| SAFEREVIEW["Authenticated safety-review interrupt"]
+      SAFEREVIEW -->|Matching approval| HISTORY["History Agent · Python chronology"]
+      SAFEREVIEW -->|Stop| ENDCASE["Stopped case"]
+      SAFE -->|Ordinary eligibility| HISTORY
+      HISTORY --> MEDS["Medication Agent · Python orders + dose changes"]
+      MEDS --> EVIDENCE["Approved local evidence retrieval · may be empty"]
+      EVIDENCE --> REASON["Clinical Reasoning Agent · constrained hypotheses"]
+      REASON --> VALID["Validate schema, eligible labels, exact excerpts + source attribution"]
+      VALID -->|Invalid| FAIL["Fail closed"]
+      VALID -->|Valid| RECHECK["Recheck Python safety policy"]
+      RECHECK --> DRAFT["Compose seven-section unverified draft"]
+      DRAFT --> REVIEW["Authenticated clinician-review interrupt"]
+      REVIEW -->|Reject with notes: remains pending| REVIEW
+      REVIEW -->|Approve exact draft| COMPLETE["Recheck safety + signed approval receipt"]
+      COMPLETE --> FINAL["Reviewed report + guarded export"]
+    end
+
+    SNAP --> SAFE
+    REASON -->|Prompt + JSON Schema| OLLAMA["Ollama · 127.0.0.1:11434 · gemma4:e2b"]
+    OLLAMA -->|Structured JSON returned to reasoning node| REASON
+    AUTH["LocalAuth · expiring sessions, signed receipts + SQLite audit"] -.-> HUMAN
+    AUTH -.-> SAFEREVIEW
+    AUTH -.-> REVIEW
+    MEMORY["InMemorySaver · graph state, interrupts + resume"] -.-> GRAPH
+    TRACE["Source IDs · exact excerpts · content hashes"] -.-> VALID
+  end
