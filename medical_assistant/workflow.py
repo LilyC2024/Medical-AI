@@ -1,5 +1,6 @@
 """Clinical-review graph with deterministic safety holds and authenticated review."""
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import TypedDict
 from uuid import uuid4
 
@@ -17,6 +18,7 @@ from medical_assistant.models import PatientRecord, Review
 from medical_assistant.report import compose, digest
 from medical_assistant.safety import SafetyAgent
 from medical_assistant.storage import ROOT
+from medical_assistant.imaging import ImagingStore
 
 
 class CaseState(TypedDict, total=False):
@@ -39,12 +41,14 @@ class CaseState(TypedDict, total=False):
     review_history: list[dict]
     reviewed_at: str
     final_report: str
+    imaging: list[dict]
 
 
 class MedicalHistoryOrchestrator:
     def __init__(self, inference: Inference, evidence_collection=None, *, auth=None, safety=None):
         self.inference = inference
         self.auth = auth or LocalAuth()
+        self.imaging_store = ImagingStore(self.auth.path, self.auth)
         self.safety = safety or SafetyAgent()
         self.evidence_collection = evidence_collection or LocalEvidenceCollection(ROOT / "data" / "evidence")
         builder = StateGraph(CaseState)
@@ -126,9 +130,15 @@ class MedicalHistoryOrchestrator:
     def _final_safety(self, state):
         return {"final_safety_decision": self._verify_safety_ack(state)}
 
-    @staticmethod
-    def _compose(state):
-        draft = compose(PatientRecord.model_validate(state["record"]), state["source_file"], state["assessments"], state["evidence"])
+    def _verify_imaging(self, state):
+        snapshots = state.get("imaging", [])
+        if any(s["manifest"]["patient_id"] != state["record"]["patient_id"] for s in snapshots):
+            raise ValueError("Imaging snapshot patient mismatch")
+        self.imaging_store.verify(snapshots)
+
+    def _compose(self, state):
+        self._verify_imaging(state)
+        draft = compose(PatientRecord.model_validate(state["record"]), state["source_file"], state["assessments"], state["evidence"], state.get("imaging", []))
         return {"draft": draft, "generated_draft": draft, "status": "awaiting_clinician_review"}
 
     def _review(self, state):
@@ -145,6 +155,7 @@ class MedicalHistoryOrchestrator:
 
     def _complete(self, state):
         self._verify_safety_ack(state)
+        self._verify_imaging(state)
         review = Review.model_validate(state["review"])
         self.auth.verify_receipt(state["approval_receipt"], "clinical-review:" + state["case_id"], digest(review.model_dump_json()))
         if not review.approved or review.draft_sha256 != digest(state["draft"]):
@@ -156,15 +167,21 @@ class MedicalHistoryOrchestrator:
     def config(case_id):
         return {"configurable": {"thread_id": case_id}}
 
-    def start(self, record: PatientRecord, source_file: str):
+    def start(self, record: PatientRecord, source_file: str, *, imaging=None):
         validate_record_grounding(record)
         case_id = uuid4().hex
         return case_id, self.graph.stream({"case_id": case_id, "record": record.model_dump(mode="json"),
             "source_file": source_file, "model": self.inference.model, "assessments": {},
-            "review_history": [], "status": "running", "reviewed": False}, self.config(case_id), stream_mode="updates")
+            "review_history": [], "status": "running", "reviewed": False,
+            "imaging": imaging or []}, self.config(case_id), stream_mode="updates")
 
     def start_patient(self, patient_id, path):
-        return self.start(get_history(patient_id, path), "SQLite original-source snapshot")
+        if Path(path).resolve() != self.auth.path.resolve():
+            raise ValueError("Case database must match the authenticated local service")
+        record = get_history(patient_id, path)
+        # Never delay an urgent safety hold for optional image artifact inspection.
+        imaging = [] if self.safety.evaluate(record)["state"] == "urgent" else self.imaging_store.snapshots(patient_id)
+        return self.start(record, "SQLite original-source snapshot", imaging=imaging)
 
     def state(self, case_id):
         return self.graph.get_state(self.config(case_id)).values
@@ -213,6 +230,7 @@ class MedicalHistoryOrchestrator:
         if state.get("status") != "complete" or not state.get("reviewed") or snapshot.next:
             raise ValueError("Report is not complete: clinician approval is required")
         self._verify_safety_ack(state)
+        self._verify_imaging(state)
         review = Review.model_validate(state["review"])
         self.auth.verify_receipt(state["approval_receipt"], "clinical-review:" + case_id, digest(review.model_dump_json()))
         if not review.approved or review.draft_sha256 != digest(state["final_report"]):

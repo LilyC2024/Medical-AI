@@ -18,6 +18,39 @@ software behavior, not clinical accuracy, diagnostic validity or triage safety.
 
 ## Executed checks
 
+### Shared CT workbench integration — 22 October 2026
+
+- **120 MHCRA tests passed in 31.61 seconds**, including 33 imaging/worker/UI
+  checks. Tests cover wrong patient/study, rejected/tampered archives, NPY header
+  allocation attempts, malformed metadata, overlay/count/geometry consistency,
+  authenticated imaging acceptance, immutable studies, commit-failure recovery,
+  interrupted promotion retry, fixed snapshots and final report/export guards.
+  UI regressions also ensure image inspection cannot delay urgent routing and a
+  newly supplied warning blocks review/download of an older case snapshot.
+- The separate CT Python 3.12 environment passed **32 tests in 10.708 seconds**,
+  plus Ruff and dependency consistency. These include actual synthetic DICOM,
+  ONNX export/parity, source-grid restoration and the new bundle exporter.
+- **Real cross-project imaging smoke passed**: the separate CT worker generated
+  20 synthetic 48×48 slices, trained its 12-epoch tiny demonstration model and
+  returned a bundle accepted by MHCRA's receiver validation. Source-grid class
+  counts were `[40218, 128, 5734, 0]`; all 41 artifacts verified. The smoke prepared
+  an import but issued **no imaging, safety or final report approval**.
+- **Real local `gemma4:e2b` smoke passed again**, separately: missing-data holds
+  preceded inference; the eligible synthetic case reached final clinician review
+  with `reviewed=false`. Images and reviewer notes are excluded from LLM input.
+- A scientific contact-sheet illustration was generated from the actual synthetic
+  source/overlay previews and counts; it contains no real patient pixels.
+  The tiny model has weak teacher agreement and is not an anatomical/lesion model.
+- Independent review found and resolved oversized NPY allocation attempts,
+  malformed numeric metadata, commit-failure recovery and job-study binding.
+  Producer-declared provenance is labeled explicitly. Hash consistency cannot
+  independently prove synthetic origin or model execution.
+- Streamlit automated UI checks passed. Interactive browser preview was unavailable
+  because browser origin access was declined; no browser workaround was used.
+
+These results supersede the earlier suite total; historical phase results below
+are retained. The published GitHub checks are reported separately after execution.
+
 - Foundation gate: 20 tests passed, plus a real local structured-response
   connection check against the installed `gemma4:e2b` model.
 - History gate: 24 cumulative foundation/history tests passed.
@@ -85,6 +118,9 @@ review assistants, not runtime clinical agents or clinical validators.
   Python 3.10 and Python 3.12. Live Ollama inference was verified locally, not in CI.
 - No project redistribution license has been selected. Model/dependency licenses
   remain applicable; model weights are not bundled.
+- Optional imaging is generated-synthetic only. Candidate measurements and entropy
+  are research outputs, not validated clinical findings/confidence. CT worker logs,
+  source/model artifacts, accepted originals and pending bundles stay ignored.
 
 Suggested next task after publication: have a clinician review and version a
 local evidence collection and evaluate the bounded prototype on a larger,

@@ -1,7 +1,7 @@
 [server]
 address = "127.0.0.1"
 headless = true
-maxUploadSize = 1
+maxUploadSize = 64
 
 [browser]
 gatherUsageStats = false

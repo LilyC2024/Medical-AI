@@ -19,3 +19,22 @@ must pass its tests before work begins on the next.
 5. **Streamlit interface and automated evaluation** — SQLite selection/import,
    symptoms, timeline, medications, evidence, safety controls and checklist tests.
    Status: passed (87 full regression/UI/adversarial tests; real local smoke passed; see EVALUATION.md).
+
+## Shared CT workbench extension
+
+6. **CT exchange contract** — add a synthetic-only, hash-bound review bundle,
+   explicit identity/unknown dates, source-grid previews and measurements; test
+   CT export and invalid-artifact behavior before MHCRA implementation.
+   Status: passed (32 CT tests including 2 new bridge tests; CT lint passed;
+   unchanged MHCRA baseline: 87 tests passed).
+7. **MHCRA imaging workbench** — isolated local CT jobs, verified bundle inspection,
+   source/overlay viewer, authenticated imaging acceptance and source-linked report
+   appendix. Preserve existing safety and final approval gates. Test before phase 8.
+   Status: passed (116 full MHCRA tests, including 29 imaging/worker/UI checks;
+   CT suite rerun: 32 tests; real exported synthetic bundle validated by MHCRA).
+8. **Cross-project demonstration and publication** — run both suites, real synthetic
+   CT processing and local Ollama smoke; document actual results, illustrate the
+   integration, review publication contents and push both repositories.
+   Implementation/local validation passed: 120 MHCRA tests, 32 CT tests, real CT
+   worker/receiver smoke and separate real local Ollama smoke. The coordinated
+   release pins its CT producer in hosted integration CI; see EVALUATION.md.

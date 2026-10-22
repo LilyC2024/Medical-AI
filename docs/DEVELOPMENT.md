@@ -49,6 +49,15 @@ to its runtime.
 
 ## Work on the code
 
+The shared CT extension follows phases 6–8 in `PLAN.md`: establish and test the
+producer contract, implement/test the MHCRA viewer and acceptance/appendix, then
+run real local smoke checks and publish. The companion uses its own Python 3.12
+environment. MHCRA's NumPy/Pillow dependencies were already present through
+Streamlit and are now declared directly; its existing environment was reused.
+Independent subagent reviews supplied the archive-allocation, malformed-metadata,
+transaction-recovery and identity regressions. This integration adds deterministic
+worker/inspection/storage components, not another LLM agent.
+
 Read [AGENTS.md](../AGENTS.md) before changes. Reuse the environment and inspect
 versions before changing dependencies:
 

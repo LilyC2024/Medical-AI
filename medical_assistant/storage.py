@@ -39,7 +39,12 @@ def save_report(payload: dict, directory: Path = REPORT_DIR, *, auth=None, safet
                                 digest(review.model_dump_json()))
     if actor != review.reviewer:
         raise ValueError("Authenticated reviewer identity mismatch")
-    generated = compose(record, payload["source_file"], payload["assessments"], payload["evidence"])
+    if payload.get("imaging"):
+        from medical_assistant.imaging import ImagingStore
+        if any(s["manifest"]["patient_id"] != record.patient_id for s in payload["imaging"]):
+            raise ValueError("Imaging snapshot patient mismatch")
+        ImagingStore(auth.path).verify(payload["imaging"])
+    generated = compose(record, payload["source_file"], payload["assessments"], payload["evidence"], payload.get("imaging", []))
     if payload.get("generated_draft") != generated or payload["final_report"] != generated:
         raise ValueError("Clinical report no longer matches its grounded source snapshot")
     decision = (safety or SafetyAgent()).evaluate(record)

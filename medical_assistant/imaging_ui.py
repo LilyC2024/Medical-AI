@@ -1,0 +1,115 @@
+"""Imaging inspection UI; acceptance is separate from final clinical approval."""
+import streamlit as st
+
+from medical_assistant.ct_worker import LocalCTJob, configured_ct_root
+from medical_assistant.imaging import ImagingStore
+from medical_assistant.models import Review
+
+
+def _viewer(manifest, path_for, key):
+    st.caption("Synthetic research output · acquisition date unavailable · teal: class 1; amber: class 2; purple: class 3. Class 0 does not establish normality.")
+    depth = manifest["geometry"]["shape_zyx"][0]
+    index = st.slider("Source-grid slice", 0, depth - 1, depth // 2, key=key) if depth > 1 else 0
+    left, right = st.columns(2)
+    left.image(str(path_for("source_preview", index)), caption=f"Synthetic source · slice {index}", width="stretch")
+    right.image(str(path_for("overlay_preview", index)), caption=f"Unvalidated candidate overlay · slice {index}", width="stretch")
+    st.dataframe([{"Class": i, "Heuristic meaning": manifest["classes"][str(i)],
+                   "Source-grid voxels": manifest["voxel_counts"][i],
+                   "Candidate volume (mm³)": manifest["candidate_volumes_mm3"][i]} for i in range(4)], hide_index=True)
+    st.caption(f"Bundle-reported entropy mean: {manifest['uncertainty_mean']:.3f} — model behavior, not clinical confidence. Raw predictions; producer declares ONNX parity passed.")
+    with st.expander("Imaging identity and source provenance"):
+        st.json(manifest)
+
+
+def imaging_ui(path, auth, token, user, record, *, locked=False):
+    st.subheader("Local imaging workbench")
+    st.info("Inspect generated synthetic CT beside the history. Imaging remains a research appendix, outside diagnostic reasoning. Imaging acceptance does not approve the final report.")
+    if "imaging_store" not in st.session_state:
+        st.session_state.imaging_store = ImagingStore(path, auth)
+    store = st.session_state.imaging_store
+
+    def prepare(payload, *, study_id=None):
+        result = store.prepare(payload, record.patient_id, study_id=study_id)
+        if "imaging_proposal" in st.session_state:
+            store.discard(st.session_state.imaging_proposal[0])
+        st.session_state.imaging_proposal = result
+
+    job = st.session_state.get("ct_job")
+    running = job is not None and job.status() == "running"
+    st.caption("Companion location: " + str(configured_ct_root()))
+    if st.button("Generate synthetic CT demonstration", key="ct_generate", disabled=locked or running or not token):
+        try:
+            st.session_state.ct_job = LocalCTJob(record.patient_id, jobs=store.root / "jobs")
+            st.rerun()
+        except (ValueError, OSError) as error:
+            st.error(str(error))
+    if job:
+        status = job.status()
+        st.write(f"CT job: {status} · synthetic patient {job.patient_id} · study {job.study_id}")
+        if status == "running":
+            st.caption("Processing in a separate local Python worker. Refresh to check completion; a watchdog stops jobs after three minutes.")
+            st.button("Refresh CT job", key="ct_refresh")
+            if st.button("Cancel CT job", key="ct_cancel"):
+                job.cancel()
+                st.rerun()
+        elif status == "complete":
+            if st.button("Inspect completed CT bundle", key="ct_inspect", disabled=locked or job.patient_id != record.patient_id):
+                try:
+                    prepare(job.bundle_path.read_bytes(), study_id=job.study_id)
+                except (ValueError, OSError) as error:
+                    st.error(f"Imaging rejected: {error}")
+        else:
+            st.warning(job.error)
+        if status != "running" and st.button("Dismiss CT job", key="ct_dismiss"):
+            del st.session_state.ct_job
+            st.rerun()
+    uploaded = st.file_uploader("Synthetic CT review bundle (.zip)", type=["zip"], key="ct_bundle")
+    if st.button("Inspect uploaded CT bundle", key="ct_upload", disabled=locked or uploaded is None):
+        try:
+            prepare(uploaded.getvalue())
+        except (ValueError, OSError) as error:
+            st.error(f"Imaging rejected: {error}")
+    if "imaging_proposal" in st.session_state:
+        key, proposal = st.session_state.imaging_proposal
+        manifest = proposal["manifest"]
+        st.subheader("Pending imaging acceptance — not in the clinical report")
+        if manifest["patient_id"] != record.patient_id:
+            st.warning("Select the matching patient or discard this proposal.")
+        else:
+            directory = store.root / "pending" / key
+            try:
+                store._verify_directory(directory, proposal)
+                def preview(role, index):
+                    item = next(a for a in manifest["artifacts"] if a["role"] == role and a["slice_index"] == index)
+                    return directory / item["path"]
+                _viewer(manifest, preview, "pending_ct_slice")
+                with st.form("imaging_acceptance"):
+                    notes = st.text_area("Imaging review notes", key="imaging_notes")
+                    attested = st.checkbox("I checked the synthetic patient/study association, overlays, geometry and research limitations.", key="imaging_attest")
+                    submit = st.form_submit_button("Accept imaging for research appendix", key="imaging_accept", disabled=locked or not token)
+                if submit:
+                    review = Review(approved=True, reviewer=user or "", clinician_attestation=attested,
+                                    notes=notes, draft_sha256=proposal["sha256"])
+                    store.approve(key, review, token)
+                    del st.session_state.imaging_proposal
+                    if job is not None and job.study_id == manifest["study_id"]:
+                        st.session_state.pop("ct_job", None)
+                    st.rerun()
+            except (ValueError, OSError, PermissionError) as error:
+                st.error(f"Imaging acceptance blocked: {error}")
+        if st.button("Discard imaging proposal", key="imaging_discard"):
+            store.discard(key)
+            del st.session_state.imaging_proposal
+            if job is not None and job.study_id == manifest["study_id"]:
+                st.session_state.pop("ct_job", None)
+            st.rerun()
+    try:
+        accepted = store.snapshots(record.patient_id)
+        if accepted:
+            st.subheader("Accepted research imaging")
+            selected = st.selectbox("Accepted study", [s["manifest"]["study_id"] for s in accepted], key="accepted_ct_study")
+            snapshot = next(s for s in accepted if s["manifest"]["study_id"] == selected)
+            st.caption(f"Accepted by {snapshot['review']['reviewer']}. A new clinical case includes this fixed imaging snapshot in its draft appendix.")
+            _viewer(snapshot["manifest"], lambda role, index: store.preview_path(snapshot, role, index), "accepted_ct_slice")
+    except (ValueError, OSError) as error:
+        st.error(f"Accepted imaging integrity check failed: {error}")

@@ -40,6 +40,7 @@ logs/
 /data/imports/
 /data/uploads/
 /data/backups/
+/data/imaging/
 
 # Only reviewed built-in fictional fixtures are publishable by default
 /data/patients/*

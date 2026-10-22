@@ -16,6 +16,8 @@ from medical_assistant.report import NOTICE, digest
 from medical_assistant.runtime import get_services
 from medical_assistant.storage import save_report
 from medical_assistant.workflow import MedicalHistoryOrchestrator
+from medical_assistant.imaging_ui import imaging_ui
+from medical_assistant.safety import SafetyAgent
 
 
 def account_ui(auth):
@@ -111,9 +113,16 @@ def history_ui(path, auth, token, user, record):
             st.rerun()
 
 
-def clinical_ui(path, auth, token, user, record, model):
+def clinical_ui(path, auth, token, user, record, model, *, urgent=False):
     active = "case_id" in st.session_state
-    if st.button("Generate draft for clinician review", key="generate", type="primary", disabled=active or "proposal" in st.session_state):
+    if active and urgent:
+        existing = st.session_state.workflow.state(st.session_state.case_id)
+        if existing.get("safety_decision", {}).get("state") != "urgent":
+            st.error("A newly supplied warning is outside this case snapshot. Stop review and start a new case for human assessment.")
+            return
+    ct_job = st.session_state.get("ct_job")
+    pending_imaging = not urgent and ("imaging_proposal" in st.session_state or (ct_job is not None and ct_job.status() in ("running", "complete")))
+    if st.button("Generate draft for clinician review", key="generate", type="primary", disabled=active or "proposal" in st.session_state or pending_imaging):
         st.session_state.pop("run_error", None)
         try:
             workflow = MedicalHistoryOrchestrator(OllamaClient(model), auth=auth)
@@ -217,6 +226,9 @@ def main():
     st.sidebar.caption("Only http://127.0.0.1:11434 is permitted. Local accounts do not verify clinical credentials.")
     try:
         record = get_history(selected, path)
+        urgent = SafetyAgent().evaluate(record)["state"] == "urgent"
+        if urgent:
+            st.error("A structured warning-sign report requires human assessment. Automated clinical reasoning is blocked; do not wait for imaging inspection.")
         st.subheader(record.display_name)
         with st.expander("Longitudinal timeline and original sources", expanded=not active):
             for entry in sorted(record.entries, key=chronology):
@@ -226,9 +238,20 @@ def main():
                 st.text(source.content)
         with st.expander("Medication reconciliation overview"):
             st.json(MedicationAgent().run(record).model_dump(mode="json"))
-        if not active:
-            history_ui(path, auth, token, user, record)
-        clinical_ui(path, auth, token, user, record, model)
+        clinical, imaging = st.tabs(["History and clinical review", "Imaging workbench"])
+        with imaging:
+            if urgent:
+                st.warning("Imaging inspection is paused while the structured warning requires human assessment.")
+                job = st.session_state.get("ct_job")
+                if job is not None and job.status() == "running" and st.button("Cancel CT job", key="ct_cancel_urgent"):
+                    job.cancel()
+                    st.rerun()
+            else:
+                imaging_ui(path, auth, token, user, record, locked=active or "proposal" in st.session_state)
+        with clinical:
+            if not active:
+                history_ui(path, auth, token, user, record)
+            clinical_ui(path, auth, token, user, record, model, urgent=urgent)
     except (ValueError, LookupError, OSError) as error:
         st.error(f"Record validation failed: {error}")
 

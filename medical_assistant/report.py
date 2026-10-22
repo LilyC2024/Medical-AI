@@ -26,7 +26,7 @@ def inline_text(value) -> str:
     return re.sub(r"(?<!\w)_|_(?!\w)", r"\\_", text)
 
 
-def compose(record: PatientRecord, source_file: str, outputs: dict[str, dict], evidence=None) -> str:
+def compose(record: PatientRecord, source_file: str, outputs: dict[str, dict], evidence=None, imaging=None) -> str:
     sources = {entry.id: entry for entry in record.entries}
     assessments = {role: Assessment.model_validate(value).validate_sources(record)
                    for role, value in outputs.items()}
@@ -100,4 +100,20 @@ def compose(record: PatientRecord, source_file: str, outputs: dict[str, dict], e
     for item in dict.fromkeys(item for assessment in assessments.values() for item in assessment.clinician_questions):
         lines.append(f"- {inline_text(item)}")
     lines.append("- Have all record-derived claims, hypotheses, safety flags and medication discrepancies been checked against the sources?")
+    if imaging:
+        from medical_assistant.imaging_contract import ImagingBundle
+        lines += ["", "### Research imaging appendix",
+                  "Accepted synthetic model artifacts, not confirmed clinical findings. Imaging is excluded from LLM reasoning and cannot establish normality or lower safety escalation."]
+        for snapshot in imaging:
+            item = ImagingBundle.model_validate(snapshot["manifest"])
+            lines += [f"- Study {inline_text(item.study_id)}; source bundle.json; acquisition date unavailable; processed {inline_text(item.processed_at.isoformat())}.",
+                      f"- Source ID imaging-{snapshot['manifest_sha256']}; original archive SHA-256 {snapshot['archive_sha256']}.",
+                      f"- Source series SHA-256 {item.source_series_sha256}; checkpoint SHA-256 {item.checkpoint_sha256}; ONNX SHA-256 {item.onnx_sha256}.",
+                      f"- Imaging accepted by local account {inline_text(snapshot['review']['reviewer'])}; final report approval remains separate.",
+                      f"- Source grid z/y/x {item.geometry.shape_zyx}; spacing mm {item.geometry.spacing_zyx_mm}; raw predictions; producer declares ONNX parity passed.",
+                      f"- Model entropy mean {item.uncertainty_mean:.3f}; this is not clinical confidence."]
+            for i in range(4):
+                lines.append(f"- Class {i}: {inline_text(item.classes[str(i)])}; {item.voxel_counts[i]} source-grid voxels; {item.candidate_volumes_mm3[i]:.3f} mm³ candidate volume.")
+            lines.append("- No anatomical correctness, lesion diagnosis, causal explanation or treatment need is established by these artifacts.")
+            lines.append("- Artifact consistency is checked locally; source/model hashes and execution metadata are producer declarations, not independent authentication of model execution or synthetic origin.")
     return "\n".join(lines) + "\n"

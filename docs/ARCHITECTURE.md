@@ -57,6 +57,9 @@ conflicting IDs fail. No model writes or modifies records.
 | --- | --- |
 | `app.py` | Streamlit record selection and human review forms |
 | `runtime.py` | Idempotently seed bundled fixtures and cache shared local authentication services |
+| `ct_worker.py` | Separate local CT interpreter, bounded jobs, cancellation and watchdog |
+| `imaging_contract.py` | Bounded ZIP/NPY/PNG validation, geometry/count/overlay checks |
+| `imaging.py`, `imaging_ui.py` | Separate accepted-study storage, authenticated acceptance and source/overlay inspection |
 | `models.py` | Strict Pydantic records, assessments and review contracts |
 | `database.py` | stdlib SQLite transactions, immutable sources, idempotent seed and reads |
 | `grounding.py` | Compare extracted fields against original JSON entries |
@@ -113,3 +116,20 @@ and model support affect speed and reliability.
 Tracing switches are disabled before graph imports. Dependency installation and
 model downloads are separate setup operations; inference never falls back to an
 external provider.
+
+## Optional shared CT workbench
+
+See [IMAGING.md](IMAGING.md). A configured companion checkout generates synthetic
+CT and runs its model in an isolated Python 3.12 subprocess. MHCRA reads only a
+bounded, internally consistent inspection bundle. SQLite keeps accepted imaging
+separate from clinical facts, with immutable original ZIP/manifest files and
+derived previews/masks under ignored `data/imaging/`.
+
+Authenticated imaging acceptance binds the manifest/archive to a reviewer and
+study. Starting a clinical case captures accepted imaging snapshots. Python adds
+a research appendix after normal clinical composition; no imaging or reviewer
+notes enter the LLM or hypothesis catalog. The final draft hash covers the appendix.
+Composition, completion, export and persistence verify accepted artifact integrity.
+Urgent clinical cases enter the safety hold without waiting for optional image
+checks. Uploaded execution metadata is a producer declaration; hashes do not
+independently authenticate synthetic origin or model execution.

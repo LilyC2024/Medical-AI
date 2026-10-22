@@ -5,6 +5,12 @@ organizing **synthetic patient records** and preparing a source-linked report fo
 human clinician review. It uses SQLite, LangGraph, Streamlit and an installed
 Ollama model. It uses no paid APIs, cloud inference or remote tracing.
 
+An optional **local imaging workbench** connects the companion
+[CT 2.5D project](https://github.com/LilyC2024/ai-medimg-2.5D-CT). Inspect generated
+synthetic CT and model overlays beside the history, accept a source-linked research
+appendix, and include it in the draft covered by final clinician approval.
+CT inference runs in its own local environment; images stay outside the LLM.
+
 Educational and experimental. Not a diagnostic device. It does not establish
 diagnoses, prescribe treatment, or make automatic medical decisions. All clinical
 conclusions require clinician verification. Do not enter real patient data.
@@ -54,6 +60,35 @@ against the implementation. Their [workflow prompt](docs/images/mhcra-ai-workflo
 are included. Image generation was a documentation step; it is not an application
 runtime dependency.
 
+### Shared CT workbench
+
+![Generated synthetic CT source slices, candidate overlays and source-grid counts in the shared workbench](docs/images/mhcra-synthetic-workbench.png)
+
+This illustration uses actual outputs from the generated synthetic demonstration,
+with source slices above and model overlays below. It shows heuristic candidate
+classes, not validated anatomy. The first one-epoch tiny demo produced only
+background; the workbench now uses a 12-epoch/base-width-4 demonstration selected
+using its validation split, with visible candidate regions and still weak teacher
+agreement. No clinical accuracy or unseen-patient performance is established.
+
+Open **Imaging workbench**, generate or upload a synthetic CT review bundle,
+inspect slices/geometry/provenance, and explicitly accept it for the research
+appendix. Then start a new clinical case and follow the existing safety and final
+approval steps. Pending imaging blocks draft generation. Imaging acceptance
+preserves model-output status and does not approve the final report.
+See the concise [setup and workflow guide](docs/IMAGING.md), including separate
+Python environments, cancellation, trust boundaries and reproduction commands.
+
+```mermaid
+flowchart LR
+  CT[Generated synthetic CT] --> W[Separate local CT worker]
+  W --> B[Hashed source-grid bundle]
+  B --> V[Streamlit source and overlay viewer]
+  V --> I[Authenticated imaging acceptance]
+  I --> A[Research appendix in a new MHCRA case]
+  A --> S[Existing safety and final clinician approval]
+```
+
 ## How the agents are implemented
 
 The Medical History Orchestrator coordinates four specialist roles:
@@ -83,6 +118,8 @@ approval, and the model receives no database, filesystem or shell tools.
 The generic prompt module retains definitions for all four roles; the clinical
 graph invokes its inference wrapper for reasoning only. The other three runtime
 specialists use their dedicated Python implementations shown above.
+The CT worker is a separate bounded Python process, not a fifth LLM agent. It
+does not alter the four specialist roles or expand the diagnostic catalog.
 
 ### Development agents and subagents
 
@@ -238,6 +275,8 @@ and export. Each case uses the SQLite snapshot captured when it starts. The
 checks detect changes to that in-case snapshot, policy or assessment date; they
 do not reload later database imports. Start a new case after adding facts,
 including facts approved in another session.
+The UI gives newly supplied structured warnings priority over optional image
+inspection and blocks review/download of an older case until a new case starts.
 
 The report contains:
 
@@ -248,6 +287,10 @@ The report contains:
 5. Missing information
 6. Safety flags
 7. Questions for clinician review
+
+Accepted research imaging appears as an appendix within the seven-section draft.
+Its source bundle, model/source hashes, unknown acquisition date, candidate counts
+and review attribution are included in the exact text covered by final approval.
 
 ## Records, sources and local references
 
@@ -313,6 +356,7 @@ shares source; it does not deploy or clinically validate this application.
 
 ```bash
 .venv/bin/python -m pytest -q
+.venv/bin/python scripts/smoke_imaging.py --ct-root /absolute/path/to/ai-medimg-2.5D-CT
 .venv/bin/python scripts/check_ollama.py gemma4:e2b
 .venv/bin/python scripts/smoke_local.py --model gemma4:e2b
 ```
@@ -322,6 +366,9 @@ they do not demonstrate real model performance or clinical validity. The smoke
 script separately exercises the real local model without approving a final
 clinical report. Consult [EVALUATION.md](EVALUATION.md) for actual outcomes and
 limitations from this checkout, including the eight acceptance checklist items.
+The optional imaging smoke runs the real synthetic CT worker and receiver without
+issuing imaging or clinical approvals. Install the companion first as described
+in [IMAGING.md](docs/IMAGING.md); the ordinary offline suite needs no CT install.
 
 See [architecture](docs/ARCHITECTURE.md) for the graph and module boundaries,
 [development](docs/DEVELOPMENT.md) for how agents and the LLM were used, and

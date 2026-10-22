@@ -41,3 +41,37 @@ jobs:
         run: python -m pytest -q
       # Deliberately no Ollama download, hosted model call, record upload,
       # live-model smoke test, report artifact upload, or deployment in CI.
+
+  ct-workbench:
+    name: Synthetic CT producer-consumer smoke
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      OLLAMA_NO_CLOUD: '1'
+      LANGCHAIN_TRACING_V2: 'false'
+      LANGSMITH_TRACING: 'false'
+    steps:
+      - name: Check out MHCRA
+        uses: actions/checkout@v7
+      - name: Check out the matching CT producer
+        uses: actions/checkout@v7
+        with:
+          repository: LilyC2024/ai-medimg-2.5D-CT
+          ref: 6d24dc952bc2012123fc4343e5079c66788ec18f
+          path: companion-ct
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Install the separate environments
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install -r requirements.lock.txt
+          python -m venv companion-ct/.venv
+          companion-ct/.venv/bin/python -m pip install torch==2.14.1+cpu --index-url https://download.pytorch.org/whl/cpu
+          companion-ct/.venv/bin/python -m pip install -e './companion-ct[ml,dev]'
+      - name: Verify real generated-synthetic CT and MHCRA receiver
+        run: .venv/bin/python scripts/smoke_imaging.py --ct-root companion-ct
+      # Generated synthetic pixels/model only; no Ollama, external inference API,
+      # automatic review approvals, patient data or artifact publication.
