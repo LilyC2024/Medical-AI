@@ -21,3 +21,7 @@ the optional evidence view makes them readable without inline citation clutter.
 Accepted CT results/calipers and representative images appear in the combined
 report. Note-preview, stale-approval, HTML-export and tampered-artifact regressions
 extend the original checklist. [Report details](REPORTS.md).
+
+## Image-first endoscopy extension
+
+Endoscopy adds explicit candidate review, source/overlay reconstruction checks, artificial-only import, patient-switch cleanup and combined report/export binding. Tests use scripted reviewers; real worker smokes stop before approval. [Scope](ENDOSCOPY.md).

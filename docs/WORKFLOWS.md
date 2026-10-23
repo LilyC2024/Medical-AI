@@ -67,3 +67,7 @@ JSON or observation controls; inspect the proposal, add notes/attestation and
 approve the exact import. Dates/measurements are included only when explicitly
 supplied. Defaults are not observations. Originals and IDs are immutable.
 [Record format](RECORDS.md) · [Detailed CT review](IMAGING.md).
+
+## Image-first endoscopy extension
+
+Before safety preparation, optionally inspect and accept an endoscopy study in **Endoscopy review**. Resolve every region, add a note and attest inspection; final report approval remains separate. [Image workflow](ENDOSCOPY.md).

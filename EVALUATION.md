@@ -284,3 +284,37 @@ reviews, not clinician verification. [Development](docs/DEVELOPMENT.md).
   use scripted models and reviewer identities.
 
 [Security](SECURITY.md) · [Release/migration](docs/RELEASE.md).
+
+
+## 0.7.0 endoscopy integration — 23 October 2026
+
+Implemented typed `lovisa-endo-image-v1` source/probability/mask/overlay validation,
+a separate bounded local CV worker and Endoscopy review view. Candidate decisions,
+notes and explicit attestation bind authenticated image acceptance. Endoscopy and
+CT snapshots share report content binding and offline HTML pictures, while their
+validators/coordinates remain separate. The LLM receives no imaging pixels/notes;
+its catalog and safety routing are unchanged.
+
+**Local regression: 231 tests passed in 103.88s.** This includes all prior 220 tests
+and 11 new endoscopy source/review/workflow/patient-isolation/UI/worker tests.
+Models/reviewers in clinical tests are scripted in temporary databases. Actual
+endoscopy fixture/installed-model producer-consumer smokes passed (1.04s/1.08s,
+one region and four verified artifacts each); neither issued an image or clinical
+approval. Exact shared contract/worker equality and the unchanged CT contract
+checks passed. Real local `gemma4:e2b` smoke passed and paused before final approval.
+
+The standalone companion trained/evaluated a real CPU Kvasir-SEG baseline; mean
+positive Dice 0.446343 on 168 test images (zero negative images). This is limited,
+exploratory software research, not evidence of clinical detection or screening
+specificity. [Full companion evidence](https://github.com/LilyC2024/AI-MedImg-Endo/blob/main/EVALUATION.md).
+No NPU/Windows, external dataset, cancer classification or physical endoscopy-size
+accuracy is claimed. Public research images remain outside synthetic LOVISA cases.
+
+A separate localhost browser test port was denied by a saved browser permission;
+no workaround was attempted. New UI interactions were checked with Streamlit
+AppTest; live visual verification of the endoscopy view remains uncompleted.
+Final documentation, CI and publication outcomes are appended after execution.
+
+Final local checks: 32 Markdown files, exact endoscopy contract/worker equality and unchanged CT contract equality passed. Actual CT fixture and configured pretrained CPU smokes passed with 66 artifacts each and approvals pending. An explicit stale `models/luna16` directory first failed its registration check; the configured registered `models/luna16-full` then passed without weakening validation or silently falling back.
+
+The cross-repository endoscopy workflow pins producer `b6de536fbb44351b8a101db69a17a897c7b4978d` and checks fixture plus actually trained artificial ONNX inference against the LOVISA receiver. Hosted outcomes are recorded after completion.

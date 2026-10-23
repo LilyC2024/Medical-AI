@@ -86,3 +86,7 @@ actual local smokes and documentation. No coding subagents or additional runtime
 LLMs were introduced. History/medication/safety remain Python specialists; Ollama
 selects constrained history hypotheses. CT inspection/measurements are composed
 in Python and remain outside LLM inference. [Report contracts](REPORTS.md).
+
+## Image-first endoscopy extension
+
+Endoscopy remains a separate environment. Its ML-free contract and worker are copied exactly; run the sync check before changing either copy. Preserve CT tests and final approval/content binding. [Integration](ENDOSCOPY.md).

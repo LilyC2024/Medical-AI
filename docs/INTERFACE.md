@@ -76,3 +76,7 @@ frontend service are loaded.
 
 SQLite, Ollama and the separate CT environment remain local. This version uses
 [localhost:8501](http://127.0.0.1:8501); it has no public domain or cloud inference.
+
+## Image-first endoscopy extension
+
+The **Endoscopy review** workspace adds source/overlay images, pixel-area results and explicit candidate decisions. Its linked guide step opens that view. [Operation](ENDOSCOPY.md).

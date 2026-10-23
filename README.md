@@ -10,9 +10,11 @@ function remains the same.
 
 ## A clearer local workspace
 
+The illustration below shows the earlier history/CT layout; this release adds an Endoscopy review view and its linked guide step.
+
 ![LOVISA patient workspace and operating guide](docs/images/lovisa-workspace-overview.jpg)
 
-Sign in and choose one patient. Read the history, optionally inspect CT, then open
+Sign in and choose one patient. Read the history, optionally inspect CT or endoscopy, then open
 **Safety check** to record your assessment and generate a concise draft. The
 right-hand **Your review steps** buttons open and scroll to each action; the
 **Next action** button points to pending work. **Source records** keeps readable
@@ -23,12 +25,13 @@ and **23.40s** (Ollama clinical workflow). These are individual CPU runs, not
 clinical performance claims or guarantees. [Workspace](docs/INTERFACE.md) ·
 [Performance and limits](docs/PERFORMANCE.md).
 
-## Two projects, one reviewed workflow
+## Three projects, one reviewed workflow
 
 | Project | Input → output | Responsibility |
 | --- | --- | --- |
-| **LOVISA** — this repository | Synthetic history + accepted CT → concise clinical summary | Organize facts, identify gaps, propose constrained hypotheses and require clinician approval |
+| **LOVISA** — this repository | Synthetic history + accepted imaging → concise clinical summary | Organize facts, identify gaps, propose constrained hypotheses and require clinician approval |
 | **[Lung CT Research Assistant](https://github.com/LilyC2024/ai-medimg-2.5D-CT)** | Supported CT → nodule candidates, annotations, calipers and research summary | Support source-image inspection and measurement in a separate local environment |
+| **[Endoscopy Image Research Assistant](https://github.com/LilyC2024/AI-MedImg-Endo)** | RGB research images → candidate regions, masks and pixel-area findings | Review polyp candidates locally; send artificial studies to LOVISA |
 
 The CT companion can send a validated **synthetic** study to LOVISA. A reviewer
 checks its candidates and measurements before accepting the study. The report
@@ -36,8 +39,8 @@ includes those inspection results and representative source/annotation images.
 A brief clinician note is previewed before final approval. Images and imaging
 notes stay outside the language model. [Integration guide](docs/IMAGING.md).
 
-**Research and education only.** Neither project diagnoses cancer, excludes
-disease, prescribes treatment or makes automatic medical decisions. LOVISA accepts
+**Research and education only.** These projects do not diagnose cancer, exclude
+disease, prescribe treatment or make automatic medical decisions. LOVISA accepts
 fictional records only. Local login does not verify clinical qualifications.
 
 ## Understand the workflow
@@ -47,9 +50,9 @@ fictional records only. Local login does not verify clinical qualifications.
 Read left to right: local records → safety check → history and medication
 extraction → source-grounded hypotheses → safety recheck → clinician review.
 The report now has **one Clinical summary section**: model-selected hypotheses,
-CT inspection, essential gaps and a brief clinician note. Detailed citations stay
+CT/endoscopy inspection, essential gaps and a brief clinician note. Detailed citations stay
 in the evidence package and an optional evidence view. A portable HTML download
-includes CT pictures. [Report example and rules](docs/REPORTS.md).
+includes verified imaging pictures. [Report example and rules](docs/REPORTS.md).
 
 An urgent warning stops reasoning. Missing safety information pauses for human
 assessment. A draft becomes reviewed only after explicit approval of its exact
@@ -88,6 +91,10 @@ from extracted facts; LangGraph coordinates specialist steps and human interrupt
 Ollama runs on loopback. Completion/export recheck safety, source integrity and
 approval. The detailed [picture guide](docs/ILLUSTRATIONS.md) explains the diagrams
 and the CT connection.
+
+## Endoscopy image companion
+
+LOVISA also supports the [image-first polyp research assistant](https://github.com/LilyC2024/AI-MedImg-Endo). Inspect artificial RGB images, review candidate regions and include accepted annotations and pixel-area measurements in the combined report. CT remains a separate modality. The initial endoscopy model is an exploratory baseline, not a validated screening or cancer detector. [Setup, workflow and evidence boundaries](docs/ENDOSCOPY.md).
 
 ## Run LOVISA
 

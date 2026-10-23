@@ -7,15 +7,16 @@ from pathlib import Path
 from uuid import uuid4
 
 from medical_assistant.database import connect, get_history
+from medical_assistant.endo_support import checked_endo_review, is_endoscopy
 from medical_assistant.imaging_contract import file_digest, validate_bundle
 from medical_assistant.models import Review
-from medical_assistant.report import digest
 from medical_assistant.nodule_support import (
-    is_nodule,
     checked_nodule_review,
     imaging_acceptance_digest,
+    is_nodule,
     verify_nodule_snapshot,
 )
+from medical_assistant.report import digest
 
 
 class ImagingStore:
@@ -83,7 +84,7 @@ class ImagingStore:
             if path.is_symlink() or path.read_bytes() != data:
                 raise ValueError("Extracted imaging artifact changed")
 
-    def approve(self, key, review, token=None, *, nodule_review=None):
+    def approve(self, key, review, token=None, *, nodule_review=None, endo_review=None):
         review = Review.model_validate(review.model_dump())
         if self.auth is None or self.auth.require(token) != review.reviewer:
             raise PermissionError("Authenticated imaging reviewer required")
@@ -95,9 +96,19 @@ class ImagingStore:
             if is_nodule(proposal["manifest"])
             else None
         )
+        endoscopy_review = (
+            checked_endo_review(
+                proposal["manifest"], endo_review, reviewer=review.reviewer
+            )
+            if is_endoscopy(proposal["manifest"])
+            else None
+        )
         expected_digest = imaging_acceptance_digest(
             proposal,
             candidate_review if candidate_review is not None else nodule_review,
+            endo_review=endoscopy_review
+            if endoscopy_review is not None
+            else endo_review,
         )
         if not review.approved or review.draft_sha256 != expected_digest:
             raise ValueError("Matching explicit imaging acceptance required")
@@ -115,6 +126,8 @@ class ImagingStore:
         }
         if candidate_review is not None:
             snapshot["nodule_review"] = candidate_review.model_dump(mode="json")
+        if endoscopy_review is not None:
+            snapshot["endo_review"] = endoscopy_review.model_dump(mode="json")
         target = self._directory(patient, study)
         target.parent.mkdir(parents=True, exist_ok=True)
         moved = False

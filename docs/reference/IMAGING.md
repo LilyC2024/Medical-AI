@@ -34,3 +34,7 @@ The shared models/renderer remain unchanged by the LOVISA branding update. Exist
 `mhcra-*` names identify their versioned wire contract, not the current app name.
 Original producer review is never rewritten into LOVISA acceptance. Calipers are
 source-plane distances inside a candidate box, not confirmed lesion diameters.
+
+## Image-first endoscopy extension
+
+`endo_ui.image_results` renders RGB source/annotation and pixel-area results. `endo_support.checked_endo_review` validates every decision; `verify_endo_snapshot` binds acceptance; `endo_worker.LocalEndoscopyJob` runs bounded local CV. [Protocol](../ENDOSCOPY.md).

@@ -484,3 +484,6 @@ Vendor/check ML-free CT contracts; no CT model, torch or database tools imported
 | `sync(ct_root, *, write=False)` | See linked implementation and subject contract. |
 | `main()` | See linked implementation and subject contract. |
 
+## Image-first endoscopy extension
+
+Endoscopy entry points: `endo_worker.LocalEndoscopyJob`, `endo_ui.endoscopy_ui`, `endo_support.checked_endo_review`, `endo_support.verify_endo_snapshot` and `report.endoscopy_summary`. [Module boundaries](../ENDOSCOPY.md).

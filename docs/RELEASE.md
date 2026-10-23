@@ -108,3 +108,7 @@ The CT producer is unchanged. [Operation](WORKFLOWS.md) · [Evaluation](../EVALU
 
 No dependency, model, hypothesis catalog, safety policy or CT producer/contract
 change. The CT project remains compatible. [Reports](REPORTS.md) · [Evaluation](../EVALUATION.md).
+
+## 0.7.0 — Image-first endoscopy
+
+Adds a separate polyp image companion, source/mask/probability/overlay verification, candidate decisions, bounded local processing, patient-isolated UI and accepted endoscopy findings/pictures in the single-section report. The CV adapter is not an LLM; history reasoning remains local and catalog-bounded. Final approval binds both CT and endoscopy snapshots. [Guide](ENDOSCOPY.md).

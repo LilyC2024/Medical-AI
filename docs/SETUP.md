@@ -77,3 +77,7 @@ this exception is not suitable for a shared/production authentication system.
 LOVISA itself does not need PyTorch/MONAI. Install the CT project in a separate
 Python 3.12 environment, then follow [Imaging](IMAGING.md). The existing GitHub
 repository path is `Medical-AI`; the app is named LOVISA.
+
+## Image-first endoscopy extension
+
+The endoscopy companion uses its own `.venv`; no Torch/OpenVINO is added to LOVISA. See [Endoscopy setup](ENDOSCOPY.md) for sibling discovery and explicit backend selection.

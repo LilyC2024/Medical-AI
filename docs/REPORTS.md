@@ -1,87 +1,59 @@
-# A concise clinical summary with CT inspection
+# Concise clinical summary with reviewed imaging
 
-[Overview](../README.md) · [Operation](WORKFLOWS.md) · [Scripted example](examples/README.md)
+[Overview](../README.md) · [Operation](WORKFLOWS.md) · [Endoscopy](ENDOSCOPY.md)
 
-The report uses one heading, **Clinical summary**, with short labelled paragraphs.
-It does not repeat the full timeline or print filenames, entry IDs and hashes.
+One **Clinical summary** section contains short labelled paragraphs. Full timelines,
+filenames, source IDs and hashes stay in the evidence package.
 
-| Content | Where it comes from |
+| Content | Source |
 | --- | --- |
-| AI history analysis | Hypotheses/evidence IDs selected by local Ollama from the existing limited catalog; Python validates and presents them |
-| CT inspection | Accepted study snapshots, candidate decisions and reviewer-placed calipers, validated in Python |
-| Essential gaps | Versioned safety assessment and source-bound missing information |
-| Clinician note | An authenticated reviewer comment, previewed before approval; up to 600 characters |
-| Representative pictures | Verified source CT and annotations, including reviewed calipers |
+| AI history analysis | Local Ollama selects bounded hypotheses/evidence; Python validates them |
+| CT inspection | Accepted CT candidates and reviewer-placed calipers |
+| Endoscopy inspection, when included | Accepted artificial RGB studies, region decisions and predicted mask areas in pixels |
+| Essential gaps | Versioned safety rules and source-bound missing information |
+| Clinician note | Authenticated, previewed reviewer comment; up to 600 characters |
+| Representative pictures | Verified source and annotation pairs from up to three studies |
 
-The LLM analyzes history. It does **not** inspect CT pixels, select imaging decisions
-or calculate lesion measurements. Combining the results in one report does not
-establish a diagnosis, malignancy risk or a cause for the symptoms.
+The LLM analyzes history, not imaging pixels. Imaging paragraphs are composed in
+Python from accepted structured observations. No model score becomes a cancer
+probability, physical endoscopy measurement, symptom explanation or diagnosis.
 
-![Scripted combined-summary example](images/lovisa-combined-summary.jpg)
+## Include imaging before safety preparation
 
-This illustration uses authored artificial pixels, scripted model output and a
-scripted reviewer. It demonstrates the software format, not live clinical review
-or diagnostic accuracy. [Open its self-contained HTML](examples/clinical-summary.html)
-· [Read the text version](examples/clinical-summary.md).
+Inspect and explicitly accept CT/endoscopy **before** preparing safety. Preparation
+freezes accepted studies into the report. Pending/discarded studies are not included;
+new imaging requires a new review. CT review retains all source slices; Endoscopy
+review retains its source image and overlay. The prose covers every accepted study;
+representative pictures and short measurement lists are bounded. Exact artifacts
+and full decisions remain available in the local store/evidence package.
 
-## Include CT reliably
+## Note and final approval
 
-Inspect and **accept** the patient's CT before completing safety preparation.
-That preparation freezes the accepted studies into the report snapshot. Pending
-or discarded studies are never silently treated as accepted results. No CT is a
-visible state, not an empty appendix. **Start a new report with CT** opens an
-unlocked CT review for the same patient.
+Enter a brief note and choose **Preview note in report**. The draft updates and the
+review checkbox clears; no LLM call or approval occurs. Read the new text/images,
+confirm review and explicitly approve. Notes have signed, case-bound authorship;
+new source facts require an approved import, not a note. An old approval cannot
+approve changed content.
 
-If a study is accepted after a report was prepared, start a new review to include
-it. Existing reports retain their original snapshot. Clinical report and final
-HTML show representative source/annotation images; CT review retains all slices.
-For multiple studies, the prose aggregates every accepted study. At most three
-representative study pictures and three calipers appear in the short report;
-additional details remain in CT review and the evidence package. No missing
-measurement, normal CT or cancer conclusion is inferred.
+## Downloads and provenance
 
-## Note preview and approval
+- **HTML:** concise text and embedded source/annotation pictures; opens offline.
+- **Markdown:** the same concise text, including reviewed imaging findings.
+- **JSON:** original record excerpts, source links, model evidence, imaging
+  provenance/decisions and approval receipts. Original imaging archives remain
+  in the local store.
 
-1. Enter a brief clinician note or review feedback.
-2. Choose **Preview note in report**. This updates the draft and clears the review
-   checkbox; it does not call the LLM or approve anything.
-3. Read the updated text and CT images. Tick the review checkbox again, choose
-   **Approve report**, and submit the review.
+Every final export/save rechecks source artifacts, image acceptance, note authorship,
+evidence and approval of the full content manifest. Images cannot be substituted
+even when the short prose stays identical. HTML uses no external assets/scripts.
+Visible citations remain simple; exact evidence is preserved and validated.
 
-Approval of an older draft cannot approve a changed note. Notes have signed,
-case-bound authorship and remain distinct from source facts. New clinical facts
-need an approved record import and a new review. Notes are shown as reviewer
-comments, not independently verified clinical findings.
+## Existing illustration
 
-## Downloads and evidence
+![Earlier CT/history summary example](images/lovisa-combined-summary.jpg)
 
-| Download | Contents |
-| --- | --- |
-| HTML | Short summary, clinician note and embedded CT pictures; opens offline and can be printed |
-| Markdown | The same concise text; CT inspection results are included, images are in HTML |
-| JSON evidence package | Full original records, exact excerpts/IDs/filenames/dates, model evidence selections, references, CT provenance/decisions and review receipts |
-
-The JSON contains CT references/hashes and decisions; original CT archives and
-full volumes remain in the local imaging store. HTML embeds representative
-pictures, not the entire CT series.
-
-Every final download requires valid approval and rechecks sources, CT artifacts,
-note authorship, evidence links and report content. HTML uses no remote assets or
-scripts. **Evidence behind the analysis** is a collapsed, readable view of the
-model-selected support and counterevidence; **Source records** retains originals.
-Simpler visible citations do not remove the underlying evidence or fail-closed
-validation.
-
-The short prose shows up to two documented dose changes; the complete medication
-history remains in the record and evidence package. Underlying source text is not
-truncated or rewritten. [Implementation](CODE_REFERENCE.md) · [Validation](VALIDATION.md).
-
-## Existing reports
-
-Previously saved reports keep their original format and approval. They are not
-rewritten. Start a new review to produce and approve this concise format; an old
-approval cannot be transferred to new text or new CT content.
-
-Approval also signs a content manifest covering the source records, model evidence,
-CT snapshots and clinician note. Even when two studies produce identical short
-text, substituting different images or source metadata invalidates the approval.
+This earlier example uses artificial pixels, scripted model output and a scripted
+reviewer. It demonstrates layout, not clinical accuracy or actual clinician review.
+[Offline example](examples/clinical-summary.html). Endoscopy adds a short inspection
+paragraph and its image pair when an accepted study exists. Existing saved reports
+retain their original content/approval and are not rewritten.

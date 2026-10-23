@@ -10,6 +10,7 @@ DESTINATIONS = {
     "choose-patient": "Patient overview",
     "patient-overview": "Patient overview",
     "ct-review": "CT review",
+    "endoscopy-review": "Endoscopy review",
     "safety-check": "Safety check",
     "clinical-report": "Clinical report",
     "source-records": "Source records",
@@ -34,6 +35,9 @@ def clear_patient(state, *, preserve_login=True, preserve_patient=True):
     job = state.get("ct_job")
     if job and job.status() == "running":
         job.cancel()
+    endo_job = state.get("endo_job")
+    if endo_job and endo_job.status() == "running":
+        endo_job.cancel()
     if not task and "workflow" in state:
         state["workflow"].inference.close()
     store, proposal = state.get("imaging_store"), state.get("imaging_proposal")
@@ -65,6 +69,9 @@ def ensure_patient(state, patient):
     job = state.get("ct_job")
     if job:
         mismatch = mismatch or job.patient_id != patient
+    endo_job = state.get("endo_job")
+    if endo_job:
+        mismatch = mismatch or endo_job.patient_id != patient
     if mismatch:
         clear_patient(state)
     state["patient_scope"] = patient

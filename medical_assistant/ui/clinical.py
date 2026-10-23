@@ -161,10 +161,12 @@ def bottom_actions(path, auth, record, model, token, user, decision):
         else {}
     )
     ct = st.session_state.get("ct_job")
+    endo = st.session_state.get("endo_job")
     pending = (
         "proposal" in st.session_state
         or "imaging_proposal" in st.session_state
         or bool(ct and ct.status() in ("running", "complete"))
+        or bool(endo and endo.status() in ("running", "complete"))
     )
     status = state.get("status")
     stale = bool(
@@ -203,8 +205,15 @@ def bottom_actions(path, auth, record, model, token, user, decision):
             "You kept this case paused for human assessment. Start a new case to reassess it."
         )
     elif pending:
-        st.info("A pending record or CT study needs review first.")
+        st.info("A pending record or imaging study needs review first.")
         target = "source-records" if "proposal" in st.session_state else "ct-review"
+        from medical_assistant.endo_support import is_endoscopy
+
+        proposal = st.session_state.get("imaging_proposal")
+        if (proposal and is_endoscopy(proposal[1]["manifest"])) or (
+            endo and endo.status() in ("running", "complete")
+        ):
+            target = "endoscopy-review"
         st.button(
             "Open pending changes", key="open_pending", on_click=go_to, args=(target,)
         )
@@ -313,14 +322,14 @@ def report_content(state, workflow):
         figures = inspection_figures(state, workflow.imaging_store)
         for figure in figures:
             left, right = st.columns(2)
-            left.image(figure.source_png, caption="Source CT", width="stretch")
+            left.image(figure.source_png, caption=figure.source_label, width="stretch")
             right.image(
-                figure.overlay_png, caption="Reviewed CT annotation", width="stretch"
+                figure.overlay_png, caption=figure.annotation_label, width="stretch"
             )
             st.caption(figure.caption)
         if len(state.get("imaging", [])) > len(figures):
             st.caption(
-                "Representative images from the first three studies are shown; all studies remain in CT review and the evidence package."
+                "Representative images from the first three studies are shown; all studies remain in the imaging review views and the evidence package."
             )
     if not state.get("imaging"):
         st.button(
@@ -343,7 +352,7 @@ def report_content(state, workflow):
                     )
                     st.text(entry["excerpt"])
         st.caption(
-            "Full source links, original documents and CT provenance remain in the evidence package."
+            "Full source links, original documents and imaging provenance remain in the evidence package."
         )
 
 
@@ -360,7 +369,7 @@ def report_panel(auth, token, user, record, *, urgent=False):
     if "case_id" not in st.session_state:
         empty(
             "A clearer report starts with the source",
-            "Review the patient story and optional CT, open Safety check, then generate a draft. Final approval comes later.",
+            "Review the patient story and optional imaging, open Safety check, then generate a draft. Final approval comes later.",
         )
         return
     workflow, case = st.session_state.workflow, st.session_state.case_id
@@ -420,7 +429,7 @@ def report_panel(auth, token, user, record, *, urgent=False):
                 "Preview note in report", key="preview_report_note", disabled=not token
             )
             checked = st.checkbox(
-                "I reviewed the clinical summary, CT inspection, source evidence and remaining limitations.",
+                "I reviewed the clinical summary, imaging inspections, source evidence and remaining limitations.",
                 key="attested",
             )
             action = st.radio(
@@ -480,7 +489,12 @@ def report_panel(auth, token, user, record, *, urgent=False):
             a, b, c = st.columns(3)
             with a:
                 st.download_button(
-                    "Download report with CT images (HTML)",
+                    "Download report with imaging (HTML)"
+                    if any(
+                        s["manifest"].get("schema_version") == "lovisa-endo-image-v1"
+                        for s in payload.get("imaging", [])
+                    )
+                    else "Download report with CT images (HTML)",
                     portable_html(payload, auth=auth, safety=workflow.safety),
                     file_name=f"reviewed-{case}.html",
                     mime="text/html",

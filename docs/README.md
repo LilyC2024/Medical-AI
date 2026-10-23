@@ -26,3 +26,7 @@ Start with the [project overview](../README.md), then choose one path:
 [Concise combined reports](REPORTS.md) explains CT inclusion, note preview,
 simplified citations and the HTML/Markdown/JSON downloads. A clearly labelled
 [scripted example](examples/README.md) demonstrates the format.
+
+## Image-first endoscopy extension
+
+For RGB polyp candidates, read [Endoscopy integration](ENDOSCOPY.md).

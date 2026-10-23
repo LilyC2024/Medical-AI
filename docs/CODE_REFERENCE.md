@@ -42,3 +42,7 @@ and [complete callable/subfunction signatures](reference/CALLABLES.md).
 | .venv | Ignored local environment |
 
 [Exact tracked-file inventory](FILE_INVENTORY.md) · [Stable names](NAMING.md).
+
+## Image-first endoscopy extension
+
+`endo_contracts/` supplies shared ML-free schemas and worker lifecycle; `endo_worker.py` launches local CV; `endo_support.py` binds decisions; `endo_ui.py` renders image review. Shared imaging storage and report modules dispatch by modality. [Contract and behavior](ENDOSCOPY.md).

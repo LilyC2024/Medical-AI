@@ -4,6 +4,7 @@ import streamlit as st
 
 import medical_assistant  # noqa: F401 — disable tracing before graph imports
 from medical_assistant.database import get_history, list_patients
+from medical_assistant.endo_ui import endoscopy_ui
 from medical_assistant.imaging_ui import imaging_ui
 from medical_assistant.runtime import get_services
 from medical_assistant.safety import SafetyAgent
@@ -112,7 +113,7 @@ def main():
     if not token:
         ui.empty(
             "Sign in to open your local demo",
-            "Patient examples, CT studies and reports are available after sign-in. Use the local account form in the sidebar.",
+            "Patient examples, imaging studies and reports are available after sign-in. Use the local account form in the sidebar.",
         )
         st.caption(
             "LOVISA uses fictional records and local processing. A local account does not verify clinical qualifications."
@@ -194,6 +195,7 @@ def main():
             [
                 "Patient overview",
                 "CT review",
+                "Endoscopy review",
                 "Safety check",
                 "Clinical report",
                 "Source records",
@@ -222,6 +224,32 @@ def main():
                             st.rerun()
                     else:
                         imaging_ui(
+                            path,
+                            auth,
+                            token,
+                            user,
+                            record,
+                            locked=active or "proposal" in st.session_state,
+                            case_imaging=state.get("imaging") if active else None,
+                        )
+                elif view == "Endoscopy review":
+                    anchor("endoscopy-review")
+                    if urgent:
+                        st.warning(
+                            "Endoscopy inspection is paused while this warning requires human assessment."
+                        )
+                        endo_job = st.session_state.get("endo_job")
+                        if (
+                            endo_job
+                            and endo_job.status() == "running"
+                            and st.button(
+                                "Cancel image analysis", key="endo_cancel_urgent"
+                            )
+                        ):
+                            endo_job.cancel()
+                            st.rerun()
+                    else:
+                        endoscopy_ui(
                             path,
                             auth,
                             token,

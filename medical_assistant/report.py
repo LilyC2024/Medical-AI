@@ -4,6 +4,11 @@ import hashlib
 import html
 import re
 
+from medical_assistant.endo_support import (
+    is_endoscopy,
+    summarize_endo,
+    verify_endo_snapshot,
+)
 from medical_assistant.models import Assessment, PatientRecord, ReportNote
 
 NOTICE = "Educational, experimental synthetic case. Not a diagnostic device; clinician verification required."
@@ -33,7 +38,7 @@ def evidence_index(record, outputs, imaging=None):
         role: Assessment.model_validate(value).validate_sources(record)
         for role, value in outputs.items()
     }
-    return {
+    result = {
         "record_entries": [
             {
                 "entry_id": e.id,
@@ -65,8 +70,20 @@ def evidence_index(record, outputs, imaging=None):
                 "archive_sha256": s["archive_sha256"],
             }
             for s in imaging or []
+            if not is_endoscopy(s["manifest"])
         ],
     }
+    endo = [s for s in imaging or [] if is_endoscopy(s["manifest"])]
+    if endo:
+        result["endoscopy_studies"] = [
+            {
+                "study_id": s["manifest"]["study_id"],
+                "manifest_sha256": s["manifest_sha256"],
+                "archive_sha256": s["archive_sha256"],
+            }
+            for s in endo
+        ]
+    return result
 
 
 def ct_summary(imaging):
@@ -74,6 +91,7 @@ def ct_summary(imaging):
     from medical_assistant.imaging_results import summarize
     from medical_assistant.nodule_support import verify_nodule_snapshot
 
+    imaging = [s for s in imaging or [] if not is_endoscopy(s["manifest"])]
     if not imaging:
         return "No accepted CT study is included. Inspect and accept CT before preparing a new report if imaging is needed."
     results = []
@@ -86,7 +104,9 @@ def ct_summary(imaging):
         )
     lung = [result for result in results if "candidate_count" in result]
     legacy = len(results) - len(lung)
-    parts = [f"{len(results)} accepted artificial CT {'study' if len(results) == 1 else 'studies'} included."]
+    parts = [
+        f"{len(results)} accepted artificial CT {'study' if len(results) == 1 else 'studies'} included."
+    ]
     if lung:
         proposed = sum(r["candidate_count"] for r in lung)
         accepted = sum(r["accepted_count"] for r in lung)
@@ -125,6 +145,33 @@ def ct_summary(imaging):
         )
     parts.append("Acquisition dates are unavailable.")
     return " ".join(parts)
+
+
+def endoscopy_summary(imaging):
+    studies = [s for s in imaging or [] if is_endoscopy(s["manifest"])]
+    if not studies:
+        return None
+    results = [
+        summarize_endo(s["manifest"], verify_endo_snapshot(s).model_dump(mode="json"))
+        for s in studies
+    ]
+    proposed = sum(r["candidate_count"] for r in results)
+    accepted = sum(r["accepted_count"] for r in results)
+    areas = [
+        str(row["Area (pixels)"])
+        for r in results
+        for row in r["rows"]
+        if row["Review"] == "accept"
+    ]
+    text = f"{len(studies)} accepted artificial image study/studies; {proposed} candidate region(s), {accepted} accepted on inspection."
+    if areas:
+        text += " Accepted mask areas: " + ", ".join(areas[:3]) + " pixels."
+        if len(areas) > 3:
+            text += " Further areas are retained in the evidence package."
+    if any(r["mode"] == "synthetic-fixture" for r in results):
+        text += " Includes a non-ML demonstration."
+    text += " No calibrated physical size, anatomical location or histology is supplied. These regions do not establish cancer, explain symptoms or exclude missed polyps."
+    return text
 
 
 def summary_parts(record, outputs, imaging=None, clinician_note=None):
@@ -190,13 +237,17 @@ def summary_parts(record, outputs, imaging=None, clinician_note=None):
         )
     note = ReportNote.model_validate(clinician_note) if clinician_note else None
     note_text = f"{note.reviewer}: {note.text}" if note and note.text else "Not added."
-    return [
+    parts = [
         ("Patient", record.display_name),
         ("AI history analysis", analysis),
         ("CT inspection", ct_summary(imaging)),
         ("For clinician review", followup.strip()),
         ("Clinician note", note_text),
     ]
+    endo = endoscopy_summary(imaging)
+    if endo:
+        parts.insert(3, ("Endoscopy inspection", endo))
+    return parts
 
 
 def compose(

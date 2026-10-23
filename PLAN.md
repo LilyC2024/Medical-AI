@@ -93,3 +93,18 @@ software gates.
     transfer, browser example/app checks and 31/25 document checks passed. Hosted
     Python 3.10/3.12 and fixture/pretrained/legacy compatibility checks passed.
     Implementation and aligned CT documentation are published; local trees match.
+
+## Image-first endoscopy companion
+
+25. **Endoscopy foundation** — standalone typed RGB candidate/source/review contracts,
+    safe synthetic exchange, dataset validation and grouped frozen splits; test
+    all contracts and data invariants before adding inference. Status: passed — 15 companion foundation tests.
+26. **Endoscopy model and deployment** — compact U-Net, reproducible train/evaluate,
+    ONNX CPU parity, optional explicit OpenVINO devices and local CLI/UI. Separate
+    real training/evaluation from synthetic tests. Status: passed — 26 companion tests and actual artificial CPU training/export/parity.
+27. **LOVISA endoscopy integration** — modality-specific validator, bounded local
+    worker, candidate review UI, accepted evidence and report images. Preserve
+    safety, frozen snapshots, authentication and CT compatibility. Status: passed — 227 full tests and actual fixture/installed-model exchange smokes.
+28. **Joint verification and publication** — full regressions, local Ollama and
+    producer-consumer smokes, browser review, concise linked documentation and
+    accurate evaluation records; publish both projects after passing. Status: in progress.

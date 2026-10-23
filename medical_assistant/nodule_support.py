@@ -24,7 +24,14 @@ def checked_nodule_review(manifest, review, *, reviewer=None):
     return value
 
 
-def imaging_acceptance_digest(proposal, nodule_review=None):
+def imaging_acceptance_digest(proposal, nodule_review=None, *, endo_review=None):
+    from medical_assistant.endo_support import is_endoscopy, endo_acceptance_digest
+    if is_endoscopy(proposal["manifest"]):
+        if nodule_review is not None:
+            raise ValueError("CT decisions cannot be attached to endoscopy")
+        return endo_acceptance_digest(proposal, endo_review)
+    if endo_review is not None:
+        raise ValueError("Endoscopy decisions cannot be attached to CT")
     if not is_nodule(proposal["manifest"]):
         if nodule_review is not None:
             raise ValueError(
@@ -43,6 +50,9 @@ def imaging_acceptance_digest(proposal, nodule_review=None):
 
 
 def verify_nodule_snapshot(snapshot):
+    from medical_assistant.endo_support import is_endoscopy, verify_endo_snapshot
+    if is_endoscopy(snapshot["manifest"]):
+        return verify_endo_snapshot(snapshot)
     if not is_nodule(snapshot["manifest"]):
         return None
     value = checked_nodule_review(

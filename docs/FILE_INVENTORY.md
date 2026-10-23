@@ -1,10 +1,8 @@
 # LOVISA tracked-file inventory
 
-[Overview](../README.md) · [Module/folder guide](CODE_REFERENCE.md)
+[Overview](../README.md) · [Module guide](CODE_REFERENCE.md) · [Endoscopy](ENDOSCOPY.md)
 
-Files below contain code, configuration, deliberately fictional fixtures and
-documentation. Databases, credentials, weights, CT jobs and clinical exports are
-ignored. Stable legacy identifiers are explained in [Naming](NAMING.md).
+Maintained code, fictional fixtures, configuration and guides. Credentials, models, runtime image stores and generated clinical reports are ignored.
 
 - [.github/workflows/tests.yml](../.github/workflows/tests.yml)
 - [.gitignore](../.gitignore)
@@ -32,6 +30,7 @@ ignored. Stable legacy identifiers are explained in [Naming](NAMING.md).
 - [docs/CODE_REFERENCE.md](../docs/CODE_REFERENCE.md)
 - [docs/DEMO_CASES.md](../docs/DEMO_CASES.md)
 - [docs/DEVELOPMENT.md](../docs/DEVELOPMENT.md)
+- [docs/ENDOSCOPY.md](../docs/ENDOSCOPY.md)
 - [docs/FILE_INVENTORY.md](../docs/FILE_INVENTORY.md)
 - [docs/ILLUSTRATIONS.md](../docs/ILLUSTRATIONS.md)
 - [docs/IMAGING.md](../docs/IMAGING.md)
@@ -69,6 +68,11 @@ ignored. Stable legacy identifiers are explained in [Naming](NAMING.md).
 - [medical_assistant/compact_reasoning.py](../medical_assistant/compact_reasoning.py)
 - [medical_assistant/ct_worker.py](../medical_assistant/ct_worker.py)
 - [medical_assistant/database.py](../medical_assistant/database.py)
+- [medical_assistant/endo_contracts/__init__.py](../medical_assistant/endo_contracts/__init__.py)
+- [medical_assistant/endo_contracts/worker.py](../medical_assistant/endo_contracts/worker.py)
+- [medical_assistant/endo_support.py](../medical_assistant/endo_support.py)
+- [medical_assistant/endo_ui.py](../medical_assistant/endo_ui.py)
+- [medical_assistant/endo_worker.py](../medical_assistant/endo_worker.py)
 - [medical_assistant/evidence.py](../medical_assistant/evidence.py)
 - [medical_assistant/grounding.py](../medical_assistant/grounding.py)
 - [medical_assistant/history.py](../medical_assistant/history.py)
@@ -103,9 +107,11 @@ ignored. Stable legacy identifiers are explained in [Naming](NAMING.md).
 - [requirements.lock.txt](../requirements.lock.txt)
 - [scripts/check_docs.py](../scripts/check_docs.py)
 - [scripts/check_ollama.py](../scripts/check_ollama.py)
+- [scripts/smoke_endoscopy.py](../scripts/smoke_endoscopy.py)
 - [scripts/smoke_imaging.py](../scripts/smoke_imaging.py)
 - [scripts/smoke_local.py](../scripts/smoke_local.py)
 - [scripts/sync_ct_contracts.py](../scripts/sync_ct_contracts.py)
+- [scripts/sync_endo_contracts.py](../scripts/sync_endo_contracts.py)
 - [tests/conftest.py](../tests/conftest.py)
 - [tests/test_agents.py](../tests/test_agents.py)
 - [tests/test_combined_report.py](../tests/test_combined_report.py)
@@ -113,6 +119,9 @@ ignored. Stable legacy identifiers are explained in [Naming](NAMING.md).
 - [tests/test_compact_reasoning.py](../tests/test_compact_reasoning.py)
 - [tests/test_ct_worker.py](../tests/test_ct_worker.py)
 - [tests/test_database.py](../tests/test_database.py)
+- [tests/test_endo_worker.py](../tests/test_endo_worker.py)
+- [tests/test_endoscopy.py](../tests/test_endoscopy.py)
+- [tests/test_endoscopy_ui.py](../tests/test_endoscopy_ui.py)
 - [tests/test_focused_ui.py](../tests/test_focused_ui.py)
 - [tests/test_guided_services.py](../tests/test_guided_services.py)
 - [tests/test_guided_ui.py](../tests/test_guided_ui.py)

@@ -78,3 +78,7 @@ non-ML fixture figures above.
 The current report is one concise Clinical summary section with CT inspection and
 a brief reviewer note. Earlier illustrations show the prior layout; the
 [report guide](REPORTS.md) and its scripted example show the current output.
+
+## Image-first endoscopy extension
+
+Earlier figures illustrate the history/CT workflow. The image-first endoscopy branch follows the same source → candidate inspection → acceptance → combined draft → final approval pattern. [Current endoscopy workflow](ENDOSCOPY.md).

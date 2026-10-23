@@ -3,8 +3,7 @@
 [Overview](../README.md) · [Illustrations](ILLUSTRATIONS.md) · [Code reference](CODE_REFERENCE.md)
 
 LOVISA organizes synthetic history and prepares a clinician-reviewed report. The
-CT companion detects image candidates in its own process/environment. Their only
-shared input to the clinical report is a validated, human-accepted research study.
+CT companion detects image candidates in its own process/environment. Both CT and endoscopy provide validated, human-accepted artificial research studies to the clinical report. Each uses its own environment.
 
 ## Clinical workflow
 
@@ -142,3 +141,7 @@ routing. [Report rules](REPORTS.md).
 Approval also signs a content manifest covering the source records, model evidence,
 CT snapshots and clinician note. Even when two studies produce identical short
 text, substituting different images or source metadata invalidates the approval.
+
+## Image-first endoscopy extension
+
+The endoscopy companion adds a local CV adapter, RGB-specific evidence validator and authenticated region review. It shares imaging persistence and final content binding; it does not send pixels to the LLM or change safety/hypothesis rules. [Full boundary](ENDOSCOPY.md).

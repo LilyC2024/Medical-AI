@@ -132,6 +132,9 @@ def validate_bundle(payload: bytes, patient_id: str):
             from medical_assistant.nodule_exchange import read_exchange, unique_object
             header=json.loads(archive.read("bundle.json"),object_pairs_hook=unique_object)
             if not isinstance(header,dict):raise ValueError("Imaging manifest must be an object")
+            if header.get("schema_version") == "lovisa-endo-image-v1":
+                from medical_assistant.endo_contracts import read_exchange as read_endo
+                return read_endo(payload, patient_id)
             if header.get("schema_version")=="mhcra-lung-nodules-v2":
                 return read_exchange(payload,patient_id)
         with zipfile.ZipFile(io.BytesIO(payload)) as z:

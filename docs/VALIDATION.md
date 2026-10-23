@@ -85,3 +85,7 @@ The main UI test verifies Generate is the final main-page action and stays locke
 until safety is prepared. The largest demo also exercises the actual compact
 wire-size check using an HTTP mock without dropping source entries. None of those
 checks are live inference or clinician verification.
+
+## Image-first endoscopy extension
+
+Endoscopy adds `test_endoscopy.py`, `test_endoscopy_ui.py` and `test_endo_worker.py`. Run `scripts/sync_endo_contracts.py --endo-root ../AI-MedImg-Endo` and `scripts/smoke_endoscopy.py --endo-root ../AI-MedImg-Endo` for exact contract and actual synthetic producer/receiver checks. [Details](ENDOSCOPY.md).

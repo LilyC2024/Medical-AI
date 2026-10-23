@@ -1,0 +1,95 @@
+"""Explicit local Endoscopy Agent adapter; bounded CV worker, no LLM or downloads."""
+
+import os
+from pathlib import Path
+from uuid import uuid4
+
+from pydantic import TypeAdapter
+
+from medical_assistant.endo_contracts import Id
+from medical_assistant.endo_contracts.worker import LocalJob
+from medical_assistant.storage import ROOT
+
+
+def configured_endo_root():
+    return (
+        Path(os.environ.get("LOVISA_ENDO_ROOT", str(ROOT.parent / "AI-MedImg-Endo")))
+        .expanduser()
+        .resolve()
+    )
+
+
+def configured_endo_model(root=None):
+    root = Path(root or configured_endo_root())
+    return (
+        Path(
+            os.environ.get(
+                "LOVISA_ENDO_MODEL_DIR", str(root / "artifacts/kvasir-model")
+            )
+        )
+        .expanduser()
+        .resolve()
+    )
+
+
+class LocalEndoscopyJob(LocalJob):
+    def __init__(
+        self,
+        patient_id,
+        *,
+        root=None,
+        jobs=None,
+        mode="fixture",
+        model_dir=None,
+        backend="onnx-cpu",
+        timeout=110,
+    ):
+        TypeAdapter(Id).validate_python(patient_id)
+        if (
+            mode not in ("fixture", "installed")
+            or backend not in ("onnx-cpu", "openvino-cpu", "openvino-npu")
+            or (mode == "fixture" and backend != "onnx-cpu")
+        ):
+            raise ValueError("Unsupported endoscopy mode/backend")
+        root = Path(root or configured_endo_root()).resolve()
+        python = (
+            root / ".venv" / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
+        )
+        if not python.is_file() or not (root / "src/endo/cli.py").is_file():
+            raise ValueError(
+                "Install the endoscopy companion and its .venv; see docs/ENDOSCOPY.md"
+            )
+        self.patient_id = patient_id
+        self.study_id = "endo-" + uuid4().hex[:16]
+        directory = Path(jobs or ROOT / "data/imaging/endo-jobs") / uuid4().hex
+        output = directory / "result"
+        command = [
+            str(python),
+            "-m",
+            "endo.cli",
+            "bridge",
+            "--patient-id",
+            patient_id,
+            "--study-id",
+            self.study_id,
+            "--output",
+            str(output),
+            "--backend",
+            backend,
+        ]
+        if mode == "installed":
+            command += [
+                "--model-dir",
+                str(
+                    Path(model_dir or configured_endo_model(root))
+                    .expanduser()
+                    .resolve()
+                ),
+            ]
+        super().__init__(
+            command,
+            cwd=root,
+            directory=directory,
+            output=output / "bundle.endo.zip",
+            timeout=timeout,
+        )

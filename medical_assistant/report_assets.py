@@ -7,6 +7,7 @@ from dataclasses import dataclass
 
 from PIL import Image
 
+from medical_assistant.endo_support import is_endoscopy, verify_endo_snapshot
 from medical_assistant.nodule_exchange import NoduleBundle, source_pixels, wire_pixels
 from medical_assistant.nodule_support import is_nodule, verify_nodule_snapshot
 from medical_assistant.report import NOTICE, summary_parts
@@ -18,6 +19,8 @@ class InspectionFigure:
     caption: str
     source_png: bytes
     overlay_png: bytes
+    source_label: str = "Source CT"
+    annotation_label: str = "Reviewed CT annotation"
 
 
 def inspection_figures(state, store):
@@ -31,7 +34,13 @@ def inspection_figures(state, store):
     for number, snapshot in enumerate(snapshots[:3], 1):
         manifest = snapshot["manifest"]
         resolve = store.preview_resolver(snapshot)
-        if is_nodule(manifest):
+        endo = is_endoscopy(manifest)
+        if endo:
+            verify_endo_snapshot(snapshot)
+            index = 0
+            overlay_png = resolve("overlay_preview", 0).read_bytes()
+            caption = f"Study {number} · artificial endoscopy image. Amber: predicted candidate regions; decisions reviewed separately. Pixel area is not physical lesion size."
+        elif is_nodule(manifest):
             bundle = NoduleBundle.model_validate(manifest)
             review = verify_nodule_snapshot(snapshot)
             accepted = {
@@ -74,7 +83,11 @@ def inspection_figures(state, store):
             caption = f"Study {number} · legacy tissue-mask demonstration · source slice {index}. Representative view, not nodule detection."
         figures.append(
             InspectionFigure(
-                caption, resolve("source_preview", index).read_bytes(), overlay_png
+                caption,
+                resolve("source_preview", index).read_bytes(),
+                overlay_png,
+                "Source endoscopy" if endo else "Source CT",
+                "Reviewed endoscopy annotation" if endo else "Reviewed CT annotation",
             )
         )
     return figures
@@ -107,8 +120,8 @@ def portable_html(payload, *, auth, safety=None):
             + label
             + "</small></div>"
             for label, data in [
-                ("Source CT", figure.source_png),
-                ("Reviewed annotation", figure.overlay_png),
+                (figure.source_label, figure.source_png),
+                (figure.annotation_label, figure.overlay_png),
             ]
         )
         images.append(
@@ -120,7 +133,7 @@ def portable_html(payload, *, auth, safety=None):
         )
     if len(payload.get("imaging", [])) > len(figures):
         images.append(
-            "<p>Representative images from the first three studies are shown. All accepted studies remain in the evidence package and CT review.</p>"
+            "<p>Representative images from the first three studies are shown. All accepted studies remain in the evidence package and the imaging review views.</p>"
         )
     return (
         """<!doctype html><html lang="en"><head><meta charset="utf-8">

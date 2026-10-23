@@ -85,3 +85,47 @@ jobs:
         run: .venv/bin/python scripts/smoke_imaging.py --ct-root companion-ct --mode legacy
       # Generated synthetic pixels only; no Ollama, remote inference, automatic
       # review approvals, patient data or report artifact publication.
+
+
+  endoscopy-workbench:
+    name: Synthetic endoscopy producer-consumer smoke
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      OLLAMA_NO_CLOUD: '1'
+      LANGCHAIN_TRACING_V2: 'false'
+      LANGSMITH_TRACING: 'false'
+    steps:
+      - name: Check out LOVISA
+        uses: actions/checkout@v7
+      - name: Check out matching endoscopy producer
+        uses: actions/checkout@v7
+        with:
+          repository: LilyC2024/AI-MedImg-Endo
+          ref: b6de536fbb44351b8a101db69a17a897c7b4978d
+          path: companion-endo
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Install separate local CPU environments
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install -r requirements.lock.txt
+          python -m venv companion-endo/.venv
+          companion-endo/.venv/bin/python -m pip install torch==2.14.1+cpu --index-url https://download.pytorch.org/whl/cpu
+          companion-endo/.venv/bin/python -m pip install -e './companion-endo[ml]'
+      - name: Check exact shared schema and worker
+        run: .venv/bin/python scripts/sync_endo_contracts.py --endo-root companion-endo
+      - name: Verify actual artificial fixture exchange
+        run: .venv/bin/python scripts/smoke_endoscopy.py --endo-root companion-endo
+      - name: Train and export a tiny artificial model
+        run: |
+          companion-endo/.venv/bin/python -m endo.cli synthetic-data --output companion-endo/data/ci --count 32 --size 64
+          companion-endo/.venv/bin/python -m endo.cli split --data companion-endo/data/ci --output companion-endo/data/ci-split.json
+          companion-endo/.venv/bin/python -m endo.cli train --data companion-endo/data/ci --manifest companion-endo/data/ci-split.json --output companion-endo/artifacts/ci-model --epochs 1 --size 64 --base 4 --threads 1 --synthetic
+          companion-endo/.venv/bin/python -m endo.cli export-model --model-dir companion-endo/artifacts/ci-model
+      - name: Verify actual installed-model artificial exchange
+        run: .venv/bin/python scripts/smoke_endoscopy.py --endo-root companion-endo --mode installed --model-dir companion-endo/artifacts/ci-model
+      # Software/inference validation only; no clinical data, Ollama, automatic
+      # image acceptance, clinician approval or report publication.

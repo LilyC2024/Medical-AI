@@ -176,6 +176,14 @@ def next_action(state=None, *, urgent=False):
         return "safety-check", "Next action: review the warning sign"
     if "proposal" in st.session_state:
         return "source-records", "Next action: review the pending record"
+    proposal = st.session_state.get("imaging_proposal")
+    from medical_assistant.endo_support import is_endoscopy
+
+    if proposal and is_endoscopy(proposal[1]["manifest"]):
+        return "endoscopy-review", "Next action: review or discard the endoscopy image"
+    endo_job = st.session_state.get("endo_job")
+    if endo_job and endo_job.status() in ("running", "complete"):
+        return "endoscopy-review", "Next action: inspect the endoscopy result"
     job = st.session_state.get("ct_job")
     if "imaging_proposal" in st.session_state or (
         job and job.status() in ("running", "complete")
@@ -194,6 +202,7 @@ def guide(view, state=None, *, running=False, signed_in=False):
         ("Choose a patient", "choose-patient"),
         ("Review the history", "patient-overview"),
         ("Review CT · optional", "ct-review"),
+        ("Review endoscopy · optional", "endoscopy-review"),
         ("Complete safety check", "safety-check"),
         ("Review the report", "clinical-report"),
     ]

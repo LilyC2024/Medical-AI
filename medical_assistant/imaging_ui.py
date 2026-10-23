@@ -9,6 +9,7 @@ from medical_assistant.ct_worker import (
     configured_ct_model,
 )
 from medical_assistant.imaging import ImagingStore
+from medical_assistant.endo_support import is_endoscopy
 from medical_assistant.imaging_results import summarize
 from medical_assistant.models import Review
 from medical_assistant.nodule_support import imaging_acceptance_digest, is_nodule
@@ -102,6 +103,12 @@ def imaging_ui(path, auth, token, user, record, *, locked=False, case_imaging=No
             store.discard(st.session_state.imaging_proposal[0])
         st.session_state.imaging_proposal = result
 
+    pending = st.session_state.get("imaging_proposal")
+    if pending and is_endoscopy(pending[1]["manifest"]):
+        from medical_assistant.ui.navigation import go_to
+        st.info("Resolve the pending endoscopy study before adding CT.")
+        st.button("Open pending endoscopy", on_click=go_to, args=("endoscopy-review",), key="ct_open_endo")
+        return
     job = st.session_state.get("ct_job")
     if job:
         status = job.status()
@@ -128,6 +135,7 @@ def imaging_ui(path, auth, token, user, record, *, locked=False, case_imaging=No
         )
         if case_imaging is not None:
             store.verify(accepted)
+        accepted = [s for s in accepted if not is_endoscopy(s["manifest"])]
         if accepted:
             st.subheader("Accepted research imaging")
             selected = st.selectbox(
@@ -265,7 +273,7 @@ def imaging_ui(path, auth, token, user, record, *, locked=False, case_imaging=No
         if st.button(
             "Run CT analysis",
             key="ct_generate",
-            disabled=locked or running or not token,
+            disabled=locked or running or not token or bool(st.session_state.get("endo_job") and st.session_state.endo_job.status() in ("running", "complete")),
         ):
             try:
                 st.session_state.ct_job = LocalCTJob(
