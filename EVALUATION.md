@@ -37,8 +37,7 @@ keeps readable original excerpts in Source records and adds fixed local navigati
 anchors. Browser verification caught and corrected a scroll-helper execution/quoting
 issue and repeated same-destination rendering; each click now creates a fresh,
 fixed-ID local component. No source/model text is executed. Existing response
-budgets and research limitations still apply. Hosted publication is recorded below
-once completed.
+budgets and research limitations still apply. Hosted publication is recorded below.
 
 ### Hosted focused-workspace publication
 
@@ -46,8 +45,16 @@ once completed.
 passed at `d3c39b092e3f3181825ece15f2f48d24d71db640`: Python 3.10/3.12,
 dependency/document checks, exact shared contracts and actual fixture/pretrained/
 legacy CT producer-consumer smokes. The published tree matched the staged local
-tree. The subsequent literal-filename rendering change has passed all 206 local
-tests; its hosted verification is recorded after completion.
+tree.
+
+[Final run 39968159029](https://github.com/LilyC2024/Medical-AI/actions/runs/39968159029)
+passed at `f3634b758e03821c127bb96087bc5a0d5a99e454`: Python 3.10/3.12,
+dependency/document checks, exact shared contracts and actual fixture/pretrained/
+legacy CT producer-consumer smokes. This includes literal source-filename rendering
+and the 206-test suite. Its published tree matches the local checkout. The final
+verification-record commit changes documentation only and skips duplicate CI.
+The loopback demo is left at Morgan's unsubmitted Safety check; no clinical or
+imaging approval was issued by these actual checks.
 
 ## Guided demonstration release — 23 October 2026
 

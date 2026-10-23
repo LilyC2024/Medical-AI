@@ -72,7 +72,7 @@ software gates.
     guide-to-safety jump shows the form and locked generation control.
 21. **Verification and delivery** — regression, actual browser navigation and
     patient-isolation checks, concise guides/screenshots and revised local release.
-    Status: local verification complete — 206 final tests, actual local Ollama,
-    fixture/pretrained CT and desktop/narrow browser navigation/isolation checks;
-    guides and four screenshots updated. Initial hosted Python/CT checks passed;
-    literal-filename follow-up publication checks in progress.
+    Status: complete — 206 local tests, actual local Ollama, fixture/pretrained
+    CT and desktop/narrow browser navigation/isolation checks. Guides and four
+    screenshots updated; final hosted Python 3.10/3.12 and all three CT compatibility
+    flows passed. Published/local trees match; demo remains on loopback.
