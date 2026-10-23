@@ -15,6 +15,7 @@ LOVISA local workspace: reusable UI, bounded jobs and human review.
 | --- | --- |
 | `account_ui(auth)` | See linked implementation and subject contract. |
 | `clear_private_state()` | Signing out hides every case and prevents background results reappearing. |
+| `switch_patient()` | See linked implementation and subject contract. |
 | `reset_case()` | See linked implementation and subject contract. |
 | `main()` | See linked implementation and subject contract. |
 
@@ -341,6 +342,7 @@ Responsive clinical UI; only explicit human actions issue review receipts.
 | `resume_task.run(progress, budget)` | See linked implementation and subject contract. |
 | `collect_task()` | Publish only a completed, in-budget result into this Streamlit session. |
 | `task_progress()` | See linked implementation and subject contract. |
+| `background_progress()` | Keep completion responsive when the reviewer opens a different view. |
 | `generate_task(workflow, case, token)` | See linked implementation and subject contract. |
 | `generate_task.run(progress, budget)` | See linked implementation and subject contract. |
 | `bottom_actions(path, auth, record, model, token, user, decision)` | Safety first, then one explicit bottom-of-page generation action. |
@@ -362,6 +364,7 @@ Reusable presentation components. Escape every source-derived HTML value.
 | `medications(record)` | See linked implementation and subject contract. |
 | `original_sources(record)` | See linked implementation and subject contract. |
 | `empty(title, copy)` | See linked implementation and subject contract. |
+| `next_action(state=None, *, urgent=False)` | See linked implementation and subject contract. |
 | `guide(view, state=None, *, running=False, signed_in=False)` | See linked implementation and subject contract. |
 | `footer()` | See linked implementation and subject contract. |
 
@@ -373,6 +376,19 @@ Human-approved history import UI; source data is never guessed or overwritten.
 | --- | --- |
 | `history_ui(path, auth, token, user, record)` | See linked implementation and subject contract. |
 | `history_ui.replace_proposal(result)` | See linked implementation and subject contract. |
+
+## [medical_assistant/ui/navigation.py](../../medical_assistant/ui/navigation.py)
+
+Patient-scoped UI lifecycle and fixed, source-independent navigation targets.
+
+| Callable | Purpose/contract |
+| --- | --- |
+| `clear_patient(state, *, preserve_login=True, preserve_patient=True)` | Cancel abandoned work and drop every patient-specific widget/proposal. |
+| `ensure_patient(state, patient)` | Fail closed before rendering/collecting a mismatched patient snapshot. |
+| `destination(target)` | See linked implementation and subject contract. |
+| `go_to(target, *, state=None)` | See linked implementation and subject contract. |
+| `anchor(target)` | See linked implementation and subject contract. |
+| `focus_pending()` | Scroll only to fixed app anchors; never interpolate record/model text into JS. |
 
 ## [medical_assistant/workflow.py](../../medical_assistant/workflow.py)
 

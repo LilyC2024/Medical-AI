@@ -1,20 +1,21 @@
 """Imaging inspection UI; acceptance is separate from final clinical approval."""
 
+import os
+
 import streamlit as st
-from medical_assistant.imaging_results import summarize
 
 from medical_assistant.ct_worker import (
     LocalCTJob,
-    configured_ct_root,
     configured_ct_model,
 )
 from medical_assistant.imaging import ImagingStore
+from medical_assistant.imaging_results import summarize
 from medical_assistant.models import Review
-from medical_assistant.nodule_support import is_nodule, imaging_acceptance_digest
+from medical_assistant.nodule_support import imaging_acceptance_digest, is_nodule
 from medical_assistant.nodule_ui import (
-    nodule_viewer,
-    candidate_controls,
     build_nodule_review,
+    candidate_controls,
+    nodule_viewer,
     preview_calipers,
 )
 
@@ -57,14 +58,12 @@ def _viewer(manifest, path_for, key, *, review=None):
     st.caption(
         f"Bundle-reported entropy mean: {manifest['uncertainty_mean']:.3f} — model behavior, not clinical confidence. Raw predictions; producer declares ONNX parity passed."
     )
-    with st.expander("Imaging identity and source provenance"):
-        st.json(manifest)
 
 
 def result_summary(manifest, review=None):
     result = summarize(manifest, review)
     st.subheader("CT analysis results")
-    st.caption(f"Study {result['study_id']} · {result['mode']} · {result['status']}")
+    st.caption("Reviewed study" if review else "Study awaiting your review")
     if "candidate_count" in result:
         a, b, c = st.columns(3)
         a.metric("Candidates proposed", result["candidate_count"])
@@ -84,7 +83,7 @@ def result_summary(manifest, review=None):
         st.write("Tissue-class voxel counts:", result["voxel_counts"])
     st.info(result["conclusion"])
     st.caption(
-        "Scores are not cancer probabilities. Measurements are reviewer-placed calipers; box extents are not lesion diameters. Source images and annotations are shown below."
+        "Inspect the source images and annotations below. Calipers require human review."
     )
 
 
@@ -117,8 +116,9 @@ def imaging_ui(path, auth, token, user, record, *, locked=False, case_imaging=No
                 job.inspection_ready = True
             except (ValueError, OSError) as error:
                 st.error("The completed CT study could not be verified.")
-                with st.expander("CT validation details"):
-                    st.text(str(error))
+                st.caption(
+                    "Discard this study and run it again, or ask the local administrator to check the source bundle."
+                )
                 job.validation_error = str(error)
                 job.inspection_ready = True
     accepted = []
@@ -240,11 +240,6 @@ def imaging_ui(path, auth, token, user, record, *, locked=False, case_imaging=No
     ):
         job = st.session_state.get("ct_job")
         running = job is not None and job.status() == "running"
-        with st.expander("Local CT connection · settings"):
-            st.text("Companion: " + str(configured_ct_root()))
-            st.caption(
-                "Uses a separate local Python environment. No images are sent to the language model."
-            )
         mode = st.selectbox(
             "CT workflow",
             [
@@ -262,16 +257,10 @@ def imaging_ui(path, auth, token, user, record, *, locked=False, case_imaging=No
         model_dir = None
         device = "cpu"
         if modes[mode] == "lung-pretrained":
-            model_dir = st.text_input(
-                "Installed local nodule model directory",
-                str(configured_ct_model()),
-                key="ct_model_dir",
-            )
-            device = st.selectbox(
-                "CT inference device", ["cpu", "cuda"], key="ct_device"
-            )
+            model_dir = str(configured_ct_model())
+            device = os.environ.get("MHCRA_CT_DEVICE", "cpu")
             st.caption(
-                "Uses installed weights on generated synthetic CT. No download occurs; unavailable CUDA fails explicitly."
+                "Uses the installed detector on artificial CT images. No model download is needed."
             )
         if st.button(
             "Run CT analysis",

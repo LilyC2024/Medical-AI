@@ -1,14 +1,28 @@
 """LOVISA local workspace: reusable UI, bounded jobs and human review."""
 
-import medical_assistant  # noqa: F401 — disable tracing before graph imports
 import streamlit as st
+
+import medical_assistant  # noqa: F401 — disable tracing before graph imports
 from medical_assistant.database import get_history, list_patients
+from medical_assistant.imaging_ui import imaging_ui
 from medical_assistant.runtime import get_services
 from medical_assistant.safety import SafetyAgent
-from medical_assistant.imaging_ui import imaging_ui
 from medical_assistant.ui import components as ui
+from medical_assistant.ui.clinical import (
+    background_progress,
+    bottom_actions,
+    collect_task,
+    report_panel,
+)
 from medical_assistant.ui.history import history_ui
-from medical_assistant.ui.clinical import collect_task, bottom_actions, report_panel
+from medical_assistant.ui.navigation import (
+    DESTINATIONS,
+    anchor,
+    clear_patient,
+    ensure_patient,
+    focus_pending,
+    go_to,
+)
 
 
 def account_ui(auth):
@@ -45,15 +59,12 @@ def account_ui(auth):
 
 def clear_private_state():
     """Signing out hides every case and prevents background results reappearing."""
-    task = st.session_state.get("analysis_task")
-    if task:
-        task.cancel()
-    job = st.session_state.get("ct_job")
-    if job and job.status() == "running":
-        job.cancel()
-    if not task and "workflow" in st.session_state:
-        st.session_state.workflow.inference.close()
+    clear_patient(st.session_state, preserve_login=False, preserve_patient=False)
     st.session_state.clear()
+
+
+def switch_patient():
+    clear_patient(st.session_state)
 
 
 def reset_case():
@@ -71,9 +82,17 @@ def reset_case():
         "last_analysis_seconds",
     ):
         st.session_state.pop(key, None)
-    for key in ("safety_notes", "safety_attest", "safety_action"):
+    for key in (
+        "safety_notes",
+        "safety_attest",
+        "safety_action",
+        "review_notes",
+        "attested",
+        "decision",
+    ):
         st.session_state.pop(key, None)
     st.session_state.navigate_to = "Patient overview"
+    st.session_state.focus_target = "patient-overview"
 
 
 def main():
@@ -99,47 +118,50 @@ def main():
         )
         ui.footer()
         return
-    collect_task()
-    if "navigate_to" in st.session_state:
-        st.session_state.workspace = st.session_state.pop("navigate_to")
-    st.sidebar.caption("PATIENT WORKSPACE")
     patients = list_patients(path)
     if not patients:
         st.error("No fictional patient records are available.")
         return
-    active = "case_id" in st.session_state or "analysis_task" in st.session_state
-    ct = st.session_state.get("ct_job")
-    running_ct = ct is not None and ct.status() == "running"
-    selected = st.sidebar.selectbox(
+    anchor("choose-patient")
+    selected = st.selectbox(
         "Patient",
         [p["id"] for p in patients],
         format_func=lambda key: next(
             p["display_name"] for p in patients if p["id"] == key
         ),
-        index=[p["id"] for p in patients].index("fictional-001")
-        if any(p["id"] == "fictional-001" for p in patients)
-        else 0,
-        disabled=active or "proposal" in st.session_state or running_ct,
+        index=None,
+        placeholder="Choose a patient…",
         key="patient",
-        on_change=reset_case,
+        on_change=switch_patient,
     )
+    if selected is None:
+        ui.empty(
+            "Choose a patient to begin",
+            "Open one fictional record using the Patient menu above.",
+        )
+        focus_pending()
+        ui.footer()
+        return
+    ensure_patient(st.session_state, selected)
+    collect_task()
+    ensure_patient(st.session_state, selected)
+    if "navigate_to" in st.session_state:
+        view_name = st.session_state.pop("navigate_to")
+        go_to(
+            next(
+                k
+                for k, v in DESTINATIONS.items()
+                if v == view_name and k != "choose-patient"
+            )
+        )
+    active = "case_id" in st.session_state or "analysis_task" in st.session_state
+    ct = st.session_state.get("ct_job")
+    running_ct = ct is not None and ct.status() == "running"
     st.sidebar.button(
-        "Start a new case", key="new_case", on_click=reset_case, width="stretch"
+        "Start a new review", key="new_case", on_click=reset_case, width="stretch"
     )
-    st.sidebar.divider()
-    with st.sidebar.expander("Local AI settings"):
-        model = st.text_input(
-            "Installed local Ollama model",
-            value="gemma4:e2b",
-            disabled=active,
-            key="model",
-        )
-        st.caption(
-            "Only the installed local model is used. No cloud inference or paid API."
-        )
-    st.sidebar.caption(
-        "Fictional records only. Local accounts do not verify clinical qualifications."
-    )
+    st.sidebar.caption("Artificial records · Local research only")
+    model = "gemma4:e2b"
     try:
         record = get_history(selected, path)
         decision = SafetyAgent().evaluate(record)
@@ -158,20 +180,23 @@ def main():
             st.error(
                 "A structured warning-sign report requires human assessment. Automated clinical reasoning is blocked; do not wait for imaging inspection."
             )
-        with st.expander("Five complex artificial demo cases"):
-            st.table(
-                [
-                    {"Case": p["display_name"], "Patient ID": p["id"]}
-                    for p in patients
-                    if p["id"].startswith("demo-0")
-                ]
-            )
-            st.caption(
-                "Choose a case from Patient in the sidebar. All histories, laboratory values and medication orders are authored fictional test data. Casey demonstrates a mandatory warning-sign stop."
-            )
+        next_target, next_label = ui.next_action(state, urgent=urgent)
+        st.button(
+            next_label,
+            key="next_action",
+            type="primary",
+            on_click=go_to,
+            args=(next_target,),
+        )
         view = st.radio(
             "Workspace",
-            ["Patient overview", "CT review", "Clinical report"],
+            [
+                "Patient overview",
+                "CT review",
+                "Safety check",
+                "Clinical report",
+                "Source records",
+            ],
             horizontal=True,
             label_visibility="collapsed",
             key="workspace",
@@ -180,14 +205,11 @@ def main():
             workspace, guide = st.columns([3.3, 1.18], gap="large")
             with workspace:
                 if view == "Patient overview":
+                    anchor("patient-overview")
                     ui.timeline(record)
                     ui.medications(record)
-                    ui.original_sources(record)
-                    if not active:
-                        st.divider()
-                        st.subheader("Add to the record")
-                        history_ui(path, auth, token, user, record)
                 elif view == "CT review":
+                    anchor("ct-review")
                     if urgent:
                         st.warning(
                             "CT inspection is paused while this warning requires human assessment."
@@ -207,8 +229,19 @@ def main():
                             locked=active or "proposal" in st.session_state,
                             case_imaging=state.get("imaging") if active else None,
                         )
+                elif view == "Safety check":
+                    anchor("safety-check")
+                    bottom_actions(path, auth, record, model, token, user, decision)
+                elif view == "Source records":
+                    anchor("source-records")
+                    ui.original_sources(record)
+                    if not active:
+                        history_ui(path, auth, token, user, record)
                 else:
+                    anchor("clinical-report")
                     report_panel(auth, token, user, record, urgent=urgent)
+                if view != "Safety check" and "analysis_task" in st.session_state:
+                    background_progress()
             with guide:
                 with st.container(key="help_rail"):
                     ui.guide(
@@ -217,12 +250,13 @@ def main():
                         running="analysis_task" in st.session_state,
                         signed_in=bool(token),
                     )
-        bottom_actions(path, auth, record, model, token, user, decision)
+        focus_pending()
         ui.footer()
-    except (ValueError, LookupError, OSError) as error:
+    except (ValueError, LookupError, OSError):
         st.error("This record needs attention before it can be displayed.")
-        with st.expander("Record validation details"):
-            st.text(str(error))
+        st.info(
+            "Choose another patient or start a new review. The record has not been changed."
+        )
 
 
 if __name__ == "__main__":

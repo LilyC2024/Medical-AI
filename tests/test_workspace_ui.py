@@ -12,14 +12,14 @@ def test_workspace_has_operating_guide_and_readable_history(ui):
     login(app)
     assert app.title[0].value == "LOVISA"
     text = "\n".join(m.value for m in app.markdown)
-    assert "How to use LOVISA" in text and "The patient story" in "\n".join(
+    assert "Your review steps" in text and "The patient story" in "\n".join(
         h.value for h in app.subheader
     )
     assert "lv-timeline" in text and "fictional_patient.json" in text
     assert not app.get("download_button")
     open_imaging(app)
     assert not app.button(key="ct_generate").disabled
-    assert any("How to use LOVISA" in m.value for m in app.markdown)
+    assert any("Your review steps" in m.value for m in app.markdown)
 
 
 def test_source_html_is_escaped_in_design_components():

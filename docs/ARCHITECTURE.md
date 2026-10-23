@@ -77,7 +77,11 @@ orders or clinical conclusions. [Implementation/budgets](PERFORMANCE.md).
 The interface runs clinical generation/resumption in bounded background tasks and
 polls progress once per second. Cancellation or deadline rejects late publication.
 UI components, imports and clinical controls live in separate `ui/` modules; only
-the selected view renders. The CT worker uses its own process/watchdog. Native
+the selected view renders. Patient selection is explicit. Switching cancels pending
+work and clears patient-specific widgets/proposals; scope guards run before and
+after collecting a completed task. Fixed, allowlisted guide destinations choose a
+view and scroll to its action without issuing any review. Source/model content
+never enters the scroll helper's JavaScript. The CT worker uses its own process/watchdog. Native
 Streamlit controls and local CSS form the [design system](INTERFACE.md).
 
 ## Safety and review

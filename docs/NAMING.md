@@ -12,7 +12,7 @@ clinical acronym. Earlier documentation, figures and releases used **MHCRA AI**.
 | Medical History & Clinical Reasoning Assistant | Functional description beneath the name |
 | `LilyC2024/Medical-AI` | Existing GitHub repository address |
 | `medical_assistant` / `MedicalHistoryOrchestrator` | Existing Python package and orchestrator class |
-| `MHCRA_CT_ROOT` / `MHCRA_CT_MODEL_DIR` | Existing CT checkout and weight-location settings |
+| `MHCRA_CT_ROOT` / `MHCRA_CT_MODEL_DIR` / `MHCRA_CT_DEVICE` | Existing CT checkout and weight-location settings |
 | `mhcra-lung-nodules-v2` | Current synthetic nodule exchange contract |
 | `mhcra-imaging-v1` | Retained legacy tissue-mask exchange contract |
 | `deploy.mhcra_lung_bridge` / `deploy.mhcra_bridge` | Current nodule and legacy producer entry points |

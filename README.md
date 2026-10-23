@@ -12,10 +12,12 @@ function remains the same.
 
 ![LOVISA patient workspace and operating guide](docs/images/lovisa-workspace-overview.jpg)
 
-Sign in, read source-linked patient cards, inspect CT results in their own view,
-then complete the safety step at the bottom before generating a concise draft. A right-hand guide explains each step. Technical JSON
-and hashes remain available under details. Background progress and cancellation
-keep the workspace responsive; processing stops at 110 seconds if needed.
+Sign in and choose one patient. Read the history, optionally inspect CT, then open
+**Safety check** to record your assessment and generate a concise draft. The
+right-hand **Your review steps** buttons open and scroll to each action; the
+**Next action** button points to pending work. **Source records** keeps readable
+evidence separate from the main workflow. Changing patients clears unfinished
+notes and cancels old work. Background processing stops at 110 seconds if needed.
 Actual local synthetic smokes took **1.65s** (fixture CT), **12.43s** (pretrained CT)
 and **23.40s** (Ollama clinical workflow). These are individual CPU runs, not
 clinical performance claims or guarantees. [Workspace](docs/INTERFACE.md) ·
@@ -102,7 +104,8 @@ includes local Ollama configuration, local-demo account setup and Windows paths;
 
 Five additional complex fictional cases cover medicines/dizziness, cough/CT,
 fatigue/mixed evidence, a warning-sign stop and conflicting follow-up doses. They
-are listed after login and tested separately from live model inference.
+are available in the patient menu after login. Only the selected patient's data
+is displayed. Tests are separate from live model inference.
 [Cases and expected behavior](docs/DEMO_CASES.md).
 
 Install CT separately with Python **3.12**. The integration supports nodule-v2 and

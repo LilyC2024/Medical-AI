@@ -4,7 +4,9 @@ import json
 from datetime import datetime
 from uuid import uuid4
 from zoneinfo import ZoneInfo
+
 import streamlit as st
+
 from medical_assistant.history_import import HistoryManagement
 from medical_assistant.models import PatientRecord
 from medical_assistant.ui.clinical import make_review
@@ -17,6 +19,9 @@ def history_ui(path, auth, token, user, record):
     manager = st.session_state.imports
 
     def replace_proposal(result):
+        if result[1]["record"]["patient_id"] != record.patient_id:
+            manager.pending.pop(result[0], None)
+            raise ValueError("Choose a record belonging to the selected patient.")
         if "proposal" in st.session_state:
             manager.pending.pop(st.session_state.proposal[0], None)
         st.session_state.proposal = result
@@ -110,8 +115,6 @@ def history_ui(path, auth, token, user, record):
             st.caption(
                 f"{len(proposal['duplicate_ids'])} exact duplicate entries will be skipped."
             )
-        with st.expander("Import proposal · technical details"):
-            st.json(proposal)
         with st.form("import_approval"):
             notes = st.text_area("Import review notes", key="import_notes")
             checked = st.checkbox(

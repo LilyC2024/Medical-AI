@@ -1,14 +1,15 @@
 """Nodule source inspection and typed candidate/caliper controls; no inference."""
 
-import numpy as np
 import streamlit as st
 
 from medical_assistant.nodule_exchange import NoduleBundle, source_pixels, wire_pixels
 from medical_assistant.nodule_models import (
-    Review as NoduleReview,
-    Decision,
     Caliper,
+    Decision,
     digest,
+)
+from medical_assistant.nodule_models import (
+    Review as NoduleReview,
 )
 
 
@@ -24,15 +25,12 @@ def nodule_viewer(manifest, path_for, key, *, review=None):
     bundle = NoduleBundle.model_validate(manifest)
     study = bundle.study
     st.caption(
-        "Synthetic lung nodule research · amber: candidate box · cyan: reviewed caliper. Detector scores are not malignancy risk; box extents are not lesion diameters or volume."
+        "Artificial CT · amber: candidate box · cyan: reviewed caliper. Scores are not cancer probabilities; box size is not a measured lesion diameter."
     )
     if study.model.synthetic_fixture:
         st.warning(
-            "Non-ML generated-phantom fixture finder — not trained lesion detection."
+            "Generated demonstration with a non-ML finder; this is not a trained detector result."
         )
-    st.caption(
-        "CT review and final clinical approval are separate steps. This study remains research evidence."
-    )
     ids = [c.candidate_id for c in study.candidates]
     selected = st.selectbox(
         "Jump to candidate", ["All slices", *ids], key=key + "_candidate"
@@ -44,7 +42,7 @@ def nodule_viewer(manifest, path_for, key, *, review=None):
         else study.geometry.shape_zyx[0] // 2
     )
     index = st.slider(
-        "Slice (zero-based)",
+        "Image slice",
         0,
         study.geometry.shape_zyx[0] - 1,
         center,
@@ -72,27 +70,6 @@ def nodule_viewer(manifest, path_for, key, *, review=None):
             overlay, caption="Candidates and LOVISA-reviewed calipers", width="stretch"
         )
     st.caption(f"Source slice {index} · original evidence is retained with this study.")
-    with st.expander("Candidate box geometry · details"):
-        st.dataframe(
-            [
-                {
-                    "ID": c.candidate_id,
-                    "Detector score (not malignancy)": c.score,
-                    "Source-grid box extents x/y/z mm": tuple(
-                        round(v, 2)
-                        for v in (
-                            (np.array(c.box_zyx[3:]) - c.box_zyx[:3])
-                            * study.geometry.spacing_zyx_mm
-                        )[::-1]
-                    ),
-                }
-                for c in study.candidates
-            ],
-            hide_index=True,
-        )
-    with st.expander("Source evidence, model and geometry · details"):
-        st.code(f"Source slice {index} SHA-256: {study.sources[index].sha256}")
-        st.json(manifest)
 
 
 def candidate_controls(manifest, key):

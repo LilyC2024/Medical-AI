@@ -36,7 +36,7 @@ p,li{line-height:1.62;} [data-testid="stCaptionContainer"],[data-testid="stCapti
 .lv-patient h2{margin:0;padding:0;font-size:21px!important;letter-spacing:-.025em;}.lv-small{font-size:12px;color:var(--lv-muted);margin-top:5px;}
 .lv-pill{display:inline-block;border-radius:99px;padding:5px 10px;font-size:11px;font-weight:700;color:#436274;background:#edf2f6;}
 .lv-pill.amber{background:#fff1d4;color:#895c13;}.lv-pill.red{background:#fee9e8;color:#aa3838;}.lv-pill.teal{background:#e1f2eb;color:#216f57;}
-.lv-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:14px 0 20px;}
+.lv-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:14px 0 20px;}
 .lv-stat{background:white;border:1px solid var(--lv-line);border-radius:13px;padding:14px 18px;}.lv-stat strong{display:block;color:var(--lv-ink);font-size:23px;font-weight:650;letter-spacing:-.05em;}.lv-stat span{display:block;font-size:11px;color:var(--lv-muted);margin-top:1px;}
 .st-key-workspace_shell [data-testid="stHorizontalBlock"]{align-items:flex-start;}
 .st-key-help_rail{background:white;border:1px solid var(--lv-line);border-radius:var(--lv-radius);padding:22px 20px!important;box-shadow:0 8px 25px #18343a04;}
@@ -71,4 +71,8 @@ input,textarea{font-size:13px!important;}.stTextInput input,.stTextArea textarea
 .st-key-report_paper h1{font-size:22px!important;}.st-key-report_paper h2{font-size:17px!important;margin-top:20px;}
 @media(max-width:1100px){.block-container{padding:3.8rem 1.5rem 1.5rem;}.lv-hero{padding:20px;}.lv-stats{gap:8px;}.lv-stat{padding:12px;}}
 @media(max-width:760px){.block-container{padding:3.8rem 1rem 1rem;}.lv-stats{grid-template-columns:repeat(2,1fr);}.lv-hero{align-items:flex-start;flex-direction:column;}.lv-patient h2{font-size:18px!important;}.st-key-help_rail{position:static;}.st-key-workspace_shell>[data-testid="stLayoutWrapper"]>[data-testid="stHorizontalBlock"]>[data-testid="stColumn"]:last-child{position:static;max-height:none;overflow:visible;}h1{font-size:2.2rem!important;}}
+.lv-anchor{display:block;scroll-margin-top:5.5rem;outline:none;}
+.st-key-help_rail button{justify-content:flex-start;text-align:left;background:#fff;}
+.st-key-help_rail button:hover{background:#e9f5f1;}
+.st-key-next_action button{margin-bottom:8px;}
 </style>

@@ -197,12 +197,13 @@ def test_commit_failure_restores_pending_files(imaging_store, monkeypatch):
 
 def test_same_bundle_can_recover_orphaned_promotion_after_process_crash(imaging_store):
     store, token = imaging_store
-    key, proposal = store.prepare(bundle_bytes(), "synthetic-checklist")
+    payload = bundle_bytes()  # Retry the exact archive; ZIP metadata can differ across calls.
+    key, proposal = store.prepare(payload, "synthetic-checklist")
     target = store._directory("synthetic-checklist", "synthetic-study-001")
     target.parent.mkdir(parents=True)
     (store.root / "pending" / key).rename(target)  # simulated crash before DB insertion
     store.pending.clear()
-    key, proposal = store.prepare(bundle_bytes(), "synthetic-checklist")
+    key, proposal = store.prepare(payload, "synthetic-checklist")
     snapshot = store.approve(key, acceptance(proposal), token)
     assert store.snapshots("synthetic-checklist") == [snapshot]
     assert not (store.root / "pending" / key).exists()

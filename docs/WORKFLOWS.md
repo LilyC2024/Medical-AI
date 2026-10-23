@@ -7,21 +7,22 @@
 1. **Sign in.** All patient examples, CT and report controls stay hidden until
    authenticated. Select Taylor or one of the five complex fictional cases.
 2. Read **Patient overview**. Check dates, attribution, medicines and original
-   sources. Import/approve any synthetic corrections before preparing the case.
+   sources in **Source records**. Import/approve any synthetic corrections there
+   before preparing the case.
 3. Optionally open **CT review** and **Run CT analysis**. The completed result
    opens automatically: candidate count, review status, source slices, annotations
    and optional calipers. Inspect and accept it, or discard it. A pending study
    blocks the safety preparation so it cannot be silently omitted from the draft.
-4. At the **bottom of the page**, read **Before you generate the draft**. For
+4. Open **Safety check** using its tab, **Next action**, or guide step 4. For
    missing current information, add assessment notes, tick the review checkbox,
    choose **Allow draft generation after my safety assessment**, and **Save safety
    assessment**. This saves the decision and freezes the snapshot; **no model
    runs yet**. Choosing **Keep analysis paused** ends this case for human review.
    When the required current structured observations are supplied, use **Confirm
    required safety checks** instead. An urgent warning blocks generation outright.
-5. Only after these checks does the bottom **Generate draft for clinician review**
-   button become enabled. Click it to run local reasoning. Progress/cancel remains
-   at the bottom; completion opens **Clinical report**.
+5. Only after these checks does **Generate draft for clinician review**, at the
+   bottom of Safety check, become enabled. Click it to run local reasoning.
+   Progress/cancel stays in that view; completion opens **Clinical report**.
 6. Read the concise seven-section draft. Source text appears once in the timeline;
    `[S1]` evidence keys refer to filename/date/entry IDs in **Source key**. CT is a
    short research appendix. The JSON export retains full provenance and decisions.
@@ -29,9 +30,14 @@
    only after review. The default requests corrections and keeps the draft pending.
    Approval saves ignored local JSON and enables JSON/Markdown downloads.
 
-**Start a new case** before changing a prepared patient/source/CT snapshot.
-Signing out or session expiry hides all case controls and cancels session work.
-Unsubmitted safety choices are cleared when the patient changes.
+Use **Start a new review** to reassess the same patient after a source change.
+You can choose another patient at any time: unfinished work is cancelled and all
+notes/proposals/report controls are cleared. Stored accepted records remain
+patient-specific. Sign-out or session expiry hides all patient content.
+
+Every button in **Your review steps** opens and scrolls to the relevant section.
+If safety is blocked by pending CT/history, use **Open pending changes**, then
+accept or discard that proposal. Navigation never approves anything.
 
 ## Safety is a workflow boundary
 
@@ -49,7 +55,7 @@ claim of medical-device compliance. The model cannot lower escalation.
 
 ## Import a source
 
-Open **Import a synthetic medical record / add observations**. Preview supported
+Open **Source records**, then **Import a synthetic medical record / add observations**. Preview supported
 JSON or observation controls; inspect the proposal, add notes/attestation and
 approve the exact import. Dates/measurements are included only when explicitly
 supplied. Defaults are not observations. Originals and IDs are immutable.

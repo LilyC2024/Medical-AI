@@ -43,10 +43,13 @@ def ui(monkeypatch, tmp_path):
         task._thread.join(timeout=2)
 
 
-def login(app):
+def login(app, *, choose=True):
     app.text_input(key="login_user").input("dr.example")
     app.text_input(key="login_password").input("synthetic-test-password")
-    return app.button(key="login").click().run()
+    app.button(key="login").click().run()
+    if choose:
+        app.selectbox(key="patient").set_value("fictional-001").run()
+    return app
 
 
 def wait_analysis(app):
@@ -64,7 +67,16 @@ def open_imaging(app):
     return app.radio(key="workspace").set_value("CT review").run()
 
 
+def open_safety(app):
+    return app.button(key="guide_safety-check").click().run()
+
+
+def open_sources(app):
+    return app.button(key="guide_sources").click().run()
+
+
 def prepare_safety(app):
+    open_safety(app)
     assert app.button(key="generate").disabled
     app.text_area(key="safety_notes").input(
         "Scripted assessment of fictional missing data."
@@ -86,8 +98,11 @@ def test_ui_hides_all_patient_examples_until_signin(ui):
     login(app)
     assert app.selectbox(key="patient").value == "fictional-001"
     assert len(app.selectbox(key="patient").options) == 7
-    assert app.button(key="generate").disabled and not inference.calls
-    assert app.main.button[-1].key == "generate"
+    assert not any(b.key == "generate" for b in app.button) and not inference.calls
+    open_safety(app)
+    assert app.button(key="generate").disabled
+    # Generation is the last clinical action in the Safety check column.
+    assert app.button(key="generate").label == "Generate draft for clinician review"
     app.button(key="logout").click().run()
     assert not app.selectbox and not app.radio and not app.get("download_button")
 
@@ -95,6 +110,7 @@ def test_ui_hides_all_patient_examples_until_signin(ui):
 def test_ui_safety_review_rejection_approval_and_export(ui, tmp_path):
     app, _, _, inference = ui
     login(app)
+    open_safety(app)
     assert app.button(key="generate").disabled
     app.text_area(key="safety_notes").input(
         "Synthetic test: assessed the missing-data limitations."
@@ -132,6 +148,7 @@ def test_ui_observation_proposal_requires_approval_and_preserves_unknown_date(ui
     app, path, _, _ = ui
     login(app)
     app.selectbox(key="patient").set_value("synthetic-checklist").run()
+    open_sources(app)
     before = len(get_history("synthetic-checklist", path).entries)
     app.text_area(key="symptoms").input(
         "Synthetic observation: symptom timing remains unavailable."
@@ -139,7 +156,7 @@ def test_ui_observation_proposal_requires_approval_and_preserves_unknown_date(ui
     app.button(key="prepare_symptom").click().run()
     assert not app.exception
     assert len(get_history("synthetic-checklist", path).entries) == before
-    assert app.button(key="generate").disabled
+    assert not any(b.key == "generate" for b in app.button)
     app.text_area(key="import_notes").input(
         "Verified synthetic observation text; date and measurements were not supplied."
     )
@@ -158,6 +175,7 @@ def test_ui_observation_proposal_requires_approval_and_preserves_unknown_date(ui
 def test_ui_urgent_case_stops_without_calling_model(ui):
     app, _, _, inference = ui
     login(app)
+    open_sources(app)
     app.text_area(key="symptoms").input(
         "Synthetic fixture explicitly reports a warning sign for workflow testing."
     )
@@ -166,6 +184,7 @@ def test_ui_urgent_case_stops_without_calling_model(ui):
     app.text_area(key="import_notes").input("Verified explicit synthetic warning flag.")
     app.checkbox(key="import_attest").check()
     app.button(key="approve_import").click().run()
+    open_safety(app)
     assert not app.exception
     assert app.button(key="generate").disabled
     assert not any(b.key == "submit_safety" for b in app.button)

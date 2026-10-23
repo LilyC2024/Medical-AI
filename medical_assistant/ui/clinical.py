@@ -1,13 +1,16 @@
 """Responsive clinical UI; only explicit human actions issue review receipts."""
 
 import json
+
 import streamlit as st
+
 from medical_assistant import ollama_client, storage
-from medical_assistant.jobs import WorkTask, BudgetInference
+from medical_assistant.jobs import BudgetInference, WorkTask
 from medical_assistant.models import Review
 from medical_assistant.report import digest
-from medical_assistant.workflow import MedicalHistoryOrchestrator
 from medical_assistant.ui.components import empty
+from medical_assistant.ui.navigation import go_to
+from medical_assistant.workflow import MedicalHistoryOrchestrator
 
 STAGES = {
     "safety": "Organizing the supplied history",
@@ -71,6 +74,8 @@ def resume_task(workflow, case, review, token):
             return workflow, case
         finally:
             workflow.inference = original
+            if budget.stopped.is_set():
+                original.close()
 
     return WorkTask(run, title="Applying the safety review")
 
@@ -113,6 +118,18 @@ def task_progress():
         st.rerun()
 
 
+@st.fragment(run_every=1)
+def background_progress():
+    """Keep completion responsive when the reviewer opens a different view."""
+    task = st.session_state.get("analysis_task")
+    if task is not None:
+        if task.snapshot()["state"] != "running":
+            st.rerun()
+        st.caption(
+            "Preparing your report… Open Safety check for progress or cancellation."
+        )
+
+
 def generate_task(workflow, case, token):
     def run(progress, budget):
         original = workflow.inference
@@ -124,16 +141,17 @@ def generate_task(workflow, case, token):
             return workflow, case
         finally:
             workflow.inference = original
+            if budget.stopped.is_set():
+                original.close()
 
     return WorkTask(run, title="Rechecking safety before clinical reasoning")
 
 
 def bottom_actions(path, auth, record, model, token, user, decision):
     """Safety first, then one explicit bottom-of-page generation action."""
-    st.divider()
-    st.subheader("Before you generate the draft")
+    st.subheader("Safety check")
     st.caption(
-        "1. Review the sources and optional CT. 2. Resolve the safety check. 3. Generate an unreviewed draft."
+        "Review the missing information below, record your decision, then generate a draft."
     )
     task = st.session_state.get("analysis_task")
     state = (
@@ -184,8 +202,10 @@ def bottom_actions(path, auth, record, model, token, user, decision):
             "You kept this case paused for human assessment. Start a new case to reassess it."
         )
     elif pending:
-        st.info(
-            "Review or discard the pending history/CT changes before completing the safety check."
+        st.info("A pending record or CT study needs review first.")
+        target = "source-records" if "proposal" in st.session_state else "ct-review"
+        st.button(
+            "Open pending changes", key="open_pending", on_click=go_to, args=(target,)
         )
     elif decision["state"] == "uncertain":
         st.markdown("**Safety check: current information needs review**")
@@ -236,10 +256,9 @@ def bottom_actions(path, auth, record, model, token, user, decision):
                     )
                 )
                 st.rerun()
-            except (ValueError, PermissionError) as error:
+            except (ValueError, PermissionError):
                 st.error(
-                    "Add assessment notes and tick the review checkbox before saving. "
-                    + str(error)
+                    "Add assessment notes and tick the review checkbox before saving. If the record changed, start a new review."
                 )
     else:
         st.info(
@@ -276,15 +295,16 @@ def failure():
     st.error(
         "This run stopped before producing a reviewed report. Start a new case or retry the draft."
     )
-    with st.expander("Why this run stopped"):
-        st.text(st.session_state.run_error)
+    st.caption(
+        "Check the local service and source records, then start a new review. No report has been approved."
+    )
 
 
 def report_panel(auth, token, user, record, *, urgent=False):
     if st.session_state.get("analysis_task"):
         empty(
             "Your draft is being prepared",
-            "The workspace stays available while local processing runs. Progress and cancellation are shown at the bottom.",
+            "The workspace stays available while local processing runs. Open Safety check for progress and cancellation.",
         )
         return
     if st.session_state.get("run_error"):
@@ -293,7 +313,7 @@ def report_panel(auth, token, user, record, *, urgent=False):
     if "case_id" not in st.session_state:
         empty(
             "A clearer report starts with the source",
-            "Review the patient story and optional CT, complete the safety check at the bottom, then generate a draft. Final approval comes later.",
+            "Review the patient story and optional CT, open Safety check, then generate a draft. Final approval comes later.",
         )
         return
     workflow, case = st.session_state.workflow, st.session_state.case_id
@@ -306,8 +326,8 @@ def report_panel(auth, token, user, record, *, urgent=False):
         return
     if state["status"] in ("running", "awaiting_safety_review"):
         empty(
-            "Complete the steps below",
-            "Resolve the safety check at the bottom, then choose Generate draft for clinician review. No reasoning runs when you save a safety assessment.",
+            "Complete the safety check",
+            "Open Safety check, then choose Generate draft for clinician review. No reasoning runs when you save a safety assessment.",
         )
     elif state["status"] == "stopped_for_human_review":
         st.info(
@@ -354,10 +374,9 @@ def report_panel(auth, token, user, record, *, urgent=False):
                     token,
                 )
                 st.rerun()
-            except (ValueError, PermissionError) as error:
+            except (ValueError, PermissionError):
                 st.error("Review rejected. Check your notes, attestation and sign-in.")
-                with st.expander("Review details"):
-                    st.text(str(error))
+
     elif state["status"] == "complete":
         try:
             payload = workflow.export(case)
@@ -379,7 +398,7 @@ def report_panel(auth, token, user, record, *, urgent=False):
                 )
             with b:
                 st.download_button(
-                    "Download reviewed report (JSON)",
+                    "Download evidence package (JSON)",
                     json.dumps(payload, indent=2),
                     file_name=f"reviewed-{case}.json",
                     mime="application/json",
@@ -387,9 +406,5 @@ def report_panel(auth, token, user, record, *, urgent=False):
                 )
             with st.container(key="report_paper"):
                 st.markdown(payload["final_report"])
-            with st.expander("Local save location"):
-                st.text(st.session_state.saved_path)
-        except (ValueError, PermissionError, OSError) as error:
+        except (ValueError, PermissionError, OSError):
             st.error("Final export blocked. The source or approval needs rechecking.")
-            with st.expander("Export details"):
-                st.text(str(error))

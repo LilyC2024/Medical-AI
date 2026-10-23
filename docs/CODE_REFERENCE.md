@@ -10,6 +10,7 @@ and [complete callable/subfunction signatures](reference/CALLABLES.md).
 | --- | --- | --- |
 | UI/bootstrap | app.py, runtime.py | Patient selection, lazy workspace routing, local services and fixture seed |
 | Design system/forms | ui/components.py, ui/theme.css, ui/history.py, ui/clinical.py | Escaped readable cards, right-hand guide, import/clinical forms and task progress |
+| Patient navigation | ui/navigation.py | Fixed action links, scrolling, patient-state cleanup and mismatched-result guards |
 | Response budget | jobs.py | Bounded workers, cancellation, deadline and late-result rejection |
 | Record contracts | models.py, grounding.py | Strict fields and original-source comparisons |
 | Persistence | database.py, storage.py | Parameterized SQLite and guarded report saving |

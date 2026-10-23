@@ -3,6 +3,7 @@
 # Ruff sees imported pytest fixtures as redefinitions at test parameters.
 # ruff: noqa: F811
 from test_ui import ui, login, prepare_safety, wait_analysis, open_imaging  # noqa: F401
+from test_ui import open_safety
 from test_nodule_imaging import nodule_bytes
 
 
@@ -29,7 +30,7 @@ def test_completed_ct_automatically_shows_results_and_keeps_them_after_analysis(
     assert any(h.value == "CT analysis results" for h in app.subheader)
     assert not any("No CT result yet" in item.value for item in app.info)
     assert app.metric[0].label == "Candidates proposed" and app.metric[0].value == "1"
-    assert app.button(key="generate").disabled
+    assert not any(b.key == "generate" for b in app.button)
     app.radio(key="workspace").set_value("Patient overview").run()
     open_imaging(app)
     assert app.metric[0].value == "1"
@@ -51,9 +52,11 @@ def test_completed_ct_automatically_shows_results_and_keeps_them_after_analysis(
 def test_patient_change_clears_unsubmitted_safety_decision(ui):
     app, _, _, _ = ui
     login(app)
+    open_safety(app)
     app.text_area(key="safety_notes").input("Unsubmitted notes for previous patient.")
     app.checkbox(key="safety_attest").check()
     app.selectbox(key="patient").set_value("demo-01").run()
+    open_safety(app)
     assert app.text_area(key="safety_notes").value == ""
     assert not app.checkbox(key="safety_attest").value
     assert app.button(key="generate").disabled

@@ -11,7 +11,7 @@ def test_nodule_ui_requires_decisions_and_authentication(ui):
     key, proposal = store.prepare(nodule_bytes(), "synthetic-checklist")
     app.session_state.imaging_proposal = (key, proposal)
     app.run()
-    assert not app.exception and app.button(key="generate").disabled
+    assert not app.exception and not any(b.key == "generate" for b in app.button)
     app.text_area(key="imaging_notes").input(
         "Inspected synthetic source and candidates."
     )
@@ -21,7 +21,7 @@ def test_nodule_ui_requires_decisions_and_authentication(ui):
     app.selectbox(key=key + "_decision_N001").set_value("accept")
     app.button(key="imaging_accept").click().run()
     assert not app.exception and len(store.snapshots("synthetic-checklist")) == 1
-    assert app.button(key="generate").disabled and not inference.calls
+    assert not any(b.key == "generate" for b in app.button) and not inference.calls
     assert not app.get("download_button")
 
 

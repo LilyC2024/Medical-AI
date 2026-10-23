@@ -59,3 +59,19 @@ software gates.
     checks, updated concise guides/evaluation and revised local demo. Status: complete —
     187 local tests, actual local Ollama and fixture/pretrained browser runs,
     Python 3.10/3.12 hosted tests and all three CT receiver smokes passed.
+
+## Focused patient workspace
+
+19. **Navigation and isolation foundation** — patient-scoped cleanup, stale-result
+    guards and fixed allowlisted action destinations. Test before UI integration.
+    Status: passed — 11 navigation/isolation unit checks (0.24 seconds).
+20. **Concise guided UI** — explicit single-patient selection, dedicated Safety
+    check view, clickable steps/next action, readable sources and no raw technical
+    panels. Keep generation gated and final approval intact. Status: passed —
+    16 adapted UI checks and 16 new navigation/isolation checks; actual browser
+    guide-to-safety jump shows the form and locked generation control.
+21. **Verification and delivery** — regression, actual browser navigation and
+    patient-isolation checks, concise guides/screenshots and revised local release.
+    Status: local verification complete — 205 final tests, actual local Ollama,
+    fixture/pretrained CT and desktop/narrow browser navigation/isolation checks;
+    guides and four screenshots updated. Publication checks in progress.

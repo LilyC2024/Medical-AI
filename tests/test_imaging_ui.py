@@ -14,7 +14,7 @@ def test_imaging_workbench_requires_review_and_keeps_facts_separate(ui):
     app.session_state.imaging_proposal = proposal
     app.run()
     assert not app.exception
-    assert app.button(key="generate").disabled
+    assert not any(b.key == "generate" for b in app.button)
     app.button(key="imaging_accept").click().run()
     assert app.error
     assert store.snapshots("synthetic-checklist") == []
@@ -25,7 +25,7 @@ def test_imaging_workbench_requires_review_and_keeps_facts_separate(ui):
     app.button(key="imaging_accept").click().run()
     assert not app.exception
     assert len(store.snapshots("synthetic-checklist")) == 1
-    assert app.button(key="generate").disabled
+    assert not any(b.key == "generate" for b in app.button)
     assert inference.calls == []
     assert not app.get("download_button")
 
@@ -85,7 +85,7 @@ def test_urgent_ui_routing_skips_optional_artifact_inspection(ui, monkeypatch):
     app.run()
     assert not app.exception
     assert any("structured warning-sign report" in error.value for error in app.error)
-    assert app.button(key="generate").disabled
+    assert not any(b.key == "generate" for b in app.button)
     assert not inference.calls
 
 

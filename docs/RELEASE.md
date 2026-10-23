@@ -64,3 +64,25 @@ use compact evidence keys and retain a brief CT appendix with full JSON provenan
 An explicit demo-only account setup leaves normal password rules unchanged.
 The local hypothesis catalog, CT format and clinical review boundary are unchanged.
 [Operation](WORKFLOWS.md) · [Cases](DEMO_CASES.md) · [Evaluation](../EVALUATION.md).
+
+## 0.5.0 — focused patient navigation
+
+- Made patient selection explicit and placed it above the workspace. Removed the
+  multi-case body table; only the selected person's data is rendered.
+- Added a dedicated Safety check view. Pending imports/CT have a direct resolution
+  link; generation stays locked until required checks and remains below the form.
+- Replaced static instructions with clickable guide steps and a contextual Next
+  action. Links open and scroll to fixed app destinations without approving work.
+- Removed raw extraction/manifest JSON, hashes, model paths and internal IDs from
+  the review page. Readable source excerpts and original-input downloads remain
+  in Source records; evidence validation and export provenance are preserved.
+- Clear patient-specific widgets/proposals and cancel abandoned jobs on switching;
+  check snapshot identity before rendering results. Clear previous final-review
+  choices when starting another review. Background completion is polled even when
+  the reviewer opens a different view.
+- Corrected a recovery-test fixture that regenerated a ZIP on retry: its timestamp
+  could change the archive identity. The test now retries the exact same bytes;
+  production archive checks remain strict.
+
+No dependency, model, safety policy, hypothesis catalog or CT contract upgrade.
+The CT producer is unchanged. [Operation](WORKFLOWS.md) · [Evaluation](../EVALUATION.md).

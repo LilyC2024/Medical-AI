@@ -4,6 +4,42 @@ These results concern synthetic software behavior, not diagnostic accuracy,
 clinical safety or clinician time savings. [Reproduce checks](docs/VALIDATION.md)
 · [Eight acceptance requirements](docs/ACCEPTANCE.md).
 
+## Focused patient workspace — 23 October 2026
+
+| Executed check | Actual result |
+| --- | --- |
+| Final complete regression | **205 passed in 72.31s**; earlier 205-test runs passed in 68.10s and 101.26s (the latter during a separate local Ollama smoke) |
+| Formatted UI/navigation/imaging regression | **59 passed in 38.32s**; final targeted navigation/CT checks **23 passed in 15.96s** |
+| Actual local gemma4:e2b smoke | Passed: missing-data hold, eligible reasoning and final clinician-review pause; no approvals |
+| Dependencies / shared CT contract / compile | pip check, exact contract equality and compileall passed |
+| Documentation | 28 maintained Markdown files passed local-target checks |
+| Generated scroll scripts | All six fixed destinations passed Node syntax checks; this is separate from browser execution |
+| Actual browser navigation | Guide opens/focuses patient menu, history, CT, safety, sources and report; repeat CT/safety links work |
+| Actual browser isolation/safety | Morgan → Riley clears pending CT; only selected patient displayed; Casey warning keeps generation blocked |
+| Actual local CT runs | Fixture and installed-pretrained phantom runs completed, one candidate each, both source/overlay images loaded; no acceptance |
+| Responsive check | Temporary desktop override reset; native 609px view has no horizontal overflow and safety anchor lands at 88px |
+| Actual human approvals | None issued: no safety continuation, imaging acceptance or final approval; local demo left at Morgan's unsubmitted safety form |
+
+Tests use temporary databases, scripted inference and synthetic reviewer identities.
+New checks cover explicit patient selection, guide navigation, pending-CT resolution,
+patient switching during analysis, dropped late results, cleared notes and discarded
+pending studies. Final approval and source/policy checks remain mandatory.
+
+The first full regression exposed a ZIP-retry fixture that generated a fresh
+archive, allowing ZIP timestamp metadata to change its identity. The test now
+retries the original bytes; archive verification was not weakened. An outdated
+navigation test double was also updated to expose the real task snapshot API.
+The successful full run above includes both corrections.
+
+No dependency, model, clinical policy, hypothesis catalog or CT wire contract was
+changed. CT's producer repository is unchanged. The UI removes technical dumps,
+keeps readable original excerpts in Source records and adds fixed local navigation
+anchors. Browser verification caught and corrected a scroll-helper execution/quoting
+issue and repeated same-destination rendering; each click now creates a fresh,
+fixed-ID local component. No source/model text is executed. Existing response
+budgets and research limitations still apply. Hosted publication is recorded below
+once completed.
+
 ## Guided demonstration release — 23 October 2026
 
 | Executed check | Actual result |

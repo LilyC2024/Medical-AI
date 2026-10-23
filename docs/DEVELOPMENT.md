@@ -67,3 +67,13 @@ results precede controls. The concise report quotes each source once and keeps
 full provenance in JSON. All development/review in this pass used the primary
 coding agent and automated tests; no additional runtime or coding subagents were
 introduced. [Operation](WORKFLOWS.md) · [Case expectations](DEMO_CASES.md).
+
+## Focused navigation release
+
+Patient-scope cleanup and fixed navigation targets were tested before UI
+integration. The interface then gained explicit selection, a dedicated Safety
+check view, actionable guide buttons and separate readable sources. Regression
+checks include switching during blocked scripted inference and discarding the
+previous patient's pending CT. Browser checks verify actual scrolling separately
+from scripted AppTest assertions. This pass uses the primary coding agent and
+automated tests; it introduces no subagents or runtime model changes.

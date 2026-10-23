@@ -3,8 +3,9 @@
 [Overview](../README.md) · [Operation](WORKFLOWS.md) · [Evaluation](../EVALUATION.md)
 
 These are deliberately authored fictional software fixtures, not patient records.
-They appear in the signed-in patient selector and **Five complex artificial demo
-cases** list. The original Alex and Taylor fixtures remain available too.
+They appear only in the signed-in patient menu. After selection, the workspace
+shows only that person's data. The original Alex and Taylor fixtures remain
+available too.
 
 | Case / ID | Complexity and intended check | Source |
 | --- | --- | --- |

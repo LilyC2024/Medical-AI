@@ -16,6 +16,8 @@
 | compact_reasoning.prepare / expand | Same record/catalog → bounded ID schema → exact excerpts and fully revalidated Assessment; invalid/duplicate IDs fail |
 | jobs.Budget / WorkTask / BudgetInference | Finite local operation → staged progress or terminal stop; cancellation/deadline prevents late result publication |
 | ui.components / ui.history / ui.clinical | Escaped display, explicit import/review forms and background actions; workers never write Streamlit state |
+| ui.navigation.clear_patient / ensure_patient | Cancel abandoned work, discard unaccepted proposals and clear widgets; reject mismatched patient snapshots before display |
+| ui.navigation.go_to / anchor / focus_pending | Allowlisted app destination → selected view and local scroll; no record/model input or approval |
 | OllamaClient | Bounded prompt/schema → JSON from fixed-loopback local model; reject remote-backed metadata and oversized requests |
 | SafetyAgent.evaluate | Snapshot, date and versioned policy → urgent/uncertain/ordinary decision with input binding |
 | LocalAuth.create_clinician / login / require | Credentials/token → salted local account / expiring identity; not a credential registry |

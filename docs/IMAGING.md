@@ -45,7 +45,9 @@ weights. Fetch official weights explicitly during CT setup when needed:
 ```
 
 LOVISA discovers a sibling `ai-medimg-2.5D-CT`; otherwise set `MHCRA_CT_ROOT`.
-`MHCRA_CT_MODEL_DIR` selects installed weights. Default discovery prefers registered
+`MHCRA_CT_MODEL_DIR` selects installed weights. `MHCRA_CT_DEVICE` selects `cpu`
+(default) or `cuda` for the installed detector; unavailable CUDA fails explicitly.
+These settings are kept outside the review UI. Default discovery prefers registered
 `models/luna16-full`, otherwise `models/luna16`. From LOVISA's own checkout:
 
 ```bash

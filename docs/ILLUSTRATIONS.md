@@ -71,6 +71,6 @@ retained legacy bridge. Its segmentation metrics are not nodule-detection result
 The current light interface shows exact fictional source text and policy status.
 [Operating guide](INTERFACE.md) · [Responsiveness and timings](PERFORMANCE.md).
 
-The [interface guide](INTERFACE.md) also shows the bottom safety step and an actual
+The [interface guide](INTERFACE.md) also shows the dedicated Safety check view and an actual
 installed-pretrained result on a generated phantom. These are separate from the
 non-ML fixture figures above.
