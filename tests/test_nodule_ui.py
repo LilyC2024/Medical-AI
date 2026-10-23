@@ -21,7 +21,7 @@ def test_nodule_ui_requires_decisions_and_authentication(ui):
     app.selectbox(key=key + "_decision_N001").set_value("accept")
     app.button(key="imaging_accept").click().run()
     assert not app.exception and len(store.snapshots("synthetic-checklist")) == 1
-    assert not app.button(key="generate").disabled and not inference.calls
+    assert app.button(key="generate").disabled and not inference.calls
     assert not app.get("download_button")
 
 

@@ -56,9 +56,21 @@ Open [localhost:8501](http://127.0.0.1:8501). Streamlit binds to loopback and di
 usage telemetry. Fictional fixtures are seeded idempotently at startup; optional
 explicit seeding is `.venv/bin/python -m medical_assistant.database`.
 
-Choose **Taylor Synthetic — checklist case**. Its missing screening and blood
+Sign in before opening any example. Choose **Taylor Synthetic — checklist case**. Its missing screening and blood
 pressure intentionally pause reasoning. Follow the [review walkthrough](WORKFLOWS.md).
 Keep Ollama and Streamlit local. [Troubleshooting](VALIDATION.md).
+
+For an explicitly local synthetic walkthrough, create the fixed `demo` account:
+
+```bash
+.venv/bin/python -m medical_assistant.auth --local-demo
+```
+
+This prompts for its password and allows a nonempty demo-only password. It never
+creates an account automatically, changes another account or commits credentials.
+Normal accounts retain the 12-character minimum. Keep this walkthrough on loopback;
+this exception is not suitable for a shared/production authentication system.
+[Five artificial cases](DEMO_CASES.md).
 
 ## 4. Add CT when needed
 

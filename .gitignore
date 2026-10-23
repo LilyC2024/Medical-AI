@@ -46,6 +46,11 @@ logs/
 /data/patients/*
 !/data/patients/fictional_patient.json
 !/data/patients/checklist_patient.json
+!/data/patients/demo_morgan.json
+!/data/patients/demo_riley.json
+!/data/patients/demo_sam.json
+!/data/patients/demo_casey.json
+!/data/patients/demo_avery.json
 
 # Editor and operating-system files
 .DS_Store

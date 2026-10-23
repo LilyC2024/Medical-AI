@@ -16,6 +16,12 @@ Accounts use salted PBKDF2 hashes and one-hour process-local sessions. Signed
 receipts bind approvals to content. They do not verify clinical qualifications,
 provide a production identity system or resist a database/process administrator.
 
+All case/example controls are gated by a valid session. Logout/expiry hides them
+and cancels session work. The explicit CLI `--local-demo` exception permits a
+nonempty password only for username `demo`; no account or password is bundled.
+Normal accounts require at least 12 characters. Keep demo credentials local and
+loopback-only. This is a synthetic walkthrough, not production authentication.
+
 ## Sources and approvals
 
 SQLite separates immutable originals from extracted facts; writes are parameterized

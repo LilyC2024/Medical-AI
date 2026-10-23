@@ -40,7 +40,9 @@ clinician review; IDs do not establish relevance or diagnostic validity.
 
 The compact call allows 1,200 output tokens instead of generating repeated source
 quotes. Other structured adapter calls use 2,000. Both retain the 16,384 context
-and conservative 11,000-byte input budget. No dependency/model change was needed.
+and conservative 11,000-byte input budget, applied to the actual transmitted
+prompt/schema after compact conversion. Entire records remain present; unused
+full-output schema size cannot reject a valid compact request. No dependency/model change was needed.
 
 ## Actual checks on this local CPU environment
 

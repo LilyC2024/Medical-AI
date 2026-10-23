@@ -70,12 +70,6 @@ class OllamaClient:
         self, system: str, user: str, *, schema: dict | None = None
     ) -> Assessment:
         output_schema = schema if schema is not None else Assessment.model_json_schema()
-        # Conservative byte budget reserves space for output and chat framing.
-        # Fail instead of letting Ollama silently truncate a long clinical input.
-        if len((system + user + json.dumps(output_schema)).encode("utf-8")) > 11_000:
-            raise ValueError(
-                "Request exceeds the conservative local context budget; shorten the supplied record"
-            )
         from medical_assistant.compact_reasoning import MARKER, PROMPT, prepare, expand
 
         compact = output_schema.get("$comment") == MARKER
@@ -84,6 +78,12 @@ class OllamaClient:
             record, refs, maps, user, output_schema = prepare(user)
             expansion = (record, refs, maps)
             system = PROMPT
+        # Conservative byte budget reserves space for output and chat framing.
+        # Fail instead of letting Ollama silently truncate a long clinical input.
+        if len((system + user + json.dumps(output_schema)).encode("utf-8")) > 11_000:
+            raise ValueError(
+                "Request exceeds the conservative local context budget; shorten the supplied record"
+            )
         self._deadline = time.monotonic() + 90
         self.ensure_local()
         result = self._post(

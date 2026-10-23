@@ -17,10 +17,10 @@ def test_sqlite_retrieval_has_exact_encounters_and_no_duplicates(tmp_path):
     assert [e.id for e in record.entries] == ["dose-1", "visit-1", "dose-2", "visit-2", "symptom-undated"]
     assert len(record.entries) == 5
     assert [e.id for e in record.entries if e.kind == "encounter"] == ["visit-1", "visit-2"]
-    assert len(list_patients(path)) == 2
+    assert len(list_patients(path)) == 7
     assert record.entries[-1].date is None
     with sqlite3.connect(path) as db:
-        assert db.execute("SELECT COUNT(*) FROM audit").fetchone()[0] == 2
+        assert db.execute("SELECT COUNT(*) FROM audit").fetchone()[0] == 7
         assert db.execute("SELECT COUNT(*) FROM sources WHERE patient_id='synthetic-checklist'").fetchone()[0] == 1
     assert record.sources[0].filename == "checklist_patient.json"
 

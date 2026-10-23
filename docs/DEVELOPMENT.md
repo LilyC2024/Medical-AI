@@ -57,3 +57,13 @@ config and deliberately fictional fixtures only. Keep credentials, databases,
 exports, local approvals, logs, data and weights ignored.
 
 [Validation commands](VALIDATION.md) · [Security](../SECURITY.md) · [Naming](NAMING.md).
+
+## Guided demonstration release
+
+The next pass separates safety preparation from model execution. Five explicitly
+authored fictional cases extend software coverage; they do not expand the medical
+hypothesis catalog. CT completion is prepared before empty-state rendering and
+results precede controls. The concise report quotes each source once and keeps
+full provenance in JSON. All development/review in this pass used the primary
+coding agent and automated tests; no additional runtime or coding subagents were
+introduced. [Operation](WORKFLOWS.md) · [Case expectations](DEMO_CASES.md).

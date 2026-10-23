@@ -60,6 +60,7 @@ p,li{line-height:1.62;} [data-testid="stCaptionContainer"],[data-testid="stCapti
 .stButton>button[kind="primary"],.stFormSubmitButton>button[kind="primary"]{background:#147d73;color:white;border-color:#147d73;box-shadow:0 3px 8px #147d7315;}
 .stButton>button:hover,.stFormSubmitButton>button:hover{border-color:#147d73;color:#147d73;}
 .stButton>button[kind="primary"]:hover{background:#106a61;color:white;}
+.stButton>button:disabled,.stFormSubmitButton>button:disabled{background:#dfe7eb!important;color:#647784!important;border-color:#d3dfe5!important;box-shadow:none!important;opacity:1!important;cursor:not-allowed;}
 input,textarea{font-size:13px!important;}.stTextInput input,.stTextArea textarea{background:white;color:#203b4b;border-radius:9px;}
 [data-testid="stRadio"]>div[role="radiogroup"]{gap:6px;border-bottom:1px solid #e0e8ed;padding:0 0 13px;margin-bottom:12px;}
 [data-testid="stRadio"] label[data-baseweb="radio"]{padding:8px 12px;border-radius:9px;margin:0;background:transparent;}

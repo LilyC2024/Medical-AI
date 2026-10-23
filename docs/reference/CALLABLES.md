@@ -14,6 +14,7 @@ LOVISA local workspace: reusable UI, bounded jobs and human review.
 | Callable | Purpose/contract |
 | --- | --- |
 | `account_ui(auth)` | See linked implementation and subject contract. |
+| `clear_private_state()` | Signing out hides every case and prevents background results reappearing. |
 | `reset_case()` | See linked implementation and subject contract. |
 | `main()` | See linked implementation and subject contract. |
 
@@ -35,7 +36,7 @@ Local password authentication and short-lived in-process clinician sessions.
 | --- | --- |
 | `LocalAuth.__init__(self, path: Path=DATABASE_PATH)` | See linked implementation and subject contract. |
 | `LocalAuth.has_users(self)` | See linked implementation and subject contract. |
-| `LocalAuth.create_clinician(self, username: str, password: str)` | See linked implementation and subject contract. |
+| `LocalAuth.create_clinician(self, username: str, password: str, *, local_demo=False)` | See linked implementation and subject contract. |
 | `LocalAuth.login(self, username: str, password: str)` | See linked implementation and subject contract. |
 | `LocalAuth.require(self, token)` | See linked implementation and subject contract. |
 | `LocalAuth.logout(self, token)` | See linked implementation and subject contract. |
@@ -158,6 +159,14 @@ Bounded synthetic imaging exchange. Model artifacts are never clinical facts.
 | `validate_bundle(payload: bytes, patient_id: str)` | Read bounded bytes without extracting arbitrary archive paths or pickle. |
 | `_verify_pixels(bundle, artifacts)` | See linked implementation and subject contract. |
 
+## [medical_assistant/imaging_results.py](../../medical_assistant/imaging_results.py)
+
+Small, deterministic CT summaries shared by the viewer and clinical appendix.
+
+| Callable | Purpose/contract |
+| --- | --- |
+| `summarize(manifest, review=None)` | See linked implementation and subject contract. |
+
 ## [medical_assistant/imaging_ui.py](../../medical_assistant/imaging_ui.py)
 
 Imaging inspection UI; acceptance is separate from final clinical approval.
@@ -165,7 +174,8 @@ Imaging inspection UI; acceptance is separate from final clinical approval.
 | Callable | Purpose/contract |
 | --- | --- |
 | `_viewer(manifest, path_for, key, *, review=None)` | See linked implementation and subject contract. |
-| `imaging_ui(path, auth, token, user, record, *, locked=False)` | See linked implementation and subject contract. |
+| `result_summary(manifest, review=None)` | See linked implementation and subject contract. |
+| `imaging_ui(path, auth, token, user, record, *, locked=False, case_imaging=None)` | See linked implementation and subject contract. |
 | `imaging_ui.prepare(payload, *, study_id=None)` | See linked implementation and subject contract. |
 | `ct_progress(job)` | See linked implementation and subject contract. |
 
@@ -287,9 +297,10 @@ Deterministic seven-section composition; citations never come from model text.
 | --- | --- |
 | `digest(text: str)` | See linked implementation and subject contract. |
 | `inline_text(value)` | Render untrusted data as one literal Markdown line, never active markup. |
-| `compose(record: PatientRecord, source_file: str, outputs: dict[str, dict], evidence=None, imaging=None)` | See linked implementation and subject contract. |
-| `compose.cite(ids)` | See linked implementation and subject contract. |
-| `compose.claim(item)` | See linked implementation and subject contract. |
+| `compose(record: PatientRecord, source_file: str, outputs: dict[str, dict], evidence=None, imaging=None)` | Quote each source once; use compact evidence keys elsewhere, retaining all seven sections. |
+| `compose.refs(ids)` | See linked implementation and subject contract. |
+| `compose.unique(values)` | See linked implementation and subject contract. |
+| `imaging_appendix(imaging)` | Brief reviewed result; full source/model/review metadata remains in the JSON export. |
 
 ## [medical_assistant/runtime.py](../../medical_assistant/runtime.py)
 
@@ -324,13 +335,15 @@ Responsive clinical UI; only explicit human actions issue review receipts.
 | Callable | Purpose/contract |
 | --- | --- |
 | `make_review(approved, user, checked, notes, sha256)` | See linked implementation and subject contract. |
-| `start_task(path, auth, patient_id, model)` | See linked implementation and subject contract. |
+| `start_task(path, auth, patient_id, model, *, review=None, token=None)` | See linked implementation and subject contract. |
 | `start_task.run(progress, budget)` | See linked implementation and subject contract. |
 | `resume_task(workflow, case, review, token)` | See linked implementation and subject contract. |
 | `resume_task.run(progress, budget)` | See linked implementation and subject contract. |
 | `collect_task()` | Publish only a completed, in-budget result into this Streamlit session. |
 | `task_progress()` | See linked implementation and subject contract. |
-| `action_bar(path, auth, record, model, *, urgent=False)` | See linked implementation and subject contract. |
+| `generate_task(workflow, case, token)` | See linked implementation and subject contract. |
+| `generate_task.run(progress, budget)` | See linked implementation and subject contract. |
+| `bottom_actions(path, auth, record, model, token, user, decision)` | Safety first, then one explicit bottom-of-page generation action. |
 | `failure()` | See linked implementation and subject contract. |
 | `report_panel(auth, token, user, record, *, urgent=False)` | See linked implementation and subject contract. |
 
@@ -344,7 +357,7 @@ Reusable presentation components. Escape every source-derived HTML value.
 | `styles()` | See linked implementation and subject contract. |
 | `sidebar_brand()` | See linked implementation and subject contract. |
 | `header()` | See linked implementation and subject contract. |
-| `patient_header(record, decision)` | See linked implementation and subject contract. |
+| `patient_header(record, decision, *, safety_reviewed=False)` | See linked implementation and subject contract. |
 | `timeline(record)` | See linked implementation and subject contract. |
 | `medications(record)` | See linked implementation and subject contract. |
 | `original_sources(record)` | See linked implementation and subject contract. |
@@ -380,11 +393,13 @@ Clinical-review graph with deterministic safety holds and authenticated review.
 | `MedicalHistoryOrchestrator._review(self, state)` | See linked implementation and subject contract. |
 | `MedicalHistoryOrchestrator._complete(self, state)` | See linked implementation and subject contract. |
 | `MedicalHistoryOrchestrator.config(case_id)` | See linked implementation and subject contract. |
-| `MedicalHistoryOrchestrator.start(self, record: PatientRecord, source_file: str, *, imaging=None)` | See linked implementation and subject contract. |
-| `MedicalHistoryOrchestrator.start_patient(self, patient_id, path)` | See linked implementation and subject contract. |
+| `MedicalHistoryOrchestrator.start(self, record: PatientRecord, source_file: str, *, imaging=None, safety_only=False)` | See linked implementation and subject contract. |
+| `MedicalHistoryOrchestrator.start_patient(self, patient_id, path, *, safety_only=False)` | See linked implementation and subject contract. |
 | `MedicalHistoryOrchestrator.state(self, case_id)` | See linked implementation and subject contract. |
 | `MedicalHistoryOrchestrator._response(self, case_id, review, token, action)` | See linked implementation and subject contract. |
-| `MedicalHistoryOrchestrator.acknowledge_safety(self, case_id, review: Review, token=None)` | See linked implementation and subject contract. |
+| `MedicalHistoryOrchestrator.acknowledge_safety(self, case_id, review: Review, token=None, *, safety_only=False)` | See linked implementation and subject contract. |
+| `MedicalHistoryOrchestrator.ready_for_analysis(self, case_id, token=None)` | Authenticate and recheck the exact prepared snapshot before generation. |
+| `MedicalHistoryOrchestrator.continue_analysis(self, case_id, token=None)` | See linked implementation and subject contract. |
 | `MedicalHistoryOrchestrator.revise(self, case_id, draft: str, token=None)` | See linked implementation and subject contract. |
 | `MedicalHistoryOrchestrator.review(self, case_id, review: Review, token=None)` | See linked implementation and subject contract. |
 | `MedicalHistoryOrchestrator.export(self, case_id)` | See linked implementation and subject contract. |

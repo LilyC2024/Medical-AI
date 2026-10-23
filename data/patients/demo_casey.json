@@ -1,0 +1,50 @@
+{
+  "fictional": true,
+  "patient_id": "demo-04",
+  "display_name": "Casey Synthetic \u2014 warning-sign stop",
+  "entries": [
+    {
+      "id": "c-visit1",
+      "date": "2026-08-13",
+      "source_type": "documented",
+      "kind": "encounter",
+      "text": "Fictional teaching case: A past diagnosis of asthma appears in the supplied fictional history."
+    },
+    {
+      "id": "c-order",
+      "date": "2026-08-13",
+      "source_type": "documented",
+      "kind": "medication",
+      "text": "Fictional teaching case: A reliever inhaler is listed without a structured dose or frequency."
+    },
+    {
+      "id": "c-procedure",
+      "date": "2026-09-28",
+      "source_type": "documented",
+      "kind": "procedure",
+      "text": "Fictional teaching case: A fictional knee operation is documented; detailed perioperative records are not supplied."
+    },
+    {
+      "id": "c-report",
+      "date": null,
+      "source_type": "patient_reported",
+      "kind": "symptom",
+      "text": "Fictional teaching case: Patient reports new breathlessness with chest discomfort. Exact onset and severity are uncertain. A structured warning sign is explicitly marked present.",
+      "warning_screen": "present"
+    },
+    {
+      "id": "c-family",
+      "date": null,
+      "source_type": "patient_reported",
+      "kind": "symptom",
+      "text": "Fictional teaching case: Patient reports a family history of clots but cannot recall details. No current observations were supplied."
+    },
+    {
+      "id": "c-follow",
+      "date": "2026-10-02",
+      "source_type": "documented",
+      "kind": "encounter",
+      "text": "Fictional teaching case: Follow-up was planned; no outcome supplied. This case must stop for human assessment before reasoning or optional CT work."
+    }
+  ]
+}

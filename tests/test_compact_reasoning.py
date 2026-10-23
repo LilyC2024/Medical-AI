@@ -102,3 +102,38 @@ def test_real_adapter_uses_compact_wire_then_same_grounding_checks(record):
     result = SpecialistAgent("reasoning", client).run(record, {})
     assert result["explanations"][0]["supporting"][0]["text"] == record.entries[0].text
     client.close()
+
+
+def test_larger_demo_validates_actual_wire_budget_without_truncating_records(tmp_path):
+    from medical_assistant.database import seed, get_history
+
+    path = tmp_path / "demos.sqlite3"
+    seed(path)
+    record = get_history("demo-05", path)
+
+    def handler(request):
+        body = json.loads(request.content)
+        if request.url.path == "/api/show":
+            return httpx.Response(200, json={"details": {"parameter_size": "2B"}})
+        system, user = body["messages"]
+        assert (
+            len(
+                (
+                    system["content"] + user["content"] + json.dumps(body["format"])
+                ).encode()
+            )
+            <= 11000
+        )
+        context = json.loads(user["content"])
+        assert len(context["record"]["entries"]) == 8
+        assert {e["text"] for e in context["record"]["entries"]} == {
+            e.text for e in record.entries
+        }
+        return httpx.Response(
+            200,
+            json={"done": True, "message": {"content": json.dumps(selection(record))}},
+        )
+
+    client = OllamaClient(transport=httpx.MockTransport(handler))
+    SpecialistAgent("reasoning", client).run(record, {})
+    client.close()

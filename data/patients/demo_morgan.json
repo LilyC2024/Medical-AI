@@ -1,0 +1,75 @@
+{
+  "fictional": true,
+  "patient_id": "demo-01",
+  "display_name": "Morgan Synthetic \u2014 medicines and dizziness",
+  "entries": [
+    {
+      "id": "m-visit1",
+      "date": "2026-08-02",
+      "source_type": "documented",
+      "kind": "encounter",
+      "text": "Fictional teaching case: Hypertension and seasonal allergies recorded at medication review."
+    },
+    {
+      "id": "m-dose1",
+      "date": "2026-08-02",
+      "source_type": "documented",
+      "kind": "medication",
+      "text": "Fictional teaching case: amlodipine 5 mg orally once daily documented; current use requires reconciliation.",
+      "medication": {
+        "name": "amlodipine",
+        "dose": "5 mg",
+        "frequency": "orally once daily"
+      }
+    },
+    {
+      "id": "m-allergy",
+      "date": "2026-08-02",
+      "source_type": "documented",
+      "kind": "medication",
+      "text": "Fictional teaching case: cetirizine 10 mg orally once daily documented; current use requires reconciliation.",
+      "medication": {
+        "name": "cetirizine",
+        "dose": "10 mg",
+        "frequency": "orally once daily"
+      }
+    },
+    {
+      "id": "m-visit2",
+      "date": "2026-09-12",
+      "source_type": "documented",
+      "kind": "encounter",
+      "text": "Fictional teaching case: Standing lightheadedness was discussed; symptom onset was not established."
+    },
+    {
+      "id": "m-dose2",
+      "date": "2026-09-12",
+      "source_type": "documented",
+      "kind": "medication",
+      "text": "Fictional teaching case: amlodipine 10 mg orally once daily documented; current use requires reconciliation.",
+      "medication": {
+        "name": "amlodipine",
+        "dose": "10 mg",
+        "frequency": "orally once daily"
+      }
+    },
+    {
+      "id": "m-bp",
+      "date": "2026-09-12",
+      "source_type": "documented",
+      "kind": "encounter",
+      "text": "Fictional teaching case: Seated blood pressure 118/74 mmHg; standing measurements were not supplied.",
+      "blood_pressure": {
+        "systolic": 118,
+        "diastolic": 74
+      }
+    },
+    {
+      "id": "m-report",
+      "date": null,
+      "source_type": "patient_reported",
+      "kind": "symptom",
+      "text": "Fictional teaching case: Patient reports taking an unidentified sleep tablet, skipping some doses and feeling lightheaded on standing. Exact dates, falls history and current warning screening are unavailable."
+    }
+  ]
+}

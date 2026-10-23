@@ -1,0 +1,78 @@
+{
+  "fictional": true,
+  "patient_id": "demo-05",
+  "display_name": "Avery Synthetic \u2014 conflicting doses and follow-up",
+  "entries": [
+    {
+      "id": "a-visit1",
+      "date": "2026-07-01",
+      "source_type": "documented",
+      "kind": "encounter",
+      "text": "Fictional teaching case: Hypertension and chronic kidney disease recorded; stage was not supplied."
+    },
+    {
+      "id": "a-dose1",
+      "date": "2026-07-01",
+      "source_type": "documented",
+      "kind": "medication",
+      "text": "Fictional teaching case: amlodipine 5 mg orally once daily documented; current use requires reconciliation.",
+      "medication": {
+        "name": "amlodipine",
+        "dose": "5 mg",
+        "frequency": "orally once daily"
+      }
+    },
+    {
+      "id": "a-visit2",
+      "date": "2026-08-01",
+      "source_type": "documented",
+      "kind": "encounter",
+      "text": "Fictional teaching case: Prescription review documents an increase; symptom relationship was not established."
+    },
+    {
+      "id": "a-dose2",
+      "date": "2026-08-01",
+      "source_type": "documented",
+      "kind": "medication",
+      "text": "Fictional teaching case: amlodipine 10 mg orally once daily documented; current use requires reconciliation.",
+      "medication": {
+        "name": "amlodipine",
+        "dose": "10 mg",
+        "frequency": "orally once daily"
+      }
+    },
+    {
+      "id": "a-lab",
+      "date": "2026-08-22",
+      "source_type": "documented",
+      "kind": "lab",
+      "text": "Fictional teaching case: eGFR 42 mL/min/1.73m2 reported; prior trend and reference interpretation were not supplied."
+    },
+    {
+      "id": "a-dose3",
+      "date": "2026-09-05",
+      "source_type": "documented",
+      "kind": "medication",
+      "text": "Fictional teaching case: amlodipine 5 mg orally once daily documented; current use requires reconciliation.",
+      "medication": {
+        "name": "amlodipine",
+        "dose": "5 mg",
+        "frequency": "orally once daily"
+      }
+    },
+    {
+      "id": "a-report",
+      "date": null,
+      "source_type": "patient_reported",
+      "kind": "symptom",
+      "text": "Fictional teaching case: Patient reports still taking a 10 mg tablet, ankle swelling and disrupted sleep; exact dates and actual tablet identity are unverified."
+    },
+    {
+      "id": "a-plan",
+      "date": "2026-09-05",
+      "source_type": "documented",
+      "kind": "encounter",
+      "text": "Fictional teaching case: Reconciliation and follow-up were requested. Current blood pressure, allergies and current warning screening are unavailable."
+    }
+  ]
+}

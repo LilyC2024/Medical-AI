@@ -6,6 +6,7 @@ Start with the [project overview](../README.md), then choose one path:
 
 | Your goal | Read |
 | --- | --- |
+| Explore five complex artificial cases | [Demo cases](DEMO_CASES.md) |
 | Use the redesigned workspace | [Interface](INTERFACE.md) / [Performance](PERFORMANCE.md) |
 | Understand the two projects visually | [Illustrations](ILLUSTRATIONS.md) |
 | Install LOVISA and create a reviewer account | [Setup](SETUP.md) |

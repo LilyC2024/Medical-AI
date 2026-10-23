@@ -126,7 +126,9 @@ def list_patients(path: Path = DATABASE_PATH):
 def seed(path: Path = DATABASE_PATH):
     """Explicit built-in synthetic fixture creation; never imports arbitrary files."""
     initialize(path)
-    for filename in ("fictional_patient.json", "checklist_patient.json"):
+    for filename in ("fictional_patient.json", "checklist_patient.json",
+                     "demo_morgan.json", "demo_riley.json", "demo_sam.json",
+                     "demo_casey.json", "demo_avery.json"):
         source_path = ROOT / "data" / "patients" / filename
         record = attach_original(load_record(source_path), filename, source_path.read_text())
         write_synthetic(record, path, actor="built-in-synthetic-fixture", action="seed")

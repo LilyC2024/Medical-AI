@@ -1,0 +1,70 @@
+{
+  "fictional": true,
+  "patient_id": "demo-02",
+  "display_name": "Riley Synthetic \u2014 cough and CT review",
+  "entries": [
+    {
+      "id": "r-visit1",
+      "date": "2026-07-08",
+      "source_type": "documented",
+      "kind": "encounter",
+      "text": "Fictional teaching case: A dry cough was reported before the later prescription change."
+    },
+    {
+      "id": "r-dose1",
+      "date": "2026-07-08",
+      "source_type": "documented",
+      "kind": "medication",
+      "text": "Fictional teaching case: lisinopril 5 mg orally once daily documented; current use requires reconciliation.",
+      "medication": {
+        "name": "lisinopril",
+        "dose": "5 mg",
+        "frequency": "orally once daily"
+      }
+    },
+    {
+      "id": "r-visit2",
+      "date": "2026-09-20",
+      "source_type": "documented",
+      "kind": "encounter",
+      "text": "Fictional teaching case: Persistent cough reviewed; no supplied chest image or examination result."
+    },
+    {
+      "id": "r-dose2",
+      "date": "2026-09-20",
+      "source_type": "documented",
+      "kind": "medication",
+      "text": "Fictional teaching case: lisinopril 10 mg orally once daily documented; current use requires reconciliation.",
+      "medication": {
+        "name": "lisinopril",
+        "dose": "10 mg",
+        "frequency": "orally once daily"
+      }
+    },
+    {
+      "id": "r-report",
+      "date": null,
+      "source_type": "patient_reported",
+      "kind": "symptom",
+      "text": "Fictional teaching case: Patient reports intermittent cough, tiredness and a former smoking history without pack-years. Patient associates symptoms with tablets, but timing is uncertain."
+    },
+    {
+      "id": "r-bp",
+      "date": "2026-09-20",
+      "source_type": "documented",
+      "kind": "encounter",
+      "text": "Fictional teaching case: Blood pressure 130/80 mmHg documented; current warning screening not supplied.",
+      "blood_pressure": {
+        "systolic": 130,
+        "diastolic": 80
+      }
+    },
+    {
+      "id": "r-follow",
+      "date": "2026-10-01",
+      "source_type": "documented",
+      "kind": "procedure",
+      "text": "Fictional teaching case: Chest imaging was discussed; no clinical CT findings or images supplied. A separately generated CT demonstration is unrelated to this fictional history."
+    }
+  ]
+}

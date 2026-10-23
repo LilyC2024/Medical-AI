@@ -64,35 +64,50 @@ def open_imaging(app):
     return app.radio(key="workspace").set_value("CT review").run()
 
 
-def test_ui_loads_sqlite_and_blocks_unauthenticated_safety_continuation(ui):
-    app, _, _, inference = ui
-    assert not app.exception
-    assert app.title[0].value == "LOVISA"
-    assert app.selectbox(key="patient").value == "fictional-001"
-    assert not app.get("download_button")
-    wait_analysis(app.button(key="generate").click().run())
-    assert not app.exception
-    assert app.button(key="submit_safety").disabled
-    assert inference.calls == []
-    assert (
-        app.session_state.workflow.state(app.session_state.case_id)["status"]
-        == "awaiting_safety_review"
+def prepare_safety(app):
+    assert app.button(key="generate").disabled
+    app.text_area(key="safety_notes").input(
+        "Scripted assessment of fictional missing data."
     )
+    app.checkbox(key="safety_attest").check()
+    app.radio(key="safety_action").set_value(
+        "Allow draft generation after my safety assessment"
+    )
+    wait_analysis(app.button(key="submit_safety").click().run())
+    assert not app.button(key="generate").disabled
+    return app
+
+
+def test_ui_hides_all_patient_examples_until_signin(ui):
+    app, _, _, inference = ui
+    assert not app.exception and app.title[0].value == "LOVISA"
+    assert not app.selectbox and not app.radio and not app.get("download_button")
+    assert not any(b.key == "generate" for b in app.button)
+    login(app)
+    assert app.selectbox(key="patient").value == "fictional-001"
+    assert len(app.selectbox(key="patient").options) == 7
+    assert app.button(key="generate").disabled and not inference.calls
+    assert app.main.button[-1].key == "generate"
+    app.button(key="logout").click().run()
+    assert not app.selectbox and not app.radio and not app.get("download_button")
 
 
 def test_ui_safety_review_rejection_approval_and_export(ui, tmp_path):
     app, _, _, inference = ui
     login(app)
-    wait_analysis(app.button(key="generate").click().run())
+    assert app.button(key="generate").disabled
     app.text_area(key="safety_notes").input(
         "Synthetic test: assessed the missing-data limitations."
     )
     app.checkbox(key="safety_attest").check()
     app.radio(key="safety_action").set_value(
-        "Continue after clinician assessment of uncertainty"
+        "Allow draft generation after my safety assessment"
     )
     wait_analysis(app.button(key="submit_safety").click().run(timeout=20))
     assert not app.exception
+    assert len(inference.calls) == 0
+    assert not app.button(key="generate").disabled
+    wait_analysis(app.button(key="generate").click().run())
     assert len(inference.calls) == 1
     assert not app.get("download_button")
     app.button(key="submit_review").click().run()
@@ -151,18 +166,7 @@ def test_ui_urgent_case_stops_without_calling_model(ui):
     app.text_area(key="import_notes").input("Verified explicit synthetic warning flag.")
     app.checkbox(key="import_attest").check()
     app.button(key="approve_import").click().run()
-    wait_analysis(app.button(key="generate").click().run())
     assert not app.exception
-    assert app.radio(key="safety_action").disabled
-    app.text_area(key="safety_notes").input(
-        "Stop automated analysis for human assessment of the synthetic flag."
-    )
-    app.checkbox(key="safety_attest").check()
-    wait_analysis(app.button(key="submit_safety").click().run())
-    assert not app.exception
-    assert inference.calls == []
-    assert (
-        app.session_state.workflow.state(app.session_state.case_id)["status"]
-        == "stopped_for_human_review"
-    )
-    assert not app.get("download_button")
+    assert app.button(key="generate").disabled
+    assert not any(b.key == "submit_safety" for b in app.button)
+    assert inference.calls == [] and not app.get("download_button")

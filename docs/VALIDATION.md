@@ -73,3 +73,13 @@ at final review. Validation may fail closed; do not weaken grounding for a pass.
 CI installs dependencies/weights explicitly and runs open-source models on runner
 CPU; the application has no cloud inference provider. It publishes no patient
 records or clinical reports. [Security](../SECURITY.md).
+
+## Guided demonstration checks
+
+`tests/test_guided_services.py` exercises all five fictional records and staged
+safety with scripted inference. `tests/test_guided_ui.py` covers result retention,
+automatic completion/empty-state replacement, case switching and session expiry.
+The main UI test verifies Generate is the final main-page action and stays locked
+until safety is prepared. The largest demo also exercises the actual compact
+wire-size check using an HTTP mock without dropping source entries. None of those
+checks are live inference or clinician verification.

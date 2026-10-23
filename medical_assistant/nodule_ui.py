@@ -72,23 +72,24 @@ def nodule_viewer(manifest, path_for, key, *, review=None):
             overlay, caption="Candidates and LOVISA-reviewed calipers", width="stretch"
         )
     st.caption(f"Source slice {index} · original evidence is retained with this study.")
-    st.dataframe(
-        [
-            {
-                "ID": c.candidate_id,
-                "Detector score (not malignancy)": c.score,
-                "Source-grid box extents x/y/z mm": tuple(
-                    round(v, 2)
-                    for v in (
-                        (np.array(c.box_zyx[3:]) - c.box_zyx[:3])
-                        * study.geometry.spacing_zyx_mm
-                    )[::-1]
-                ),
-            }
-            for c in study.candidates
-        ],
-        hide_index=True,
-    )
+    with st.expander("Candidate box geometry · details"):
+        st.dataframe(
+            [
+                {
+                    "ID": c.candidate_id,
+                    "Detector score (not malignancy)": c.score,
+                    "Source-grid box extents x/y/z mm": tuple(
+                        round(v, 2)
+                        for v in (
+                            (np.array(c.box_zyx[3:]) - c.box_zyx[:3])
+                            * study.geometry.spacing_zyx_mm
+                        )[::-1]
+                    ),
+                }
+                for c in study.candidates
+            ],
+            hide_index=True,
+        )
     with st.expander("Source evidence, model and geometry · details"):
         st.code(f"Source slice {index} SHA-256: {study.sources[index].sha256}")
         st.json(manifest)

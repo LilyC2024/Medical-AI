@@ -26,6 +26,7 @@
 | _final_safety / _verify_safety_ack | Same snapshot/policy/date → repeated routing and acknowledgment validation |
 | _verify_imaging / _compose | Accepted imaging plus assessments → verified, escaped seven-section draft |
 | _review / _complete | Exact draft and human Review → pending correction or guarded reviewed state |
+| ready_for_analysis / continue_analysis | Prepared history checkpoint + authenticated session → recheck exact safety/imaging and explicitly run reasoning |
 | acknowledge_safety / review / _response | Account/session plus exact case/content Review → authenticated graph resume |
 | revise | Arbitrary text revision is unsupported; factual corrections need an approved new source/case |
 | export / storage.save_report | Reviewed state/payload → recheck sources, safety, artifacts and approval before export/save |

@@ -22,6 +22,7 @@
 | checked_nodule_review | Manifest and Review → resolved per-candidate decisions, valid calipers and matching authenticated reviewer |
 | imaging_acceptance_digest | Proposal plus exact nodule Review → choices-bound digest; legacy uses its original proposal digest |
 | verify_nodule_snapshot | Persisted study/review → study/actor/acceptance-digest validation |
+| imaging_results.summarize / imaging_ui.result_summary | Validated manifest/review → concise counts, candidate/source ranges, scores and calipers; no diagnosis or automatic approval |
 | pixels_for / nodule_viewer | Verified artifacts → source/candidate navigation; accepted caliper overlay recomputed from HU |
 | candidate_controls / build_nodule_review | UI decisions and attestation → typed candidate Review; uncertainty stays blocked |
 | preview_calipers | Source HU + unapproved endpoints → cyan line and physical distance; no persistence |

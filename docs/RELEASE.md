@@ -54,3 +54,13 @@ preview access removes repeated full-archive work. Compact local reasoning selec
 IDs and restores exact source text in Python. Clinical/import/imaging approvals,
 source integrity, local-only inference and both CT exchange formats are preserved.
 No dependency or model upgrade. [Details](PERFORMANCE.md) · [Evaluation](../EVALUATION.md).
+
+## 0.4.0 — guided signed-in demonstrations
+
+Five new authored fictional cases; login-gated examples; explicit safety preparation
+with no model call; bottom generation enabled only after required checks. CT result
+summaries remain visible after clinical analysis. Reports quote each source once,
+use compact evidence keys and retain a brief CT appendix with full JSON provenance.
+An explicit demo-only account setup leaves normal password rules unchanged.
+The local hypothesis catalog, CT format and clinical review boundary are unchanged.
+[Operation](WORKFLOWS.md) · [Cases](DEMO_CASES.md) · [Evaluation](../EVALUATION.md).

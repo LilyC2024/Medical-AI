@@ -41,13 +41,15 @@ def header():
         )
 
 
-def patient_header(record, decision):
+def patient_header(record, decision, *, safety_reviewed=False):
     initials = "".join(word[0] for word in record.display_name.split()[:2]).upper()
     label = {
         "urgent": "Human assessment required",
         "uncertain": "Safety review needed",
         "ordinary_eligible": "Ready for source review",
     }[decision["state"]]
+    if safety_reviewed and decision["state"] == "uncertain":
+        label = "Safety assessment recorded"
     color = {"urgent": "red", "uncertain": "amber", "ordinary_eligible": "teal"}[
         decision["state"]
     ]
@@ -154,7 +156,7 @@ def guide(view, state=None, *, running=False, signed_in=False):
     next_step = (
         "Processing locally. You can keep using the workspace or cancel this run."
         if running
-        else "Review the missing safety information before continuing."
+        else "Assess the missing information in the safety step at the bottom."
         if status == "awaiting_safety_review"
         else "Read the draft and check its sources. Final approval is a separate step."
         if status == "awaiting_clinician_review"
@@ -162,18 +164,18 @@ def guide(view, state=None, *, running=False, signed_in=False):
         if status == "complete"
         else "Inspect the source images and each candidate. Accepting CT does not approve a clinical report."
         if view == "CT review"
-        else "Choose a fictional patient and review the supplied history. Add CT only if useful."
+        else "Review the history and optional CT, then complete the bottom safety check."
     )
     st.markdown("### How to use LOVISA")
     st.markdown(
-        '<div class="lv-guide-intro">A short guide, always beside your workspace.</div>',
+        '<div class="lv-guide-intro">Your next steps, in one place.</div>',
         unsafe_allow_html=True,
     )
     steps = [
         ("Choose a patient", "Use a fictional demo record from the left."),
         ("Review the story", "Check the timeline, medicines and missing dates."),
         ("Add CT, if useful", "Inspect candidates and optional calipers."),
-        ("Prepare a draft", "Resolve any safety hold before local AI reasoning."),
+        ("Prepare a draft", "Complete the safety check at the bottom, then generate."),
         (
             "Review and approve",
             "Check sources, then explicitly approve the final report.",

@@ -3,12 +3,13 @@
 import threading
 import time
 
-from test_ui import ui, login, wait_analysis, open_imaging  # noqa: F401
+from test_ui import ui, login, wait_analysis, open_imaging, prepare_safety  # noqa: F401
 from medical_assistant.ui.components import safe
 
 
 def test_workspace_has_operating_guide_and_readable_history(ui):
     app, _, _, _ = ui
+    login(app)
     assert app.title[0].value == "LOVISA"
     text = "\n".join(m.value for m in app.markdown)
     assert "How to use LOVISA" in text and "The patient story" in "\n".join(
@@ -17,7 +18,7 @@ def test_workspace_has_operating_guide_and_readable_history(ui):
     assert "lv-timeline" in text and "fictional_patient.json" in text
     assert not app.get("download_button")
     open_imaging(app)
-    assert app.button(key="ct_generate").disabled
+    assert not app.button(key="ct_generate").disabled
     assert any("How to use LOVISA" in m.value for m in app.markdown)
 
 
@@ -33,7 +34,7 @@ def test_source_html_is_escaped_in_design_components():
 def test_running_model_does_not_block_ui_and_can_be_cancelled(ui, monkeypatch):
     app, path, auth, inference = ui
     login(app)
-    wait_analysis(app.button(key="generate").click().run())
+    prepare_safety(app)
     entered, release = threading.Event(), threading.Event()
     original = inference.assess
 
@@ -43,15 +44,8 @@ def test_running_model_does_not_block_ui_and_can_be_cancelled(ui, monkeypatch):
         return original(*args, **kwargs)
 
     monkeypatch.setattr(inference, "assess", slow)
-    app.text_area(key="safety_notes").input(
-        "Scripted uncertainty assessment for an isolated UI test."
-    )
-    app.checkbox(key="safety_attest").check()
-    app.radio(key="safety_action").set_value(
-        "Continue after clinician assessment of uncertainty"
-    )
     start = time.monotonic()
-    app.button(key="submit_safety").click().run(timeout=5)
+    app.button(key="generate").click().run(timeout=5)
     elapsed = time.monotonic() - start
     assert entered.wait(1)
     assert elapsed < 2.5 and not release.is_set()

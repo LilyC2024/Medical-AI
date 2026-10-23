@@ -13,8 +13,9 @@ flowchart TD
     DB[Validated SQLite source snapshot] --> S[Python Safety Agent]
     S -->|Urgent| U[Human assessment: no reasoning continuation]
     S -->|Uncertain| H[Authenticated safety-review interrupt]
-    S -->|Eligible| A[History Agent]
-    H -->|Explicit matching continuation| A
+    S -->|Eligible| G[Prepared snapshot; explicit Generate click]
+    H -->|Explicit matching assessment| G
+    G --> A[History Agent]
     H -->|Stop| X[Stopped case]
     A --> M[Medication Agent]
     M --> E[Approved local reference retrieval]
@@ -29,7 +30,11 @@ flowchart TD
 
 `MedicalHistoryOrchestrator` creates `StateGraph(CaseState)` and runs specialist
 steps sequentially. `InMemorySaver` holds pending state; `interrupt()` and
-`Command(resume=...)` implement human pauses. No model call follows final approval.
+`Command(resume=...)` implement human pauses. The UI uses `safety_only=True` to
+pause before `history`; authenticated safety acknowledgment also stops there.
+`continue_analysis()` rechecks safety/receipts/artifacts and resumes only when the
+user clicks Generate. Existing programmatic defaults retain the sequential graph.
+No model call follows final approval.
 
 ## Four specialist implementations
 

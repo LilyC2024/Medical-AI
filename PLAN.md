@@ -41,3 +41,19 @@ software gates.
     Remain on localhost as requested. Status: complete — 176 LOVISA / 81 CT tests,
     actual local model/three CT smokes, browser desktop/narrow checks and all
     hosted Python/CT/Windows/Linux/container checks passed.
+
+## Guided synthetic demonstration
+
+16. **Demo/report foundation** — five explicitly fictional complex cases with
+    source-bound test expectations, a narrowly scoped local demo-account setup,
+    staged safety preparation before inference, persistent CT result summaries,
+    and concise seven-section reporting. Test services before changing the UI.
+    Status: passed — 74 existing service checks and 7 new staged/demo checks;
+    exact-source presentation and compact wire-budget validation retained.
+17. **Guided signed-in UI** — gate all patient examples behind login, keep CT
+    findings visible in the CT panel, put clear safety controls and gated draft
+    generation at the bottom, and retain explicit final approval. Status: passed —
+    24 focused staged/UI/source-presentation checks, including persistent CT
+    results, login expiry, patient switching and no model call on safety save.
+18. **Verification and delivery** — full regression, actual local smokes/browser
+    checks, updated concise guides/evaluation and revised local demo. Status: in progress.

@@ -59,9 +59,9 @@ or remote fallback occurs. Missing weights/unavailable CUDA fail explicitly.
 
 ## Inspect and accept in LOVISA
 
-1. Sign in, select the synthetic patient and open **CT review** before
+1. Sign in (examples are hidden until login), select the synthetic patient and open **CT review** before
    starting a case. Choose fixture, installed pretrained detector or legacy demo.
-2. **Generate synthetic CT demonstration**. Progress refreshes automatically; cancel
+2. **Run CT analysis**. Progress refreshes automatically; cancel
    when needed. A 110-second watchdog bounds execution. Lung modes generate a 32×64×64 phantom; the legacy
    mode trains a tiny tissue model and checks ONNX parity. No review is approved.
 3. Completed CT opens automatically for inspection (the manual inspection button
@@ -78,7 +78,12 @@ or remote fallback occurs. Missing weights/unavailable CUDA fail explicitly.
 7. Start a new clinical case. The accepted study becomes a source-linked research
    appendix. Review and approve the exact final clinical draft separately.
 
-Pending imaging blocks draft generation. Active cases lock new imaging; later
+CT analysis results show counts, review state, source-slice ranges, scores and
+reviewed calipers. Pending and accepted results appear in CT review; accepted
+studies remain inspectable in an active clinical snapshot. Empty states explain
+when no CT has been attached.
+
+Pending imaging blocks safety preparation and draft generation. Active cases lock new imaging; later
 imports need a new case. Urgent warnings take priority over optional image checks.
 Acquisition date remains unknown. Rejected/zero candidates never establish normality.
 

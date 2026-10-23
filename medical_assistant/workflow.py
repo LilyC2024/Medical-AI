@@ -1,4 +1,5 @@
 """Clinical-review graph with deterministic safety holds and authenticated review."""
+
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import TypedDict
@@ -45,19 +46,33 @@ class CaseState(TypedDict, total=False):
 
 
 class MedicalHistoryOrchestrator:
-    def __init__(self, inference: Inference, evidence_collection=None, *, auth=None, safety=None):
+    def __init__(
+        self, inference: Inference, evidence_collection=None, *, auth=None, safety=None
+    ):
         self.inference = inference
         self.auth = auth or LocalAuth()
         self.imaging_store = ImagingStore(self.auth.path, self.auth)
         self.safety = safety or SafetyAgent()
-        self.evidence_collection = evidence_collection or LocalEvidenceCollection(ROOT / "data" / "evidence")
+        self.evidence_collection = evidence_collection or LocalEvidenceCollection(
+            ROOT / "data" / "evidence"
+        )
         builder = StateGraph(CaseState)
         builder.add_node("safety", self._initial_safety)
         builder.add_node("safety_human_review", self._safety_review)
-        for role, extractor in (("history", MedicalHistoryAgent()), ("medications", MedicationAgent())):
+        for role, extractor in (
+            ("history", MedicalHistoryAgent()),
+            ("medications", MedicationAgent()),
+        ):
+
             def extract(state, role=role, extractor=extractor):
                 result = extractor.run(PatientRecord.model_validate(state["record"]))
-                return {"assessments": {**state["assessments"], role: result.model_dump(mode="json")}}
+                return {
+                    "assessments": {
+                        **state["assessments"],
+                        role: result.model_dump(mode="json"),
+                    }
+                }
+
             builder.add_node(role, extract)
         builder.add_node("evidence_retrieval", self._retrieve_evidence)
         builder.add_node("reasoning", self._reasoning)
@@ -66,65 +81,124 @@ class MedicalHistoryOrchestrator:
         builder.add_node("clinician_review", self._review)
         builder.add_node("complete_report", self._complete)
         builder.add_edge(START, "safety")
-        builder.add_conditional_edges("safety", lambda state: "ordinary" if state["safety_decision"]["state"] == "ordinary_eligible" else "hold",
-                                      {"ordinary": "history", "hold": "safety_human_review"})
-        builder.add_conditional_edges("safety_human_review", lambda state: "continue" if state["status"] == "running" else "stop",
-                                      {"continue": "history", "stop": END})
-        sequence = ["history", "medications", "evidence_retrieval", "reasoning", "safety_review", "orchestrator", "clinician_review"]
+        builder.add_conditional_edges(
+            "safety",
+            lambda state: (
+                "ordinary"
+                if state["safety_decision"]["state"] == "ordinary_eligible"
+                else "hold"
+            ),
+            {"ordinary": "history", "hold": "safety_human_review"},
+        )
+        builder.add_conditional_edges(
+            "safety_human_review",
+            lambda state: "continue" if state["status"] == "running" else "stop",
+            {"continue": "history", "stop": END},
+        )
+        sequence = [
+            "history",
+            "medications",
+            "evidence_retrieval",
+            "reasoning",
+            "safety_review",
+            "orchestrator",
+            "clinician_review",
+        ]
         for left, right in zip(sequence, sequence[1:]):
             builder.add_edge(left, right)
-        builder.add_conditional_edges("clinician_review", lambda state: "complete" if state["status"] == "approved" else "review",
-                                      {"complete": "complete_report", "review": "clinician_review"})
+        builder.add_conditional_edges(
+            "clinician_review",
+            lambda state: "complete" if state["status"] == "approved" else "review",
+            {"complete": "complete_report", "review": "clinician_review"},
+        )
         builder.add_edge("complete_report", END)
         self.graph = builder.compile(checkpointer=InMemorySaver())
 
     def _initial_safety(self, state):
         decision = self.safety.evaluate(PatientRecord.model_validate(state["record"]))
-        return {"safety_decision": decision, "assessments": {"safety": decision["assessment"]},
-                "status": "running" if decision["state"] == "ordinary_eligible" else "awaiting_safety_review"}
+        return {
+            "safety_decision": decision,
+            "assessments": {"safety": decision["assessment"]},
+            "status": "running"
+            if decision["state"] == "ordinary_eligible"
+            else "awaiting_safety_review",
+        }
 
     def _checked_review(self, state, response, action):
         review = Review.model_validate(response["review"])
-        actor = self.auth.verify_receipt(response["receipt"], action + ":" + state["case_id"], digest(review.model_dump_json()))
+        actor = self.auth.verify_receipt(
+            response["receipt"],
+            action + ":" + state["case_id"],
+            digest(review.model_dump_json()),
+        )
         if actor != review.reviewer:
             raise PermissionError("Authenticated account does not match the reviewer")
         return review
 
     def _safety_review(self, state):
         decision = state["safety_decision"]
-        response = interrupt({"type": "safety_human_review_required", "decision": decision,
-            "message": "Uncertain cases require clinician assessment before reasoning. Urgent workflow holds cannot continue in this case."})
+        response = interrupt(
+            {
+                "type": "safety_human_review_required",
+                "decision": decision,
+                "message": "Uncertain cases require clinician assessment before reasoning. Urgent workflow holds cannot continue in this case.",
+            }
+        )
         review = self._checked_review(state, response, "safety-review")
         if review.draft_sha256 != decision["decision_sha256"]:
             raise ValueError("Stale safety assessment")
         if review.approved and decision["state"] == "urgent":
-            raise ValueError("An urgent workflow hold cannot be bypassed; stop and seek human assessment")
-        self.auth.record_receipt(response["receipt"], state["record"]["patient_id"], review.model_dump())
-        return {"safety_ack": review.model_dump(), "safety_receipt": response["receipt"],
-                "status": "running" if review.approved else "stopped_for_human_review"}
+            raise ValueError(
+                "An urgent workflow hold cannot be bypassed; stop and seek human assessment"
+            )
+        self.auth.record_receipt(
+            response["receipt"], state["record"]["patient_id"], review.model_dump()
+        )
+        return {
+            "safety_ack": review.model_dump(),
+            "safety_receipt": response["receipt"],
+            "status": "running" if review.approved else "stopped_for_human_review",
+        }
 
     def _retrieve_evidence(self, state):
         record = PatientRecord.model_validate(state["record"])
-        query = " ".join(entry.text for entry in record.entries if entry.kind in ("symptom", "diagnosis"))
+        query = " ".join(
+            entry.text
+            for entry in record.entries
+            if entry.kind in ("symptom", "diagnosis")
+        )
         return {"evidence": self.evidence_collection.retrieve(query)}
 
     def _reasoning(self, state):
         self._verify_safety_ack(state)
         result = SpecialistAgent("reasoning", self.inference).run(
-            PatientRecord.model_validate(state["record"]), state["assessments"], state["evidence"])
+            PatientRecord.model_validate(state["record"]),
+            state["assessments"],
+            state["evidence"],
+        )
         return {"assessments": {**state["assessments"], "reasoning": result}}
 
     def _verify_safety_ack(self, state):
         current = self.safety.evaluate(PatientRecord.model_validate(state["record"]))
         if current["decision_sha256"] != state["safety_decision"]["decision_sha256"]:
-            raise ValueError("Safety policy, date or records changed: restart clinical review")
+            raise ValueError(
+                "Safety policy, date or records changed: restart clinical review"
+            )
         if current["state"] == "urgent":
-            raise ValueError("Urgent safety hold blocks clinical reasoning and completion")
+            raise ValueError(
+                "Urgent safety hold blocks clinical reasoning and completion"
+            )
         if current["state"] == "uncertain":
             review = Review.model_validate(state.get("safety_ack", {}))
-            self.auth.verify_receipt(state.get("safety_receipt"), "safety-review:" + state["case_id"], digest(review.model_dump_json()))
+            self.auth.verify_receipt(
+                state.get("safety_receipt"),
+                "safety-review:" + state["case_id"],
+                digest(review.model_dump_json()),
+            )
             if not review.approved or review.draft_sha256 != current["decision_sha256"]:
-                raise ValueError("Uncertain safety state requires a matching clinician decision")
+                raise ValueError(
+                    "Uncertain safety state requires a matching clinician decision"
+                )
         return current
 
     def _final_safety(self, state):
@@ -132,56 +206,122 @@ class MedicalHistoryOrchestrator:
 
     def _verify_imaging(self, state):
         snapshots = state.get("imaging", [])
-        if any(s["manifest"]["patient_id"] != state["record"]["patient_id"] for s in snapshots):
+        if any(
+            s["manifest"]["patient_id"] != state["record"]["patient_id"]
+            for s in snapshots
+        ):
             raise ValueError("Imaging snapshot patient mismatch")
         self.imaging_store.verify(snapshots)
 
     def _compose(self, state):
         self._verify_imaging(state)
-        draft = compose(PatientRecord.model_validate(state["record"]), state["source_file"], state["assessments"], state["evidence"], state.get("imaging", []))
-        return {"draft": draft, "generated_draft": draft, "status": "awaiting_clinician_review"}
+        draft = compose(
+            PatientRecord.model_validate(state["record"]),
+            state["source_file"],
+            state["assessments"],
+            state["evidence"],
+            state.get("imaging", []),
+        )
+        return {
+            "draft": draft,
+            "generated_draft": draft,
+            "status": "awaiting_clinician_review",
+        }
 
     def _review(self, state):
-        response = interrupt({"type": "clinician_review_required", "draft": state["draft"],
-                              "draft_sha256": digest(state["draft"]), "message": "Authenticated clinician approval is required."})
+        response = interrupt(
+            {
+                "type": "clinician_review_required",
+                "draft": state["draft"],
+                "draft_sha256": digest(state["draft"]),
+                "message": "Authenticated clinician approval is required.",
+            }
+        )
         review = self._checked_review(state, response, "clinical-review")
         if review.draft_sha256 != digest(state["draft"]):
             raise ValueError("Review does not match the current report")
-        self.auth.record_receipt(response["receipt"], state["record"]["patient_id"], review.model_dump())
-        return {"review": review.model_dump(), "approval_receipt": response["receipt"],
-            "review_history": [*state.get("review_history", []), {**review.model_dump(),
-                "reviewed_draft": state["draft"], "timestamp": datetime.now(timezone.utc).isoformat()}],
-            "status": "approved" if review.approved else "awaiting_clinician_review"}
+        self.auth.record_receipt(
+            response["receipt"], state["record"]["patient_id"], review.model_dump()
+        )
+        return {
+            "review": review.model_dump(),
+            "approval_receipt": response["receipt"],
+            "review_history": [
+                *state.get("review_history", []),
+                {
+                    **review.model_dump(),
+                    "reviewed_draft": state["draft"],
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                },
+            ],
+            "status": "approved" if review.approved else "awaiting_clinician_review",
+        }
 
     def _complete(self, state):
         self._verify_safety_ack(state)
         self._verify_imaging(state)
         review = Review.model_validate(state["review"])
-        self.auth.verify_receipt(state["approval_receipt"], "clinical-review:" + state["case_id"], digest(review.model_dump_json()))
+        self.auth.verify_receipt(
+            state["approval_receipt"],
+            "clinical-review:" + state["case_id"],
+            digest(review.model_dump_json()),
+        )
         if not review.approved or review.draft_sha256 != digest(state["draft"]):
             raise ValueError("A matching authenticated clinician approval is required")
-        return {"status": "complete", "reviewed": True, "final_report": state["draft"],
-                "reviewed_at": datetime.now(timezone.utc).isoformat()}
+        return {
+            "status": "complete",
+            "reviewed": True,
+            "final_report": state["draft"],
+            "reviewed_at": datetime.now(timezone.utc).isoformat(),
+        }
 
     @staticmethod
     def config(case_id):
         return {"configurable": {"thread_id": case_id}}
 
-    def start(self, record: PatientRecord, source_file: str, *, imaging=None):
+    def start(
+        self,
+        record: PatientRecord,
+        source_file: str,
+        *,
+        imaging=None,
+        safety_only=False,
+    ):
         validate_record_grounding(record)
         case_id = uuid4().hex
-        return case_id, self.graph.stream({"case_id": case_id, "record": record.model_dump(mode="json"),
-            "source_file": source_file, "model": self.inference.model, "assessments": {},
-            "review_history": [], "status": "running", "reviewed": False,
-            "imaging": imaging or []}, self.config(case_id), stream_mode="updates")
+        return case_id, self.graph.stream(
+            {
+                "case_id": case_id,
+                "record": record.model_dump(mode="json"),
+                "source_file": source_file,
+                "model": self.inference.model,
+                "assessments": {},
+                "review_history": [],
+                "status": "running",
+                "reviewed": False,
+                "imaging": imaging or [],
+            },
+            self.config(case_id),
+            stream_mode="updates",
+            interrupt_before=["history"] if safety_only else None,
+        )
 
-    def start_patient(self, patient_id, path):
+    def start_patient(self, patient_id, path, *, safety_only=False):
         if Path(path).resolve() != self.auth.path.resolve():
             raise ValueError("Case database must match the authenticated local service")
         record = get_history(patient_id, path)
         # Never delay an urgent safety hold for optional image artifact inspection.
-        imaging = [] if self.safety.evaluate(record)["state"] == "urgent" else self.imaging_store.snapshots(patient_id)
-        return self.start(record, "SQLite original-source snapshot", imaging=imaging)
+        imaging = (
+            []
+            if self.safety.evaluate(record)["state"] == "urgent"
+            else self.imaging_store.snapshots(patient_id)
+        )
+        return self.start(
+            record,
+            "SQLite original-source snapshot",
+            imaging=imaging,
+            safety_only=safety_only,
+        )
 
     def state(self, case_id):
         return self.graph.get_state(self.config(case_id)).values
@@ -190,10 +330,19 @@ class MedicalHistoryOrchestrator:
         review = Review.model_validate(review.model_dump())
         actor = self.auth.require(token)
         if review.reviewer != actor:
-            raise PermissionError("Reviewer identity must match authenticated clinician account")
-        return {"review": review.model_dump(), "receipt": self.auth.receipt(token, action + ":" + case_id, digest(review.model_dump_json()))}
+            raise PermissionError(
+                "Reviewer identity must match authenticated clinician account"
+            )
+        return {
+            "review": review.model_dump(),
+            "receipt": self.auth.receipt(
+                token, action + ":" + case_id, digest(review.model_dump_json())
+            ),
+        }
 
-    def acknowledge_safety(self, case_id, review: Review, token=None):
+    def acknowledge_safety(
+        self, case_id, review: Review, token=None, *, safety_only=False
+    ):
         state = self.state(case_id)
         if state.get("status") != "awaiting_safety_review":
             raise ValueError("No safety review is pending")
@@ -202,7 +351,28 @@ class MedicalHistoryOrchestrator:
             raise ValueError("Stale safety decision")
         if review.approved and state["safety_decision"]["state"] == "urgent":
             raise ValueError("Urgent cases cannot continue through automated reasoning")
-        return self.graph.invoke(Command(resume=response), self.config(case_id))
+        return self.graph.invoke(
+            Command(resume=response),
+            self.config(case_id),
+            interrupt_before=["history"] if safety_only else None,
+        )
+
+    def ready_for_analysis(self, case_id, token=None):
+        """Authenticate and recheck the exact prepared snapshot before generation."""
+        self.auth.require(token)
+        snapshot = self.graph.get_state(self.config(case_id))
+        state = snapshot.values
+        if state.get("status") != "running" or tuple(snapshot.next) != ("history",):
+            raise ValueError(
+                "Complete required safety checks before generating a draft"
+            )
+        self._verify_safety_ack(state)
+        self._verify_imaging(state)
+        return True
+
+    def continue_analysis(self, case_id, token=None):
+        self.ready_for_analysis(case_id, token)
+        return self.graph.invoke(None, self.config(case_id))
 
     def revise(self, case_id, draft: str, token=None):
         self.auth.require(token)
@@ -210,10 +380,25 @@ class MedicalHistoryOrchestrator:
         if state.get("status") != "awaiting_clinician_review" or not draft.strip():
             raise ValueError("Only a non-empty pending draft can be revised")
         if draft != state["generated_draft"]:
-            raise ValueError("Clinical report text is source-bound. Record corrections require an approved source import and a new case; use review notes for feedback.")
-        self.auth.audit("clinician-correction:" + case_id, state["record"]["patient_id"], token,
-                        {"before": state["draft"], "after": draft, "previous_sha256": digest(state["draft"]), "new_sha256": digest(draft)})
-        self.graph.update_state(self.config(case_id), {"draft": draft, "review": {}, "approval_receipt": {}}, as_node="orchestrator")
+            raise ValueError(
+                "Clinical report text is source-bound. Record corrections require an approved source import and a new case; use review notes for feedback."
+            )
+        self.auth.audit(
+            "clinician-correction:" + case_id,
+            state["record"]["patient_id"],
+            token,
+            {
+                "before": state["draft"],
+                "after": draft,
+                "previous_sha256": digest(state["draft"]),
+                "new_sha256": digest(draft),
+            },
+        )
+        self.graph.update_state(
+            self.config(case_id),
+            {"draft": draft, "review": {}, "approval_receipt": {}},
+            as_node="orchestrator",
+        )
 
     def review(self, case_id, review: Review, token=None):
         state = self.state(case_id)
@@ -227,12 +412,20 @@ class MedicalHistoryOrchestrator:
     def export(self, case_id):
         snapshot = self.graph.get_state(self.config(case_id))
         state = snapshot.values
-        if state.get("status") != "complete" or not state.get("reviewed") or snapshot.next:
+        if (
+            state.get("status") != "complete"
+            or not state.get("reviewed")
+            or snapshot.next
+        ):
             raise ValueError("Report is not complete: clinician approval is required")
         self._verify_safety_ack(state)
         self._verify_imaging(state)
         review = Review.model_validate(state["review"])
-        self.auth.verify_receipt(state["approval_receipt"], "clinical-review:" + case_id, digest(review.model_dump_json()))
+        self.auth.verify_receipt(
+            state["approval_receipt"],
+            "clinical-review:" + case_id,
+            digest(review.model_dump_json()),
+        )
         if not review.approved or review.draft_sha256 != digest(state["final_report"]):
             raise ValueError("Report approval failed verification")
         return {**state, "educational_only": True}

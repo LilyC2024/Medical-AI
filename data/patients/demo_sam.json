@@ -1,0 +1,61 @@
+{
+  "fictional": true,
+  "patient_id": "demo-03",
+  "display_name": "Sam Synthetic \u2014 fatigue and mixed evidence",
+  "entries": [
+    {
+      "id": "s-visit1",
+      "date": "2026-06-11",
+      "source_type": "documented",
+      "kind": "encounter",
+      "text": "Fictional teaching case: Type 2 diabetes recorded in a fictional follow-up note."
+    },
+    {
+      "id": "s-metformin",
+      "date": "2026-06-11",
+      "source_type": "documented",
+      "kind": "medication",
+      "text": "Fictional teaching case: metformin 500 mg orally once daily documented; current use requires reconciliation.",
+      "medication": {
+        "name": "metformin",
+        "dose": "500 mg",
+        "frequency": "orally once daily"
+      }
+    },
+    {
+      "id": "s-lab",
+      "date": "2026-09-03",
+      "source_type": "documented",
+      "kind": "lab",
+      "text": "Fictional teaching case: Hemoglobin 10.8 g/dL and ferritin 12 micrograms/L reported; reference ranges and repeat results not supplied."
+    },
+    {
+      "id": "s-report",
+      "date": "2026-09-10",
+      "source_type": "patient_reported",
+      "kind": "symptom",
+      "text": "Fictional teaching case: Patient reports fatigue, short sleep during night shifts and irregular meals. No cause established."
+    },
+    {
+      "id": "s-counter",
+      "date": "2026-09-17",
+      "source_type": "patient_reported",
+      "kind": "symptom",
+      "text": "Fictional teaching case: Patient reports fatigue persisted during a week away from shifts; duration and sleep hours were not recorded."
+    },
+    {
+      "id": "s-supplement",
+      "date": null,
+      "source_type": "patient_reported",
+      "kind": "medication",
+      "text": "Fictional teaching case: Patient reports an over-the-counter supplement, with unknown name, dose and start date."
+    },
+    {
+      "id": "s-missing",
+      "date": "2026-09-17",
+      "source_type": "documented",
+      "kind": "encounter",
+      "text": "Fictional teaching case: Allergy history, current blood pressure and current warning-sign screening were not supplied."
+    }
+  ]
+}

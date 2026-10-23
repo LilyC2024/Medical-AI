@@ -4,6 +4,38 @@ These results concern synthetic software behavior, not diagnostic accuracy,
 clinical safety or clinician time savings. [Reproduce checks](docs/VALIDATION.md)
 · [Eight acceptance requirements](docs/ACCEPTANCE.md).
 
+## Guided demonstration release — 23 October 2026
+
+| Executed check | Actual result |
+| --- | --- |
+| Final complete regression | 187 passed in 59.89s |
+| Earlier full regression before final result-order correction | 187 passed in 93.55s while a separate local model smoke was running |
+| Staged safety, demos, grounding and wire budgets | 35 focused checks passed in 7.02s |
+| Guided UI/service/source-presentation checks | 24 passed in 26.26s |
+| CT result-order correction | 12 focused UI checks passed in 17.47s |
+| Actual local gemma4:e2b smoke | Passed: missing-data hold, eligible synthetic reasoning, final clinician-review pause; no approvals |
+| Shared CT contract / dependencies / compile | Exact equality, pip check and compileall passed |
+| Real browser checks | Requested demo login; seven case choices; disabled bottom Generate; fixture and installed-pretrained result summaries with both images loaded |
+| Responsive check | Temporary 1440px override reset; native 609px layout had no horizontal overflow and both CT images remained loaded |
+| Approval state in actual checks | No safety continuation, imaging acceptance or final clinician approval issued; pretrained study left pending |
+| Local credential setup | Requested local demo account created with a salted hash; account database/password not committed |
+
+An intermediate verification rerun ended with signal 143 before a pytest verdict;
+it is excluded from passing counts. The final full run above completed normally.
+
+Five authored complex cases are loaded idempotently from original JSON. Automated
+checks preserve unknown dates, identify documented dose changes, reject reasoning
+before safety preparation and keep Casey's urgent case stopped. Four scripted
+nonurgent drafts retain seven sections, each original entry once, evidence keys
+and fewer than 1,250 whitespace-separated words per tested case. These are tests
+with scripted inference and reviewer identities, not actual clinician review.
+
+The actual local Ollama smoke remains separate. Larger compact requests are checked
+against the actual transmitted prompt/schema budget; no record text is truncated.
+The model, hypothesis catalog, safety policy and CT wire contract are unchanged.
+This work establishes software behavior, not regulatory compliance, diagnostic
+accuracy or qualifications of a local account. [Examples](docs/DEMO_CASES.md).
+
 ## Workspace and response-budget release — 23 October 2026
 
 | Executed check | Actual outcome |

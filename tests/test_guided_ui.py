@@ -1,0 +1,70 @@
+"""Scripted synthetic UI regressions: login, result retention and safety-before-generation."""
+
+# Ruff sees imported pytest fixtures as redefinitions at test parameters.
+# ruff: noqa: F811
+from test_ui import ui, login, prepare_safety, wait_analysis, open_imaging  # noqa: F401
+from test_nodule_imaging import nodule_bytes
+
+
+def test_completed_ct_automatically_shows_results_and_keeps_them_after_analysis(
+    ui, tmp_path
+):
+    app, _, _, inference = ui
+    login(app)
+    open_imaging(app)
+    path = tmp_path / "result.zip"
+    path.write_bytes(nodule_bytes(patient="fictional-001"))
+
+    class Completed:
+        patient_id = "fictional-001"
+        study_id = "lung-study"
+        bundle_path = path
+
+        def status(self):
+            return "complete"
+
+    app.session_state.ct_job = Completed()
+    app.run()
+    assert not app.exception
+    assert any(h.value == "CT analysis results" for h in app.subheader)
+    assert not any("No CT result yet" in item.value for item in app.info)
+    assert app.metric[0].label == "Candidates proposed" and app.metric[0].value == "1"
+    assert app.button(key="generate").disabled
+    app.radio(key="workspace").set_value("Patient overview").run()
+    open_imaging(app)
+    assert app.metric[0].value == "1"
+    key, proposal = app.session_state.imaging_proposal
+    app.selectbox(key=key + "_decision_N001").set_value("accept")
+    app.text_area(key="imaging_notes").input("Scripted fixture inspection only.")
+    app.checkbox(key="imaging_attest").check()
+    app.button(key="imaging_accept").click().run()
+    prepare_safety(app)
+    assert not inference.calls
+    wait_analysis(app.button(key="generate").click().run())
+    open_imaging(app)
+    assert app.button(key="ct_generate").disabled
+    assert any(h.value == "CT analysis results" for h in app.subheader)
+    assert app.metric[0].value == "1" and app.metric[1].value == "1"
+    assert len(inference.calls) == 1 and not app.get("download_button")
+
+
+def test_patient_change_clears_unsubmitted_safety_decision(ui):
+    app, _, _, _ = ui
+    login(app)
+    app.text_area(key="safety_notes").input("Unsubmitted notes for previous patient.")
+    app.checkbox(key="safety_attest").check()
+    app.selectbox(key="patient").set_value("demo-01").run()
+    assert app.text_area(key="safety_notes").value == ""
+    assert not app.checkbox(key="safety_attest").value
+    assert app.button(key="generate").disabled
+
+
+def test_expired_login_hides_case_data_and_controls(ui):
+    app, _, auth, _ = ui
+    login(app)
+    token = app.session_state.auth_token
+    auth.sessions[token] = ("dr.example", 0)
+    app.run()
+    assert not app.exception and not app.selectbox and not app.radio
+    assert not any(b.key == "generate" for b in app.button)
+    assert not app.get("download_button")

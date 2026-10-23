@@ -12,8 +12,8 @@ function remains the same.
 
 ![LOVISA patient workspace and operating guide](docs/images/lovisa-workspace-overview.jpg)
 
-Read the patient story as source-linked cards, inspect CT in its own view, then
-review the clinical draft. A right-hand guide explains each step. Technical JSON
+Sign in, read source-linked patient cards, inspect CT results in their own view,
+then complete the safety step at the bottom before generating a concise draft. A right-hand guide explains each step. Technical JSON
 and hashes remain available under details. Background progress and cancellation
 keep the workspace responsive; processing stops at 110 seconds if needed.
 Actual local synthetic smokes took **1.65s** (fixture CT), **12.43s** (pretrained CT)
@@ -94,11 +94,16 @@ python3 -m venv .venv
 .venv/bin/python -m streamlit run app.py
 ```
 
-Open [localhost:8501](http://127.0.0.1:8501) and select **Taylor Synthetic — checklist
+Open [localhost:8501](http://127.0.0.1:8501), sign in, and select **Taylor Synthetic — checklist
 case**. The app seeds fictional examples automatically. Its missing blood pressure
 and warning screening intentionally trigger review. [Complete setup](docs/SETUP.md)
-includes local Ollama configuration and Windows paths;
+includes local Ollama configuration, local-demo account setup and Windows paths;
 [first-case instructions](docs/WORKFLOWS.md) explain every approval.
+
+Five additional complex fictional cases cover medicines/dizziness, cough/CT,
+fatigue/mixed evidence, a warning-sign stop and conflicting follow-up doses. They
+are listed after login and tested separately from live model inference.
+[Cases and expected behavior](docs/DEMO_CASES.md).
 
 Install CT separately with Python **3.12**. The integration supports nodule-v2 and
 legacy tissue-mask bundles within a synthetic limit of **64 slices ×256×256**.

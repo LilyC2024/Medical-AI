@@ -8,7 +8,7 @@ from medical_assistant.safety import SafetyAgent
 from medical_assistant.imaging_ui import imaging_ui
 from medical_assistant.ui import components as ui
 from medical_assistant.ui.history import history_ui
-from medical_assistant.ui.clinical import collect_task, action_bar, report_panel
+from medical_assistant.ui.clinical import collect_task, bottom_actions, report_panel
 
 
 def account_ui(auth):
@@ -20,11 +20,11 @@ def account_ui(auth):
             st.sidebar.success("Signed in: " + user)
             if st.sidebar.button("Sign out", key="logout"):
                 auth.logout(token)
-                st.session_state.pop("auth_token", None)
+                clear_private_state()
                 st.rerun()
             return token, user
         except PermissionError:
-            st.session_state.pop("auth_token", None)
+            clear_private_state()
     with st.sidebar.expander("Sign in to review", expanded=True):
         if not auth.has_users():
             st.caption(
@@ -43,6 +43,19 @@ def account_ui(auth):
     return None, None
 
 
+def clear_private_state():
+    """Signing out hides every case and prevents background results reappearing."""
+    task = st.session_state.get("analysis_task")
+    if task:
+        task.cancel()
+    job = st.session_state.get("ct_job")
+    if job and job.status() == "running":
+        job.cancel()
+    if not task and "workflow" in st.session_state:
+        st.session_state.workflow.inference.close()
+    st.session_state.clear()
+
+
 def reset_case():
     task = st.session_state.get("analysis_task")
     if task is not None:
@@ -58,6 +71,8 @@ def reset_case():
         "last_analysis_seconds",
     ):
         st.session_state.pop(key, None)
+    for key in ("safety_notes", "safety_attest", "safety_action"):
+        st.session_state.pop(key, None)
     st.session_state.navigate_to = "Patient overview"
 
 
@@ -70,12 +85,24 @@ def main():
     )
     ui.styles()
     path, auth = get_services()
+    with st.sidebar:
+        ui.sidebar_brand()
+    token, user = account_ui(auth)
+    ui.header()
+    if not token:
+        ui.empty(
+            "Sign in to open your local demo",
+            "Patient examples, CT studies and reports are available after sign-in. Use the local account form in the sidebar.",
+        )
+        st.caption(
+            "LOVISA uses fictional records and local processing. A local account does not verify clinical qualifications."
+        )
+        ui.footer()
+        return
     collect_task()
     if "navigate_to" in st.session_state:
         st.session_state.workspace = st.session_state.pop("navigate_to")
-    with st.sidebar:
-        ui.sidebar_brand()
-        st.caption("PATIENT WORKSPACE")
+    st.sidebar.caption("PATIENT WORKSPACE")
     patients = list_patients(path)
     if not patients:
         st.error("No fictional patient records are available.")
@@ -89,14 +116,17 @@ def main():
         format_func=lambda key: next(
             p["display_name"] for p in patients if p["id"] == key
         ),
+        index=[p["id"] for p in patients].index("fictional-001")
+        if any(p["id"] == "fictional-001" for p in patients)
+        else 0,
         disabled=active or "proposal" in st.session_state or running_ct,
         key="patient",
+        on_change=reset_case,
     )
     st.sidebar.button(
         "Start a new case", key="new_case", on_click=reset_case, width="stretch"
     )
     st.sidebar.divider()
-    token, user = account_ui(auth)
     with st.sidebar.expander("Local AI settings"):
         model = st.text_input(
             "Installed local Ollama model",
@@ -110,17 +140,35 @@ def main():
     st.sidebar.caption(
         "Fictional records only. Local accounts do not verify clinical qualifications."
     )
-    ui.header()
     try:
         record = get_history(selected, path)
         decision = SafetyAgent().evaluate(record)
         urgent = decision["state"] == "urgent"
-        ui.patient_header(record, decision)
+        state = {}
+        if "case_id" in st.session_state and "analysis_task" not in st.session_state:
+            state = st.session_state.workflow.state(st.session_state.case_id)
+        ui.patient_header(
+            record,
+            decision,
+            safety_reviewed=bool(state.get("safety_ack", {}).get("approved"))
+            and state["safety_decision"]["decision_sha256"]
+            == decision["decision_sha256"],
+        )
         if urgent:
             st.error(
                 "A structured warning-sign report requires human assessment. Automated clinical reasoning is blocked; do not wait for imaging inspection."
             )
-        action_bar(path, auth, record, model, urgent=urgent)
+        with st.expander("Five complex artificial demo cases"):
+            st.table(
+                [
+                    {"Case": p["display_name"], "Patient ID": p["id"]}
+                    for p in patients
+                    if p["id"].startswith("demo-0")
+                ]
+            )
+            st.caption(
+                "Choose a case from Patient in the sidebar. All histories, laboratory values and medication orders are authored fictional test data. Casey demonstrates a mandatory warning-sign stop."
+            )
         view = st.radio(
             "Workspace",
             ["Patient overview", "CT review", "Clinical report"],
@@ -128,9 +176,6 @@ def main():
             label_visibility="collapsed",
             key="workspace",
         )
-        state = {}
-        if "case_id" in st.session_state and "analysis_task" not in st.session_state:
-            state = st.session_state.workflow.state(st.session_state.case_id)
         with st.container(key="workspace_shell"):
             workspace, guide = st.columns([3.3, 1.18], gap="large")
             with workspace:
@@ -160,6 +205,7 @@ def main():
                             user,
                             record,
                             locked=active or "proposal" in st.session_state,
+                            case_imaging=state.get("imaging") if active else None,
                         )
                 else:
                     report_panel(auth, token, user, record, urgent=urgent)
@@ -171,6 +217,7 @@ def main():
                         running="analysis_task" in st.session_state,
                         signed_in=bool(token),
                     )
+        bottom_actions(path, auth, record, model, token, user, decision)
         ui.footer()
     except (ValueError, LookupError, OSError) as error:
         st.error("This record needs attention before it can be displayed.")
