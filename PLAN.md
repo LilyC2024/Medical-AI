@@ -129,4 +129,4 @@ software gates.
 32. **Combined report validation and delivery** — temporary scripted-review tests
     for the actual research-image pair, full regressions/smokes and honest outcomes,
     updated instructions/sample manifest and a refreshed local demo. Publish
-    compatible changes after passing. Status: local validation passed — 243 LOVISA / 83 CT / 37 endoscopy tests; actual 11.98s CT ROI, 3.16s endoscopy and 34.32s combined local-LLM smoke. Publishing/hosted checks in progress; full CT training remains hardware-blocked.
+    compatible changes after passing. Status: complete for the feasible local release — 243 LOVISA / 83 CT / 37 endoscopy tests; actual 11.98s CT ROI, 3.16s endoscopy and 34.32s combined local-LLM smoke. All three repositories published, all hosted workflows passed, and the localhost demo restarted with the real-image kit. Full CT training was not executed because CUDA hardware is unavailable; its documented separate workflow is retained.

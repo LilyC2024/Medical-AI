@@ -12,6 +12,7 @@
 | Actual local gemma4:e2b standard smoke | Passed uncertainty hold and eligible fictional reasoning; final review still required |
 | Actual real CT + endoscopy + local LLM combined-report smoke | **34.32s**, 170 words, one heading and four embedded source/annotation images |
 | Approval simulation | Scripted solely in a disposable test database; no actual-app imaging, safety or final approval issued |
+| Real-image UI smoke | Actual CT/endo example buttons, cyan region focus, blank image notes and four draft pictures passed with scripted model/reviews in a disposable database; final review stayed pending |
 | Review UX | Checked confirmation defaults, optional blank notes, explicit submit, paused defaults, candidate uncertainty blocks, patient-switch reset and changed-note preview tested |
 | Data boundaries | Separate public/synthetic schemas, exact pixels/boxes/crop coverage, old stored synthetic-manifest compatibility and local example path/hash guards tested |
 | Source/dependencies | Shared contracts match; pip consistency, compilation, Ruff checks and local documentation links passed |
@@ -388,3 +389,9 @@ fresh UI modules; loopback health returned HTTP 200. A new sign-in is required.
 The old pending in-memory UI state is not a reviewed report. Final documentation
 updates change no tested runtime behavior. Live visual verification remains
 limited by the saved browser permission described above.
+
+## Final research-image release checks
+
+Receiver source `2c6f2ead4886f646662be2deaf5ef05d9279f375` passed the [hosted LOVISA workflow](https://github.com/LilyC2024/Medical-AI/actions/runs/40015437588): Python 3.10, Python 3.12, all configured CT producer/receiver smokes and the endoscopy producer/receiver smoke. CT [hosted checks](https://github.com/LilyC2024/ai-medimg-2.5D-CT/actions/runs/40014638635) and repaired endoscopy [Linux/Windows checks](https://github.com/LilyC2024/AI-MedImg-Endo/actions/runs/40015138472) passed. The final follow-up changes are Markdown evidence/reference updates only.
+
+Local demo restarted on loopback `127.0.0.1:8501`; health, existing demo-account sign-in and both real-image bundles verified. The composite case remains unapproved in the actual database. An additional real-image AppTest used only a disposable DB/scripted model and review submissions, validating both example buttons, candidate highlight, default confirmations, optional blank image notes, and four draft pictures with final review pending.
