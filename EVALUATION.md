@@ -36,6 +36,16 @@ The model, hypothesis catalog, safety policy and CT wire contract are unchanged.
 This work establishes software behavior, not regulatory compliance, diagnostic
 accuracy or qualifications of a local account. [Examples](docs/DEMO_CASES.md).
 
+### Hosted guided-demo publication
+
+[Run 39949841373](https://github.com/LilyC2024/Medical-AI/actions/runs/39949841373)
+passed for `89257100df6514b5f4e6be3e42a1036dbee8ee75`: Python 3.10/3.12 tests,
+dependency/document checks, exact shared-contract equality and actual fixture,
+installed-pretrained CPU and retained legacy producer/receiver smokes. The
+published implementation tree matched the local staged tree. This follow-up
+verification record changes documentation only. The local demo remains on
+loopback with a pending, unapproved pretrained study available for inspection.
+
 ## Workspace and response-budget release — 23 October 2026
 
 | Executed check | Actual outcome |

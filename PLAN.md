@@ -48,7 +48,7 @@ software gates.
     source-bound test expectations, a narrowly scoped local demo-account setup,
     staged safety preparation before inference, persistent CT result summaries,
     and concise seven-section reporting. Test services before changing the UI.
-    Status: passed — 74 existing service checks and 7 new staged/demo checks;
+    Status: passed — 71 existing service checks and 7 new staged/demo checks;
     exact-source presentation and compact wire-budget validation retained.
 17. **Guided signed-in UI** — gate all patient examples behind login, keep CT
     findings visible in the CT panel, put clear safety controls and gated draft
@@ -56,4 +56,6 @@ software gates.
     24 focused staged/UI/source-presentation checks, including persistent CT
     results, login expiry, patient switching and no model call on safety save.
 18. **Verification and delivery** — full regression, actual local smokes/browser
-    checks, updated concise guides/evaluation and revised local demo. Status: in progress.
+    checks, updated concise guides/evaluation and revised local demo. Status: complete —
+    187 local tests, actual local Ollama and fixture/pretrained browser runs,
+    Python 3.10/3.12 hosted tests and all three CT receiver smokes passed.
