@@ -144,4 +144,8 @@ software gates.
     focused action, upload, report, review and UI tests in 49.84 seconds.
 35. **Verification and delivery** — full regression, real-file upload/model smoke,
     local Ollama smoke, corrected operating guides and refreshed localhost demo.
-    Record actual outcomes and publish tested changes. Status: in progress.
+    Record actual outcomes and publish tested changes. Status: complete for local
+    delivery — 267 offline tests, actual CT/endo ZIP uploads, actual raw-image
+    polyp inference and live Ollama passed. Guides updated; tested source published
+    as aa06c9e; localhost restarted and demo login verified. Hosted workflow
+    40019579036 is running independently; its result is not claimed as passed.

@@ -435,3 +435,17 @@ limited by the saved browser permission described above.
 Receiver source `2c6f2ead4886f646662be2deaf5ef05d9279f375` passed the [hosted LOVISA workflow](https://github.com/LilyC2024/Medical-AI/actions/runs/40015437588): Python 3.10, Python 3.12, all configured CT producer/receiver smokes and the endoscopy producer/receiver smoke. CT [hosted checks](https://github.com/LilyC2024/ai-medimg-2.5D-CT/actions/runs/40014638635) and repaired endoscopy [Linux/Windows checks](https://github.com/LilyC2024/AI-MedImg-Endo/actions/runs/40015138472) passed. The final follow-up changes are Markdown evidence/reference updates only.
 
 Local demo restarted on loopback `127.0.0.1:8501`; health, existing demo-account sign-in and both real-image bundles verified. The composite case remains unapproved in the actual database. An additional real-image AppTest used only a disposable DB/scripted model and review submissions, validating both example buttons, candidate highlight, default confirmations, optional blank image notes, and four draft pictures with final review pending.
+
+## Upload/Analyze delivery
+
+Tested source `aa06c9e160010e0992734eb2190f29eba652da3d` is published in
+[LilyC2024/Medical-AI](https://github.com/LilyC2024/Medical-AI/commit/aa06c9e160010e0992734eb2190f29eba652da3d).
+[Hosted workflow 40019579036](https://github.com/LilyC2024/Medical-AI/actions/runs/40019579036)
+was in progress at local handover; no hosted success is claimed for this release
+until that run completes. The follow-up publication changes only evaluation/phase
+records, not the tested runtime source.
+
+The existing localhost process was restarted on `127.0.0.1:8501`; health returned
+HTTP 200 and the existing `demo` account login was verified. Sign in again after
+refreshing. The smoke made no changes to the app's patient/imaging/report data.
+The prepared-kit README and maintained guides now describe Upload/Analyze.
