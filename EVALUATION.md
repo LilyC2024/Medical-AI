@@ -8,8 +8,8 @@ clinical safety or clinician time savings. [Reproduce checks](docs/VALIDATION.md
 
 | Executed check | Actual result |
 | --- | --- |
-| Final complete regression | **205 passed in 72.31s**; earlier 205-test runs passed in 68.10s and 101.26s (the latter during a separate local Ollama smoke) |
-| Formatted UI/navigation/imaging regression | **59 passed in 38.32s**; final targeted navigation/CT checks **23 passed in 15.96s** |
+| Final complete regression | **206 passed in 69.42s** after literal source-filename rendering; prior 205-test UI release passed in 72.31s |
+| Focused regression | 59 formatted UI/navigation/imaging checks in 38.32s; 23 final navigation/CT checks in 15.96s; 6 source/navigation UI checks in 9.65s |
 | Actual local gemma4:e2b smoke | Passed: missing-data hold, eligible reasoning and final clinician-review pause; no approvals |
 | Dependencies / shared CT contract / compile | pip check, exact contract equality and compileall passed |
 | Documentation | 28 maintained Markdown files passed local-target checks |
@@ -39,6 +39,15 @@ issue and repeated same-destination rendering; each click now creates a fresh,
 fixed-ID local component. No source/model text is executed. Existing response
 budgets and research limitations still apply. Hosted publication is recorded below
 once completed.
+
+### Hosted focused-workspace publication
+
+[Run 39967554491](https://github.com/LilyC2024/Medical-AI/actions/runs/39967554491)
+passed at `d3c39b092e3f3181825ece15f2f48d24d71db640`: Python 3.10/3.12,
+dependency/document checks, exact shared contracts and actual fixture/pretrained/
+legacy CT producer-consumer smokes. The published tree matched the staged local
+tree. The subsequent literal-filename rendering change has passed all 206 local
+tests; its hosted verification is recorded after completion.
 
 ## Guided demonstration release — 23 October 2026
 

@@ -74,6 +74,22 @@ def test_pending_ct_has_direct_resolution_action_in_safety_view(ui):
     assert app.text_area(key="safety_notes") and not inference.calls
 
 
+def test_source_filename_is_literal_in_the_evidence_view(ui, monkeypatch):
+    from medical_assistant import database
+    from test_ui import open_sources
+
+    app, path, _, inference = ui
+    record = database.get_history("fictional-001", path)
+    record.sources[0].filename = "![untrusted](https://example.invalid/tracker.png)"
+    monkeypatch.setattr(database, "get_history", lambda patient, path: record)
+    login(app)
+    open_sources(app)
+    label = app.expander[0].label
+    assert "![untrusted](" not in label
+    assert r"\!\[untrusted\]" in label
+    assert not app.exception and not app.json and not inference.calls
+
+
 def test_switch_during_analysis_cancels_and_rejects_old_patient_result(ui, monkeypatch):
     app, _, _, inference = ui
     login(app)

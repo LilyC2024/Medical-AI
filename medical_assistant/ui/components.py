@@ -137,7 +137,7 @@ def original_sources(record):
         "Original wording for this patient. Use these excerpts to check the history and report."
     )
     for source in record.sources:
-        with st.expander(source.filename, expanded=True):
+        with st.expander(inline_text(source.filename), expanded=True):
             for entry in sorted(
                 (e for e in record.entries if e.source_id == source.id), key=chronology
             ):
