@@ -25,7 +25,7 @@ def sync(ct_root, *, write=False):
             raise ValueError(
                 f"Contract drift: {destination}; inspect upstream and synchronize intentionally"
             )
-    print("CT/MHCRA lightweight contract and rendering sources match")
+    print("CT/LOVISA lightweight contract and rendering sources match")
 
 
 def main():

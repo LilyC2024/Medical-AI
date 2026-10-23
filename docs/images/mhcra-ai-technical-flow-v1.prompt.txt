@@ -1,3 +1,6 @@
+Historical generation record: MHCRA AI is now named LOVISA. The original prompt
+and PNG are retained; see ../ILLUSTRATIONS.md for current captions and scope.
+
 # MHCRA AI technical flow illustration
 
 Mode: built-in image generation (image_gen).

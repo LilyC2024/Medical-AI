@@ -1,9 +1,12 @@
-# Approved local evidence collection
+# LOVISA local reference collection
 
-No medical references have been approved yet. The default manifest is deliberately
-empty; the app must disclose this gap and must not invent citations.
+The default [manifest](manifest.json) is empty. LOVISA reports that no approved
+reference support was retrieved; it never invents a citation to fill that gap.
 
-A human may add `.txt` or `.md` excerpts inside this folder, then explicitly list
-their IDs, titles, relative paths, exact UTF-8 SHA-256 digests and `approved: true`
-in `manifest.json`. Only those unchanged, approved files can be retrieved.
-No web search, recursive file discovery or remote reference retrieval occurs.
+To add an excerpt, verify permission, save UTF-8 `.txt`/`.md` inside this folder,
+and explicitly record its unique ID, title, relative path, SHA-256 and
+`approved: true` in the manifest. Each excerpt is limited to 20 KB. Changed bytes
+require renewed approval. Retrieval checks approved entries only, scores word
+overlap and returns at most three results. No web search or automatic downloads.
+
+[Reference rules](../../docs/RECORDS.md) · [Implementation](../../medical_assistant/evidence.py).

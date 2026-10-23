@@ -1,20 +1,22 @@
-# Documentation index
+# LOVISA documentation
 
-[Project overview](../README.md)
+**LOVISA = the project name. Medical History & Clinical Reasoning Assistant = its
+functional description.** The separate CT companion provides image analysis.
+Start with the [project overview](../README.md), then choose one path:
 
-| Task | Guide |
+| Your goal | Read |
 | --- | --- |
-| Install and start locally | [Setup](SETUP.md) |
-| First synthetic case, imports and human approvals | [Workflows](WORKFLOWS.md) |
-| Original JSON, facts, local references and adaptation | [Records](RECORDS.md) |
-| Four specialists, LangGraph, local model and trust boundaries | [Architecture](ARCHITECTURE.md) |
-| Lung CT setup, use, versioned exchange and migration | [Imaging](IMAGING.md) |
-| Functions, subfunctions, classes and folders | [Code reference](CODE_REFERENCE.md) |
-| Clinical workflow and technical-flow images | [Illustrations](ILLUSTRATIONS.md) |
-| Reproduce tests, real smokes and troubleshoot | [Validation](VALIDATION.md) |
-| Current changes | [Release](RELEASE.md) |
-| Development-agent history | [Development](DEVELOPMENT.md) |
-| Tracked files | [Inventory](FILE_INVENTORY.md) |
+| Understand the two projects visually | [Illustrations](ILLUSTRATIONS.md) |
+| Install LOVISA and create a reviewer account | [Setup](SETUP.md) |
+| Run a case, import history or approve a report | [Workflows](WORKFLOWS.md) |
+| Connect the lung CT companion | [Imaging](IMAGING.md) |
+| Understand agents and local models | [Architecture](ARCHITECTURE.md) |
+| Understand source records and references | [Records](RECORDS.md) |
+| Find a module, function or folder | [Code reference](CODE_REFERENCE.md) |
+| Run checks or diagnose a setup problem | [Validation](VALIDATION.md) |
+| Check demonstrated results and limits | [Evaluation](../EVALUATION.md) |
+| Understand the rename or migrate an integration | [Naming](NAMING.md) / [Release](RELEASE.md) |
+| Contribute or inspect development history | [Development](DEVELOPMENT.md) / [Contributing](../CONTRIBUTING.md) |
 
-[Actual evaluation](../EVALUATION.md) · [Phased plan](../PLAN.md) ·
-[Security](../SECURITY.md) · [Contribution rules](../CONTRIBUTING.md).
+[Phase record](../PLAN.md) · [File inventory](FILE_INVENTORY.md) ·
+[Security](../SECURITY.md) · [CT documentation](https://github.com/LilyC2024/ai-medimg-2.5D-CT/blob/main/docs/README.md).

@@ -1,87 +1,64 @@
-# First case and review workflows
+# Use LOVISA: records, CT and final review
 
-[Overview](../README.md) · [Setup](SETUP.md) · [Imaging](IMAGING.md)
+[Overview](../README.md) · [Setup](SETUP.md) · [Imaging details](IMAGING.md)
 
-1. In the sidebar, sign in using the local account created above and select
-   **Taylor Synthetic — checklist case** (`synthetic-checklist`). Leave the
-   installed model as `gemma4:e2b`, or select another compatible installed local
-   model. Other models have not been evaluated by this release.
-2. Inspect **Longitudinal timeline and original sources** and **Medication
-   reconciliation overview**. The five source facts include two encounters, the
-   documented 5 mg to 10 mg dose change, and an explicitly undated symptom report.
-3. Click **Generate draft for clinician review**. This fixture intentionally lacks
-   current screening and blood pressure, so it pauses at **Human safety assessment
-   required before reasoning**, before calling the model. This is expected.
-4. Inspect the decision. A qualified reviewer can stop, or assess the synthetic
-   uncertainty, provide nonempty **Safety review notes**, tick the attestation,
-   choose **Continue after clinician assessment of uncertainty**, and submit.
-   Do not invent observations to make the hold disappear. An urgent case cannot
-   use this continuation path.
-5. Inspect every section of the unverified draft and its source citations. Add
-   **Review notes and required corrections**, tick the verification attestation,
-   choose **Approve report** only after review, and click **Submit clinician
-   review**. The default decision requests corrections and leaves it pending.
-6. Approval automatically saves reviewed JSON in `data/reports/`. The interface
-   offers separate JSON and Markdown downloads. Click **Start a new case** to
-   unlock patient/model selection and imports for another assessment.
+## First synthetic case
 
-Review actions require a signed-in account, nonempty notes and the applicable
-attestation. Local sessions expire after one hour. Record inspection and initial
-generation are available without sign-in; approvals are authenticated. The live
-model may fail output validation; a failed run produces no reviewed report.
+1. Sign in and select **Taylor Synthetic — checklist case** (`synthetic-checklist`).
+   Keep the installed model `gemma4:e2b`.
+2. Inspect the timeline, original sources and medication overview. The fixture has
+   five facts, two encounters, an amlodipine 5 mg → 10 mg documented change and an
+   undated patient report. These are fictional software-test inputs.
+3. Click **Generate draft for clinician review**. Missing current screening/blood
+   pressure triggers **Human safety assessment required before reasoning**.
+4. Review the uncertainty. To continue, an authorized reviewer supplies safety
+   notes, the attestation and **Continue after clinician assessment of uncertainty**.
+   Choosing stop ends the case. An urgent case cannot use this continuation path.
+5. Inspect the draft, exact source citations, hypotheses and missing information.
+   Enter review notes, attest verification, select **Approve report** and submit
+   only after review. The default requests corrections and keeps the draft pending.
+6. Valid approval saves JSON under ignored `data/reports/` and enables JSON/Markdown
+   downloads. **Start a new case** before changing patient, sources or accepted CT.
 
-## History and clinical review
+Approvals require login, nonempty notes, attestation and matching content hashes.
+Sessions expire after one hour. Inspection/initial generation can run without login;
+approvals cannot. Invalid model output produces no reviewed report.
 
-**History management:** inspect a synthetic JSON import proposal, its original
-sources, extracted history and medications. An authenticated reviewer must
-explicitly approve the matching proposal before it is appended to SQLite. In the
-interface, expand **Import a synthetic medical record / add observations**, select
-a JSON file and click **Preview JSON import**. Inspect the proposal, supply
-**Import review notes**, tick the source-verification attestation and click
-**Approve history import**. For an observation, use **Prepare observation
-proposal** first; date and blood-pressure inputs are stored only when their
-respective checkboxes are selected. Pending proposals can be discarded.
-Conflicting facts or dates require manual reconciliation; the program does not
-overwrite an existing original source. Built-in fixture seeding is an idempotent
-development bootstrap, separate from the user import-approval workflow.
+## Import a new synthetic source
 
-**Clinical review:** select a patient from SQLite and inspect the source record.
-Current observations supplied through the interface become a synthetic import
-proposal and require approval before use. Start the assessment. The deterministic
-safety policy runs before clinical reasoning:
+Open **Import a synthetic medical record / add observations**. Upload supported
+JSON and select **Preview JSON import**. Inspect original sources, extracted facts
+and discrepancies. Enter import notes, attest source verification and approve the
+matching proposal. Pending proposals can be discarded without importing.
 
-- Any structured `warning_screen="present"` in the supplied snapshot stops the
-  case, including historical entries. A newer absent screen cannot clear it, and
-  a reviewer cannot continue automated reasoning within that urgent case.
-- Missing or uncertain current warning screening or blood pressure pauses for an
-  authenticated clinician's assessment. A matching explicit decision is required
-  before reasoning can begin.
-- Ordinary eligibility permits reasoning; it is not a statement of clinical safety.
+Observation controls create proposals too. Date/blood-pressure values are included
+only when their checkboxes are selected. Defaults are not observations. IDs and
+originals are immutable; conflicts need reconciliation, not overwriting. Bundled
+fixture seeding is a separate development bootstrap. [Record format](RECORDS.md).
 
-Inspect the generated hypotheses, evidence, missing information and safety
-findings. Approve the exact report or reject it with review notes. Corrections to
-facts require an explicitly approved new source import and a new assessment;
-existing source/fact IDs are immutable. Unrestricted editing of generated report
-text is unsupported so an approval cannot introduce uncited clinical claims.
-Explicit authenticated approval is required to mark a report reviewed and enable
-final export. Safety and approval integrity are checked again before completion
-and export. Each case uses the SQLite snapshot captured when it starts. The
-checks detect changes to that in-case snapshot, policy or assessment date; they
-do not reload later database imports. Start a new case after adding facts,
-including facts approved in another session.
-The UI gives newly supplied structured warnings priority over optional image
-inspection and blocks review/download of an older case until a new case starts.
+## Add CT research evidence
 
-The report contains:
+Before starting a clinical case, open **Imaging workbench**. Generate a synthetic
+fixture/pretrained study or inspect an uploaded synthetic bundle. Review source
+slices, every candidate and optional calipers, then explicitly accept it for the
+research appendix. Pending imaging blocks draft generation. CT attestation,
+LOVISA imaging acceptance and final report approval remain separate.
 
-1. Medical history timeline
-2. Current clinical summary
-3. Medication overview
-4. Possible diagnostic explanations and evidence
-5. Missing information
-6. Safety flags
-7. Questions for clinician review
+Start a new clinical case to include the accepted study. Pixels/notes are excluded
+from language-model reasoning. [Full CT procedure](IMAGING.md).
 
-Accepted research imaging appears as an appendix within the seven-section draft.
-Its source bundle, model/source hashes, unknown acquisition date, candidate decisions, caliper/source-plane measurements
-and review attribution are included in the exact text covered by final approval.
+## Safety and snapshot rules
+
+| Situation | Required behavior |
+| --- | --- |
+| Any supplied structured warning is present | Urgent human assessment; no reasoning continuation in that case |
+| Current screening/BP is missing or uncertain | Authenticated uncertainty assessment before reasoning |
+| Ordinary workflow eligibility | Reasoning may proceed; this is not proof of safety |
+| New source or CT accepted after case start | Start a new case; existing snapshot remains fixed |
+| Newly supplied warning outside an active snapshot | Old review/download is blocked; start a new case |
+| Report corrections requested | Draft remains pending; factual corrections go through a new approved source |
+
+The seven report sections are timeline, current summary, medications, possible
+explanations/evidence, missing information, safety flags and clinician questions.
+Accepted CT appears as a research appendix within those sections. Final approval
+covers its source IDs/hashes, decisions, measurements and reviewer attribution.

@@ -1,9 +1,10 @@
-# Tracked-file inventory
+# LOVISA tracked-file inventory
 
-[Overview](../README.md) · [Function/folder guide](CODE_REFERENCE.md)
+[Overview](../README.md) · [Module/folder guide](CODE_REFERENCE.md)
 
-Source, tests, config, synthetic fixtures and documentation. Runtime credentials,
-databases, HU/CT jobs, downloaded weights and report exports stay ignored.
+Files below contain code, configuration, deliberately fictional fixtures and
+documentation. Databases, credentials, weights, CT jobs and clinical exports are
+ignored. Stable legacy identifiers are explained in [Naming](NAMING.md).
 
 - [.github/workflows/tests.yml](../.github/workflows/tests.yml)
 - [.gitignore](../.gitignore)
@@ -21,12 +22,14 @@ databases, HU/CT jobs, downloaded weights and report exports stay ignored.
 - [data/patients/checklist_patient.json](../data/patients/checklist_patient.json)
 - [data/patients/fictional_patient.json](../data/patients/fictional_patient.json)
 - [data/reports/.gitkeep](../data/reports/.gitkeep)
+- [docs/ACCEPTANCE.md](../docs/ACCEPTANCE.md)
 - [docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md)
 - [docs/CODE_REFERENCE.md](../docs/CODE_REFERENCE.md)
 - [docs/DEVELOPMENT.md](../docs/DEVELOPMENT.md)
 - [docs/FILE_INVENTORY.md](../docs/FILE_INVENTORY.md)
 - [docs/ILLUSTRATIONS.md](../docs/ILLUSTRATIONS.md)
 - [docs/IMAGING.md](../docs/IMAGING.md)
+- [docs/NAMING.md](../docs/NAMING.md)
 - [docs/README.md](../docs/README.md)
 - [docs/RECORDS.md](../docs/RECORDS.md)
 - [docs/RELEASE.md](../docs/RELEASE.md)
@@ -40,6 +43,9 @@ databases, HU/CT jobs, downloaded weights and report exports stay ignored.
 - [docs/images/mhcra-ai-workflow-v1.png](../docs/images/mhcra-ai-workflow-v1.png)
 - [docs/images/mhcra-ai-workflow-v1.prompt.txt](../docs/images/mhcra-ai-workflow-v1.prompt.txt)
 - [docs/images/mhcra-synthetic-workbench.png](../docs/images/mhcra-synthetic-workbench.png)
+- [docs/reference/CALLABLES.md](../docs/reference/CALLABLES.md)
+- [docs/reference/CLINICAL.md](../docs/reference/CLINICAL.md)
+- [docs/reference/IMAGING.md](../docs/reference/IMAGING.md)
 - [medical_assistant/__init__.py](../medical_assistant/__init__.py)
 - [medical_assistant/agents.py](../medical_assistant/agents.py)
 - [medical_assistant/auth.py](../medical_assistant/auth.py)

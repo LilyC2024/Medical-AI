@@ -1,5 +1,5 @@
 flowchart TD
-  subgraph LOCAL["Local application runtime"]
+  subgraph LOCAL["LOVISA · local application runtime"]
     UI["Streamlit UI · app.py"] --> SNAP["Validated patient snapshot"]
     DB[("SQLite: immutable sources + extracted facts")] --> GROUND["Pydantic + source grounding"]
     GROUND --> SNAP

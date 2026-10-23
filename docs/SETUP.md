@@ -1,12 +1,11 @@
-# Local setup
+# Install and start LOVISA
 
-[Overview](../README.md) · [First case](WORKFLOWS.md) · [CT setup](IMAGING.md)
+[Overview](../README.md) · [First case](WORKFLOWS.md) · [CT installation](IMAGING.md)
 
-The package requires Python 3.10 or newer; CI exercises Python 3.10 and 3.12.
-Use an installed Ollama server and enough local memory for the model and its
-requested 16,384-token context. Performance depends on your hardware. The commands
-below use a Linux/macOS shell; this release's hosted tests run on Linux. In an
-existing checkout, reuse `.venv`. For a fresh checkout:
+## 1. Install the history application
+
+Use Python 3.10 or newer; regression CI targets 3.10 and 3.12. Reuse `.venv` in an
+existing checkout. For a new Linux/macOS checkout:
 
 ```bash
 git clone https://github.com/LilyC2024/Medical-AI.git
@@ -16,49 +15,53 @@ python3 -m venv .venv
 .venv/bin/python -m pip check
 ```
 
-Start Ollama in another terminal if it is not already running:
+On Windows, use `.venv\Scripts\python.exe` for Python commands and `python -m
+venv .venv` to create the environment. LOVISA's hosted tests run on Linux; the
+standalone CT companion also has Windows checks. [Stable names](NAMING.md).
+
+## 2. Start local Ollama
+
+The default model is `gemma4:e2b`. Check the installed models:
+
+```bash
+ollama list
+# Explicit setup download only, if the model is absent:
+ollama pull gemma4:e2b
+```
+
+Start the server when it is not already running:
 
 ```bash
 OLLAMA_NO_CLOUD=1 OLLAMA_HOST=127.0.0.1:11434 ollama serve
 ```
 
-For service-managed Ollama, configure these variables on the service instead.
-Check that the development model is installed:
+For a managed service, set these variables on that service. On PowerShell set
+`$env:OLLAMA_NO_CLOUD="1"` and `$env:OLLAMA_HOST="127.0.0.1:11434"` before starting
+Ollama. Inference stays local. Setup packages/weights require internet access.
+The requested 16,384-token context needs sufficient local memory; performance is
+hardware-dependent. No other model is claimed evaluated here.
+
+## 3. Create a reviewer and launch
 
 ```bash
-ollama list
-```
-
-The default model is `gemma4:e2b`. If its weights are absent, install them explicitly:
-
-```bash
-ollama pull gemma4:e2b
-```
-
-Dependency installation and the initial model download need internet access.
-Inference and application operation use local resources after installation.
-
-Optionally initialize the built-in synthetic records explicitly, then create a
-local reviewer account. The UI also seeds these fixtures idempotently at startup:
-
-```bash
-.venv/bin/python -m medical_assistant.database
 .venv/bin/python -m medical_assistant.auth
-```
-
-Seeding is idempotent: exact repeats do not duplicate encounters; conflicts roll
-back. The account command prompts for a 3–80 character username using letters,
-digits, `_`, `.` or `-`, and a password of at least 12
-characters. Passwords are stored as salted PBKDF2 hashes. This authenticates a local
-account; it does not verify professional clinical credentials.
-
-Start the interface:
-
-```bash
 .venv/bin/python -m streamlit run app.py
 ```
 
-Open [the local interface](http://127.0.0.1:8501). The checked-in Streamlit
-configuration binds to loopback and disables usage telemetry. Keep the app local.
+The account command prompts for a username (3–80 characters; letters, digits,
+underscore, dot or hyphen) and a password of at least 12 characters. It stores a
+salted hash. This authenticates a local account, not clinical qualifications.
 
-Windows uses `.venv\Scripts\python.exe` in place of `.venv/bin/python`. MHCRA hosted tests run on Linux; standalone CT also has Windows checks.
+Open [localhost:8501](http://127.0.0.1:8501). Streamlit binds to loopback and disables
+usage telemetry. Fictional fixtures are seeded idempotently at startup; optional
+explicit seeding is `.venv/bin/python -m medical_assistant.database`.
+
+Choose **Taylor Synthetic — checklist case**. Its missing screening and blood
+pressure intentionally pause reasoning. Follow the [review walkthrough](WORKFLOWS.md).
+Keep Ollama and Streamlit local. [Troubleshooting](VALIDATION.md).
+
+## 4. Add CT when needed
+
+LOVISA itself does not need PyTorch/MONAI. Install the CT project in a separate
+Python 3.12 environment, then follow [Imaging](IMAGING.md). The existing GitHub
+repository path is `Medical-AI`; the app is named LOVISA.

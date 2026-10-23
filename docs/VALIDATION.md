@@ -1,8 +1,8 @@
-# Validation and reproduction
+# Validate LOVISA and the CT connection
 
-[Overview](../README.md) · [Actual results](../EVALUATION.md) · [Phase gates](../PLAN.md)
+[Overview](../README.md) · [Actual outcomes](../EVALUATION.md) · [Phase gates](../PLAN.md)
 
-## Offline regression
+## Offline software checks
 
 ```bash
 .venv/bin/python -m pip check
@@ -11,15 +11,15 @@
 .venv/bin/python scripts/check_docs.py
 ```
 
-Tests use temporary databases, synthetic sources and scripted inference/reviewers.
-They include Streamlit AppTest, exact-source grounding, medication/date extraction,
-safety bypass attempts, source/report escaping, account/session receipts, import
-limits, imaging validation and final-approval/export integrity. Passing tests do
-not establish clinical performance. Main regression needs no CT install or Ollama.
+These checks use temporary SQLite, synthetic sources and scripted model/reviewer
+identities. They cover dates/orders, grounding, safety bypasses, authenticated
+approvals, archive/pixel integrity, caliper UI and guarded export. No CT install or
+Ollama is required for this suite. Passing tests is not clinical validation.
+[Eight acceptance requirements](ACCEPTANCE.md).
 
-## Current CT interoperability
+## Real CT interoperability
 
-Install the companion as in [Imaging](IMAGING.md); then from MHCRA:
+Install the companion using [Imaging](IMAGING.md). From LOVISA:
 
 ```bash
 .venv/bin/python scripts/sync_ct_contracts.py --ct-root ../ai-medimg-2.5D-CT
@@ -28,46 +28,44 @@ Install the companion as in [Imaging](IMAGING.md); then from MHCRA:
 .venv/bin/python scripts/smoke_imaging.py --mode legacy
 ```
 
-Each smoke runs the actual separate CT interpreter, prepares the resulting bundle
-in a temporary synthetic database and checks that no study/report is approved.
-Pretrained smoke requires already-installed verified weights; no inference-time
-download is allowed. Fixture is non-ML. Legacy mode performs tiny training and
-ONNX parity; its results are not nodule metrics. CPU was executed locally; CUDA
-selection is explicit but no actual GPU execution is claimed here.
+The actual CT interpreter generates synthetic pixels and exports a bundle; LOVISA
+validates it in a temporary database. No imaging/safety/final approval is issued.
+Fixture detection is non-ML. Pretrained smoke needs verified installed weights and
+never downloads during inference. Legacy mode trains its tiny model and checks
+ONNX parity; its metrics are not nodule results.
 
-The canonical contracts, report and NumPy wire renderer are checked byte-for-byte
-against the companion after its one import-path rewrite. Intentional contract
-changes must first pass producer tests (PLAN Phase 9), then consumer tests
-(Phase 10), then joint validation/publication (Phase 11). Hosted integration pins
-a specific CT commit instead of following an unreviewed branch tip.
+Shared schema/report/rendering must match after the import-path rewrite. Maintainers
+may intentionally sync with `scripts/sync_ct_contracts.py --ct-root ... --write`,
+then test both projects and update the exact CI producer pin. Never hide drift by
+changing only one consumer. Device selection is explicit; actual CUDA/NPU execution
+must be recorded separately from unavailable-device tests.
 
-## Real local language model
+## Real local LLM
 
 ```bash
 .venv/bin/python scripts/check_ollama.py gemma4:e2b
 .venv/bin/python scripts/smoke_local.py --model gemma4:e2b
 ```
 
-This is separate from mocked tests. It verifies a missing-information hold before
-reasoning and uses a supplied eligible synthetic case for actual structured local
-Ollama reasoning. Final approval remains pending. Model validation can legitimately
-fail closed; do not remove grounding constraints to force a pass.
+This separate live smoke confirms the missing-data hold before reasoning, then
+runs actual structured Ollama reasoning on an eligible synthetic fixture. It stops
+at final review. Validation may fail closed; do not weaken grounding for a pass.
 
 ## Troubleshooting
 
 | Symptom | Action |
 | --- | --- |
-| Nodule-v1 ZIP rejected | Re-export the original workspace with current CT; do not relabel its schema |
-| Shared contract drift | Inspect changes; intentionally sync with `--write`, test both repos and update CI pin |
-| Companion missing | Set MHCRA_CT_ROOT; create CT's separate Python 3.12 `.venv` |
-| Installed detector fails | Inspect local worker.log; verify model registration, recipe/weight hashes and matching torch/torchvision |
-| CUDA unavailable | Select CPU explicitly or install compatible CUDA hardware/runtime; there is no silent fallback |
-| Candidate uncertain | Inspect it and explicitly accept/reject, or discard the proposal; uncertainty blocks acceptance |
-| Caliper controls not visible | Enable caliper and submit measurement preview, then edit newly visible form fields |
-| Later imports absent from draft | Start a new case; snapshots are immutable |
-| Artifact hash or approval mismatch | Stop/export stays blocked; inspect originals and rerun an explicitly reviewed import with a new study ID |
-| Ollama rejects a result | Review the local validation error; unsupported source claims never become a reviewed report |
+| Old nodule-v1 ZIP rejected | Re-export original workspace with current CT; do not rename schema |
+| Contract drift | Inspect producer changes, intentionally sync and test both repos |
+| Companion missing | Set MHCRA_CT_ROOT and install CT's separate Python 3.12 `.venv` |
+| Pretrained worker fails | Inspect ignored worker.log, registration/hashes and matching torch/torchvision |
+| CUDA unavailable | Configure compatible hardware/runtime or explicitly select CPU for inference |
+| Uncertain candidate | Review accept/reject or discard proposal; uncertainty cannot be accepted |
+| Caliper inputs absent | Enable caliper, submit measurement preview, then edit the exposed fields |
+| New import missing from draft | Start a new case; snapshots are fixed |
+| Source/hash/approval mismatch | Export remains blocked; inspect originals and re-import explicitly with a new study ID |
+| Ollama result rejected | Inspect the local error; unsupported claims must not become reviewed output |
 
-CI uploads no records/reports and calls no cloud inference. Hosted code tests are
-software checks; no real clinical deployment, clinician reader study or patient
-performance validation is claimed.
+CI installs dependencies/weights explicitly and runs open-source models on runner
+CPU; the application has no cloud inference provider. It publishes no patient
+records or clinical reports. [Security](../SECURITY.md).

@@ -1,25 +1,29 @@
-# Local lung CT integration
+# Connect the CT companion to LOVISA
 
-[Overview](../README.md) · [Architecture](ARCHITECTURE.md) ·
-[Companion guide](https://github.com/LilyC2024/ai-medimg-2.5D-CT/blob/main/docs/lung/mhcra.md)
+[Overview](../README.md) · [Visual explanation](ILLUSTRATIONS.md) ·
+[Producer guide](https://github.com/LilyC2024/ai-medimg-2.5D-CT/blob/main/docs/lung/mhcra.md)
 
-## Compatibility and scope
+## Responsibility and compatibility
 
-MHCRA v0.2 supports the current lung workflow through **mhcra-lung-nodules-v2**.
-It also retains the old **mhcra-imaging-v1** tissue-mask bridge. These are separate
-contracts: nodule boxes never become tissue labels. Incomplete nodule-v1 archives
-are rejected; re-export their original CT workspace using the current producer.
+The CT project detects candidate nodules and supports source-image/caliper review.
+LOVISA organizes history and includes accepted CT evidence in a clinician-reviewed
+report. Each keeps its own local environment. Pixels and imaging notes are never
+sent to Ollama; imaging cannot change safety escalation or the hypothesis catalog.
 
-Only generated synthetic inputs enter MHCRA. Public-research approval, real DICOM
-loading, large-volume review, dataset preparation, CUDA training and FROC evaluation
-remain standalone CT features. They are not implemented inside MHCRA. This is not
-cancer diagnosis or a validated lesion detector. No image-derived facts or review
-notes enter Ollama or expand the clinical hypothesis catalog.
+| CT capability/output | LOVISA support |
+| --- | --- |
+| `mhcra-lung-nodules-v2` | Source HU, all-slice previews, candidates, provenance and optional CT review |
+| Non-ML fixture / installed pretrained detector | Both launchable locally; explicit CPU or available CUDA for pretrained |
+| `mhcra-imaging-v1` | Retained tissue-mask importer, viewer, worker and appendix |
+| Incomplete nodule-v1 ZIP | Rejected; re-export the original workspace with current CT |
+| Full-size/public-research CT, dataset preparation/training | Standalone CT only; LOVISA accepts bounded generated-synthetic studies |
 
-## Install the companion
+Existing `mhcra-*`, `MHCRA_CT_*` and bridge/module names are stable interfaces.
+LOVISA is the current application name. [Naming map](NAMING.md).
 
-Keep MHCRA's existing `.venv`. From the parent directory, install CT separately
-with Python 3.12 (Windows substitutes `.venv\Scripts\python.exe`):
+## Install separately
+
+From the directory containing the LOVISA checkout, use Python 3.12 for CT:
 
 ```bash
 git clone https://github.com/LilyC2024/ai-medimg-2.5D-CT.git
@@ -28,21 +32,21 @@ python3.12 -m venv .venv
 .venv/bin/python -m pip install torch==2.14.1+cpu torchvision==0.29.1+cpu --index-url https://download.pytorch.org/whl/cpu
 .venv/bin/python -m pip install -e '.[ml,lung,ui,dev]'
 .venv/bin/python -m pip check
-.venv/bin/python -m pytest -q
 ```
 
-For CUDA use matching CUDA torch/torchvision wheels for the installed driver,
-following the companion's deployment guide. Do not install CPU wheels first.
-Intel NPU is not CUDA and is not supported for the new detector in this release.
-The fixture path needs no pretrained weights. For actual pretrained inference,
-explicitly fetch the pinned official model during setup, from the CT checkout:
+Reuse existing environments. On Windows create the CT environment with
+`py -3.12 -m venv .venv` and use `.venv\Scripts\python.exe`. CUDA needs
+matching CUDA torch/torchvision builds for its driver, installed instead of CPU
+wheels. Intel NPU is not supported for the new detector. Fixture mode needs no
+weights. Fetch official weights explicitly during CT setup when needed:
 
 ```bash
 .venv/bin/python -m lung_nodule.cli fetch-model --output models/luna16
 ```
 
-MHCRA finds the sibling CT checkout automatically. Override before starting MHCRA
-if necessary (run Streamlit from MHCRA using MHCRA's environment):
+LOVISA discovers a sibling `ai-medimg-2.5D-CT`; otherwise set `MHCRA_CT_ROOT`.
+`MHCRA_CT_MODEL_DIR` selects installed weights. Default discovery prefers registered
+`models/luna16-full`, otherwise `models/luna16`. From LOVISA's own checkout:
 
 ```bash
 export MHCRA_CT_ROOT="/absolute/path/to/ai-medimg-2.5D-CT"
@@ -50,120 +54,80 @@ export MHCRA_CT_MODEL_DIR="/absolute/path/to/ai-medimg-2.5D-CT/models/luna16"
 .venv/bin/python -m streamlit run app.py
 ```
 
-The worker uses the companion's own `.venv/bin/python` (or Windows equivalent).
-It never downloads weights/data or falls back to remote inference. An unavailable
-requested accelerator or absent model fails explicitly. Default model discovery
-prefers `models/luna16-full` when registered, otherwise `models/luna16`.
+The worker uses CT's `.venv`, never LOVISA's interpreter. No inference-time download
+or remote fallback occurs. Missing weights/unavailable CUDA fail explicitly.
 
-## MHCRA workflow
+## Inspect and accept in LOVISA
 
 1. Sign in, select the synthetic patient and open **Imaging workbench** before
-   starting a clinical case. Choose **Lung nodule fixture (non-ML)**,
-   **Installed pretrained lung detector**, or the retained **Legacy tissue-mask
-   demonstration**. Fixture is default and clearly labeled; pretrained requires
-   verified installed weights and an explicit CPU/CUDA selection.
-2. Click **Generate synthetic CT demonstration**; refresh or cancel as needed.
-   A three-minute watchdog terminates jobs. Lung modes generate a 32×64×64 chest
-   phantom; legacy mode trains its tiny tissue model and checks ONNX parity.
-   Neither path approves anything.
-3. **Inspect completed CT bundle**, or upload and inspect a synthetic v2 ZIP.
-   Patient alias must match the selected patient; jobs also bind the requested
-   study ID. All source/overlay bytes, geometry and report consistency are checked.
-4. Jump to each candidate or scroll the source slices. Amber rectangles show
-   source-grid boxes. Scores are detector outputs, not cancer risk; box extents
-   are not lesion diameters or volume. Review source/model hashes and limitations.
-5. Give every nodule an **accept** or **reject** decision; **uncertain** keeps
-   acceptance blocked. Optionally enable a same-plane caliper, set source slice,
-   start/end row/column and click **Preview nodule measurements**. Controls are in a
-   form: after enabling a caliper, preview once to expose its coordinates, then
-   edit and preview again. Cyan previews are unapproved until submission.
-6. Supply imaging notes and the association/geometry attestation; accept for the
-   research appendix. The authenticated account must match the nodule reviewer.
-   The acceptance hash covers the bundle **and exact decisions/calipers**.
-   Upstream CT review can seed controls, but cannot bypass this MHCRA review.
-7. Start a new clinical case. Existing urgent/uncertain safety holds apply before
-   reasoning. Review the seven-section draft and its nodule research appendix;
-   explicit **final clinician approval** is still required for reviewed export.
+   starting a case. Choose fixture, installed pretrained detector or legacy demo.
+2. **Generate synthetic CT demonstration**. Refresh/cancel as needed; a three-minute
+   watchdog bounds execution. Lung modes generate a 32×64×64 phantom; the legacy
+   mode trains a tiny tissue model and checks ONNX parity. No review is approved.
+3. **Inspect completed CT bundle**, or inspect an uploaded ZIP. Patient identity
+   must match; generated jobs also bind the requested study ID.
+4. Scroll source/overlay slices and jump to candidates. Amber boxes are candidate
+   locations. Scores are not malignancy probabilities; box spans are not diameters.
+5. Explicitly accept/reject every candidate. Uncertain blocks acceptance. Optional
+   calipers use one source plane and endpoints inside the candidate box. Enable a
+   caliper, submit **Preview nodule measurements** to expose its form inputs, then
+   edit and preview again. Cyan lines are unapproved previews at this stage.
+6. Add imaging notes, attest association/geometry review and accept. The authenticated
+   account and exact decisions/calipers are bound to the acceptance hash.
+7. Start a new clinical case. The accepted study becomes a source-linked research
+   appendix. Review and approve the exact final clinical draft separately.
 
-Acquisition date is unavailable rather than inferred from processing time.
-Rejected candidates remain in the audit/report context; accepted annotations do
-not establish disease. Zero-candidate output does not exclude disease.
+Pending imaging blocks draft generation. Active cases lock new imaging; later
+imports need a new case. Urgent warnings take priority over optional image checks.
+Acquisition date remains unknown. Rejected/zero candidates never establish normality.
 
-Pending imaging and running/completed uninspected jobs block draft generation.
-Accept/discard/dismiss first. Active cases lock new imaging actions. A newly
-accepted study requires a new case; active snapshots never update silently.
-Urgent structured warnings take priority over optional imaging and block stale
-review/download until a new case starts. Imaging cannot lower escalation.
+## Export from CT
 
-## Export from the standalone CT application
-
-Default standalone export still requires its explicit local reviewer attestation:
+The dedicated bridge creates a pending synthetic bundle with matching aliases:
 
 ```bash
-# From CT, after completing the review in its UI/CLI:
-.venv/bin/python -m lung_nodule.cli export --workspace artifacts/lung-demo/workspace --output artifacts/lung-reviewed.zip
+# Run in CT; this prepares input and supplies no human approval.
+.venv/bin/python -m deploy.mhcra_lung_bridge --patient-id synthetic-checklist --study-id synthetic-example --output-dir artifacts/lovisa-lung --mode fixture --device cpu
 ```
 
-Use a workspace whose `patient_alias` equals MHCRA's selected synthetic patient
-ID. The default standalone `demo` uses alias `synthetic`; for a matching study,
-run `detect` with the appropriate `--patient-alias` and `--study-id`, or use the
-MHCRA worker. The dedicated bridge creates an unreviewed bundle without forging
-standalone approval:
+Output: `artifacts/lovisa-lung/exchange/bundle.mhcra.zip`. For installed weights,
+use `--mode pretrained --model-dir models/luna16 --device cpu` (or available CUDA).
+Use a new study ID/output directory each run.
+
+Default standalone export requires completed CT review:
 
 ```bash
-# From CT; this command prepares input, not human approval.
-.venv/bin/python -m deploy.mhcra_lung_bridge --patient-id synthetic-checklist --study-id synthetic-example --output-dir artifacts/mhcra-lung --mode fixture --device cpu
+.venv/bin/python -m lung_nodule.cli export --workspace artifacts/pretrained-demo --output artifacts/nodules.zip
 ```
 
-Output: `artifacts/mhcra-lung/exchange/bundle.mhcra.zip`. Pretrained uses
-`--mode pretrained --model-dir models/luna16 --device cpu` (or available CUDA).
-Use a new output directory and immutable study ID for each run.
+Its study `patient_alias` must match LOVISA's synthetic patient ID. The default
+standalone demo uses `synthetic`; use `detect --patient-alias ... --study-id ...`
+or the dedicated bridge for an appropriate association. CT review can seed LOVISA
+controls but never replaces authenticated imaging acceptance or final approval.
 
-## Wire contract and validation
+## Contract and trust details
 
-| Content | Validation |
+| Artifact | Required check |
 | --- | --- |
-| `bundle.json` | Version, literal synthetic flag, patient/study/job identity, unknown acquisition date, processing timestamp, typed Study and optional producer Review |
-| `source.npy` | Float32 finite HU, declared shape; inspect NPY header and exact payload length before allocation |
-| Every source and overlay PNG | Dimensions plus exact pixels recomputed from HU, candidate boxes and producer calipers |
-| `producer/report.md` | Recomputed shared deterministic report, or exact pending-review text; arbitrary prose rejected |
-| Artifact manifest | Role/index/path, bytes and SHA-256; no unlisted, duplicate, encrypted or symlink members |
-| MHCRA candidate review | Exactly one explicit decision per candidate, no uncertainty, valid accepted-candidate calipers and matching study digest/reviewer |
+| bundle.json | Version, literal synthetic flag, matching patient/study, job identity, processing time, unknown acquisition date and typed study/review |
+| source.npy | Finite float32 HU; bound header/shape/payload before allocation |
+| All source/overlay PNGs | Exact dimensions and pixels recomputed from HU, boxes and producer calipers |
+| producer/report.md | Exact canonical report or fixed pending text; no arbitrary producer conclusions |
+| Manifest | Safe paths, role/index, byte sizes and SHA-256; reject duplicates/unlisted/encrypted/symlink entries |
+| LOVISA acceptance | Fully resolved candidate review, valid calipers, matching reviewer/study and content hash |
 
-Limits: 64 MiB compressed, 128 MiB expanded, at most 131 ZIP members, 400 KB
-manifest, 64 source slices and 256×256 pixels per plane. Full HU is required for
-independent preview/measurement checks. Source previews use lung window −1000 to
-400 HU. The shared NumPy renderer uses no fonts, ensuring exact parity across
-Pillow versions. Untrusted values are escaped in final report text.
+Bounds: **64 slices ×256×256**, 64 MiB compressed, 128 MiB expanded, 131 members,
+400 KB manifest. Exchange uses the full bounded source snapshot, not truncation.
+Wire previews use −1000 to 400 HU and a font-independent NumPy renderer.
 
-The ML-free schemas, renderer and canonical report are vendored from CT, with
-only the import path rewritten. Check drift with:
+Shared ML-free contracts/report/renderer are vendored from CT with one import-path
+rewrite. [Sync/check commands](VALIDATION.md) detect drift. CI pins producer
+`e0704b22177a23b323e4d3aff455c447d0579542`; later documentation commits leave that
+contract unchanged. [Workflow](../.github/workflows/tests.yml).
 
-```bash
-.venv/bin/python scripts/sync_ct_contracts.py --ct-root ../ai-medimg-2.5D-CT
-# Maintainer only, after intentionally changing and testing the contract:
-.venv/bin/python scripts/sync_ct_contracts.py --ct-root ../ai-medimg-2.5D-CT --write
-```
-
-This release pins CT `e0704b22177a23b323e4d3aff455c447d0579542`.
-Hosted integration CI pins the exact companion commit in
-[tests.yml](../.github/workflows/tests.yml); update it with coordinated releases.
-
-## Persistence and trust
-
-Ignored `data/imaging/` holds jobs, pending proposals, immutable original ZIPs,
-source HU and previews. SQLite keeps accepted snapshots/audit separately from
-clinical source facts. Imaging acceptance is transactional; composition,
-completion, export and report saving recheck accepted bytes and choices.
-The final report hash covers the appendix. Original DICOM/weights are not embedded
-in clinical exports. Source hashes, detector execution/version metadata and
-synthetic-origin markers are producer declarations: consistency does not establish
-independent authenticity or clinical truth. Local code/database administrators
-remain trusted. Neither upstream attestation nor MHCRA authentication verifies
-professional credentials.
-
-A crash can leave ignored jobs/proposals. Pending UI work is not resumable job
-management; import a completed bundle to resume inspection. Interrupted promotion
-can be retried with the same bytes; conflicting orphaned data fail closed and
-need inspection. Accepted artifacts must stay in place for integrity checks.
-There is no deletion/reopening UI. [Validation](VALIDATION.md) · [Actual results](../EVALUATION.md).
+Ignored `data/imaging/` holds originals/HU/previews/jobs. SQLite stores accepted
+snapshots/audit separately from clinical facts. Composition, completion, saving
+and export recheck artifacts and review bindings. Hashes prove internal consistency,
+not independent synthetic origin/model execution or clinical truth. Local admins
+remain trusted. Interrupted jobs/proposals are not resumable; a completed bundle
+can be re-imported. Accepted files must remain available for verification.

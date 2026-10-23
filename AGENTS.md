@@ -1,3 +1,5 @@
+# LOVISA — Medical History & Clinical Reasoning Assistant
+
 # Architectural constraints
 
 - Synthetic records only. Local Ollama inference only; no paid APIs, remote

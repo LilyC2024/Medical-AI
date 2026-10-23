@@ -35,7 +35,7 @@ def login(app):
 def test_ui_loads_sqlite_and_blocks_unauthenticated_safety_continuation(ui):
     app, _, _, inference = ui
     assert not app.exception
-    assert "MHCRA AI" in app.title[0].value
+    assert app.title[0].value == "LOVISA — Medical History & Clinical Reasoning Assistant"
     assert app.selectbox(key="patient").value == "fictional-001"
     assert not app.get("download_button")
     app.button(key="generate").click().run()

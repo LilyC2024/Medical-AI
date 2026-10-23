@@ -7,11 +7,13 @@ import re
 def main():
     root = Path(__file__).resolve().parents[1]
     errors = []
-    files = [
-        root / "README.md",
-        root / "EVALUATION.md",
-        *sorted((root / "docs").rglob("*.md")),
-    ]
+    # Scan maintained documentation only; never walk ignored runtime data/.venv.
+    files = sorted({
+        *root.glob("*.md"),
+        *(root / "docs").rglob("*.md"),
+        *(root / "third_party").rglob("*.md"),
+        *(path for path in (root / "reports/README.md", root / "data/evidence/README.md") if path.is_file()),
+    })
     for file in files:
         for target in re.findall(
             r"!?\[[^\]]*\]\(([^)]+)\)", file.read_text(encoding="utf-8")

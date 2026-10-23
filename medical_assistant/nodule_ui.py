@@ -31,7 +31,7 @@ def nodule_viewer(manifest, path_for, key, *, review=None):
             "Non-ML generated-phantom fixture finder — not trained lesion detection."
         )
     st.caption(
-        f"Producer status: {bundle.status}. Producer attestation does not approve MHCRA imaging or its final clinical report."
+        f"Producer status: {bundle.status}. Producer attestation does not approve LOVISA imaging or its final clinical report."
     )
     ids = [c.candidate_id for c in study.candidates]
     selected = st.selectbox(
@@ -69,7 +69,7 @@ def nodule_viewer(manifest, path_for, key, *, review=None):
         calipers = [d.caliper for d in parsed.decisions if d.caliper]
         _, overlay = wire_pixels(study, hu, index, calipers=calipers)
         right.image(
-            overlay, caption="Candidates and MHCRA-reviewed calipers", width="stretch"
+            overlay, caption="Candidates and LOVISA-reviewed calipers", width="stretch"
         )
     st.code(f"Source slice {index} SHA-256: {study.sources[index].sha256}")
     st.dataframe(

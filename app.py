@@ -1,4 +1,4 @@
-"""MHCRA AI: loopback-only synthetic history management and clinical review."""
+"""LOVISA: loopback-only synthetic history management and clinical review."""
 import json
 from datetime import datetime
 from uuid import uuid4
@@ -201,8 +201,8 @@ def clinical_ui(path, auth, token, user, record, model, *, urgent=False):
 
 
 def main():
-    st.set_page_config(page_title="MHCRA AI", page_icon="📋", layout="wide")
-    st.title("MHCRA AI — Medical History & Clinical Reasoning Assistant")
+    st.set_page_config(page_title="LOVISA", page_icon="📋", layout="wide")
+    st.title("LOVISA — Medical History & Clinical Reasoning Assistant")
     st.caption("Synthetic records · SQLite · LangGraph · local Ollama inference")
     st.info(NOTICE)
     st.warning("Do not enter real patient data. This prototype does not diagnose emergencies. If urgent help is needed, do not wait for this app.")

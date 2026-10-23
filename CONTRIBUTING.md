@@ -1,59 +1,45 @@
-# Contributing to MHCRA AI
+# Contributing to LOVISA
 
-This is a synthetic-record educational prototype. Read [AGENTS.md](AGENTS.md),
-[the architecture](docs/ARCHITECTURE.md) and [SECURITY.md](SECURITY.md) before changes.
-No real patient data, remote inference, paid APIs, remote tracing, automatic
-medical decisions or model database tools are accepted.
+Read [AGENTS.md](AGENTS.md), [Architecture](docs/ARCHITECTURE.md) and
+[Security](SECURITY.md). Work with synthetic records, local Ollama and explicit
+human approvals. No paid/cloud inference, remote tracing, automatic medical
+decisions or model database tools are supported.
 
-## Local development
+## Make a change
 
-Follow [README.md](README.md) to install dependencies, initialize synthetic SQLite
-and create a local reviewer account. Reuse `.venv` and the installed
-`gemma4:e2b` model. Inspect versions before changing dependencies and explain any
-lock-file update in the pull request.
+1. Reuse `.venv` and installed `gemma4:e2b`; inspect versions before dependency edits.
+2. Keep schemas, UI, storage, extraction, retrieval, safety and coordination separate.
+3. Preserve immutable sources, exact excerpts and parameterized transactions.
+4. Add meaningful regression coverage for changed behavior, including rejected paths.
+5. Complete the current [phase](PLAN.md) before starting another.
 
-Keep schema, UI, storage, extraction, evidence retrieval, safety and workflow
-coordination separate. Preserve immutable sources, parameterized transactional
-writes, exact source excerpts and explicit authenticated human approvals. Treat
-all diagnostic possibilities as hypotheses. Policy changes need a version update
-and fresh review; the model must never lower escalation.
+Safety-policy changes require versioning and fresh review. A model must never
+change escalation. A new CT contract must pass producer, consumer and joint checks
+before updating the pinned integration commit. [Stable identifiers](docs/NAMING.md).
 
-## Validation
-
-Run:
+## Validate
 
 ```bash
 .venv/bin/python -m pip check
 .venv/bin/python -m compileall -q medical_assistant app.py scripts tests
 .venv/bin/python -m pytest -q
+.venv/bin/python scripts/check_docs.py
 ```
 
-Use temporary SQLite databases and scripted models in automated tests. Add
-meaningful regression coverage for changed behavior, especially rejected and
-unauthenticated actions, source mismatches, immutable IDs, missing data and safety
-holds. For inference changes, separately run:
+Use temporary databases and scripted models/reviewers. Run real local inference
+separately when affected: `.venv/bin/python scripts/smoke_local.py --model gemma4:e2b`.
+CT changes also need [joint validation](docs/VALIDATION.md). Record actual outcomes
+in [Evaluation](EVALUATION.md); software checks are not clinical validation.
 
-```bash
-.venv/bin/python scripts/smoke_local.py --model gemma4:e2b
-```
+## Submit/publish
 
-Record actual outcomes and limitations in [EVALUATION.md](EVALUATION.md). Distinguish
-mocked tests from live local-model tests. Neither constitutes clinical validation.
-GitHub CI runs the locked-dependency regression suite on Python 3.10 and 3.12.
-It downloads dependencies but does not install models, call a hosted LLM, upload
-patient records/reports or deploy the app. A newly added CI configuration is not
-proof of a successful hosted run; inspect the actual Actions result.
+Explain the problem, resulting behavior, validation and remaining limits. Inspect
+`git status --short`, `git diff --check` and the complete staged diff. Keep real
+records, account data, tokens, logs, reports, images and weights out of commits/issues.
+New fictional fixtures need deliberate review and an explicit `.gitignore` exception.
 
-## Pull requests and data hygiene
-
-Describe the problem, resulting behavior, validation and remaining limitations.
-Use minimal, deliberately fictional reproductions. Do not include databases,
-accounts, passwords, tokens, exports, logs, `.env` files or real medical records in
-issues, commits or pull requests. New synthetic fixtures require deliberate review
-and an explicit `.gitignore` exception: arbitrary files under `data/patients/` are
-ignored by default. The two bundled fixtures are approved demonstration data.
-
-Check `git diff --check`, `git status --short` and the complete staged diff before
-committing. Existing tracked secrets are not protected by `.gitignore`.
-Report security concerns privately when a private maintainer channel is available.
-No redistribution license has been selected; do not assume open-source licensing.
+Hosted CI runs Python 3.10/3.12 regression and pinned CT smokes. It downloads setup
+packages/weights explicitly and executes models on runner CPU; the app uses no
+cloud inference service. It uploads no clinical reports or patient records.
+LOVISA has no selected project-wide redistribution license; preserve notices for
+[vendored CT code](third_party/README.md).

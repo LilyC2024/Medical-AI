@@ -1,50 +1,43 @@
-# Security and data handling
+# LOVISA security and data handling
 
-Synthetic records only. A `fictional: true` field is an input constraint, not
-proof that a file contains no personal information. Review every fixture and
-import manually. Real clinical records, real-world record modification and
-clinical deployment are outside the supported scope.
+LOVISA accepts fictional histories and bounded generated-synthetic CT only. A
+fictional flag/hash marker does not prove that input is free of personal data;
+inspect sources manually. Clinical deployment and real-world record modification
+are unsupported. [CT boundary](docs/IMAGING.md).
 
-## Local boundary
+## Local operation
 
-Run Streamlit and Ollama on loopback. Inference requests are fixed to
-`127.0.0.1:11434`. The adapter disables proxies and redirects, rejects remote-backed
-model metadata, and inherited remote tracing switches are disabled. Configure
-Ollama with `OLLAMA_NO_CLOUD=1` too. The daemon and operating system remain trusted;
-these checks are not a network sandbox.
+Keep Streamlit and Ollama on loopback. The adapter calls only `127.0.0.1:11434`,
+disables proxies/redirects and rejects remote-backed models. Tracing switches are
+disabled; set `OLLAMA_NO_CLOUD=1` on the daemon too. These checks are not a network
+sandbox. The operating system and local process administrator remain trusted.
 
-Accounts use salted PBKDF2 password hashes and expiring process-local sessions.
-Signed approval receipts bind decisions to case and content. This protects the
-normal application workflow. It does not verify professional qualifications or
-protect against someone controlling the Python process, SQLite database or source.
-This is not a production identity system or a multi-tenant service.
+Accounts use salted PBKDF2 hashes and one-hour process-local sessions. Signed
+receipts bind approvals to content. They do not verify clinical qualifications,
+provide a production identity system or resist a database/process administrator.
 
-## Persistence and approvals
+## Sources and approvals
 
-SQLite holds synthetic originals, facts, local account hashes and audit events.
-Originals are immutable through normal app operations. Writes are parameterized
-and transactional. Models have no database tools.
+SQLite separates immutable originals from extracted facts; writes are parameterized
+and transactional. Models have no database, filesystem, shell or approval tools.
+Record imports, safety continuation, imaging acceptance and final report approval
+have explicit review gates. Models cannot lower deterministic escalation.
 
-Imports and final reports require explicit human approval. Urgent holds cannot
-continue reasoning within that case. Missing current information requires human
-assessment. Models cannot lower escalation. The structured-field policy is a
-synthetic workflow rule, not validated medical triage; it does not detect every
-hazard from free text.
+CT ZIP/NPY/PNG/report validation checks bounds, paths, hashes and source/annotation
+consistency. Hashes do not independently prove origin or model execution. The
+structured safety policy is not comprehensive free-text emergency recognition.
 
-Checkpoints, sessions, approval signing keys and proposals are in process-local
-memory. Restarting loses pending work. Disk storage is not encrypted by the app.
-Audit events are not a tamper-proof legal audit service. Use operating-system
-access controls on the local project directory.
+## Persistence and publication
 
-## Publishing safely
+Pending graphs, proposals, sessions and receipt keys live in memory. Restarting
+loses pending work. Local databases, accepted images and exports are not encrypted
+by the app. Audit records are not a tamper-proof legal audit system.
 
-Commit deliberately fictional fixtures only. Exclude local databases, passwords
-or hashes, exported reports, logs, `.env` files, credentials, tokens and model
-weights. Inspect staged content and existing history; `.gitignore` does not remove
-already committed material. Reference excerpts require redistribution rights;
-the default evidence manifest is empty.
+Publish deliberately fictional fixtures only. Exclude databases, account hashes,
+credentials, exports, local approvals, logs, weights and real images. Inspect the
+staged diff and Git history; `.gitignore` does not remove previously tracked data.
+Reference excerpts require redistribution rights. The evidence manifest starts empty.
 
-For a suspected vulnerability, contact the maintainer privately using an
-available private channel. Do not put patient records, credentials or full local
-databases in public issues. Prefer a minimal synthetic reproduction. No formal
-response-time commitment or security certification is provided.
+Report suspected vulnerabilities privately when a maintainer channel is available.
+Use a minimal synthetic reproduction; never post real records or credentials in
+public issues. No certification or response-time commitment is claimed.

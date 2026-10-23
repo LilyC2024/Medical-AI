@@ -1,42 +1,45 @@
-# v0.2.0 — current lung CT interoperability
+# LOVISA release and migration record
 
-23 October 2026. [Overview](../README.md) · [Actual checks](../EVALUATION.md)
+[Overview](../README.md) · [Evaluation](../EVALUATION.md) · [Naming](NAMING.md)
 
-Previously MHCRA launched only the legacy tissue-mask demo and consumed only
-`mhcra-imaging-v1`. The CT project's current nodule workflow was not importable.
-This coordinated update adds a separate nodule path without changing clinical
-safety routing, the hypothesis catalog or final approval requirements.
+## v0.2.1 — LOVISA name and documentation
 
-## Changes
+- Renamed the visible application to **LOVISA**, retaining **Medical History &
+  Clinical Reasoning Assistant** as the functional description.
+- Rewrote both projects' guides around their distinct inputs, models, outputs and
+  human-review responsibilities. Reused prior pictures with explicit captions.
+- Kept the repository address, Python package, environment settings and versioned
+  exchange identifiers stable. Existing integrations use the same commands.
+- Separated concise overview guides from technical references and historical
+  evidence. Corrected stale links and outdated legacy commands.
+- Updated UI/report branding and its existing regression assertion. No clinical
+  policy, hypothesis catalog, detector weights or exchange schema changed.
 
-- Added **mhcra-lung-nodules-v2** with source HU, every-slice previews, typed study,
-  model/source provenance, hashed artifact manifest and explicit producer status.
-- Added shared ML-free schemas, canonical report and portable NumPy renderer;
-  drift checking avoids accidental producer/consumer divergence.
-- Added bounded nodule import with exact source/annotation/report checks and
-  authenticated candidate/caliper review. Acceptance binds the exact decisions.
-- Added source/overlay viewer, candidate navigation and caliper preview in MHCRA.
-  Upstream CT attestation seeds controls but cannot approve MHCRA imaging.
-- Added fixture and installed-pretrained workers with explicit CPU/CUDA selection;
-  retained legacy tissue worker/importer/viewer/report support.
-- Added source-linked nodule appendix inside the existing seven-section draft.
-  Images and review notes remain excluded from LLM reasoning. Final report
-  approval is separate; saved/exported reports recheck accepted artifact integrity.
-- Reorganized root README around a concise overview, current figure, agent table,
-  setup and compatibility matrix; moved detailed instructions to linked guides.
-  Preserved earlier clinical/technical pictures with their explanatory text.
-- Extended adversarial, worker and UI tests; added real fixture/pretrained/legacy
-  cross-project smoke and pinned CI contract checks. No dependency upgrade needed.
+## v0.2.0 — current lung CT compatibility
 
-## Migration
+Added `mhcra-lung-nodules-v2`: bounded source HU, every-slice previews, typed study,
+model/source hashes and optional producer review. Shared ML-free schemas/report/
+renderer support independent validation and drift checking.
 
-Existing `mhcra-imaging-v1` accepted studies and default programmatic legacy jobs
-remain supported. The UI now defaults to the explicitly non-ML nodule fixture.
-Old incomplete `mhcra-lung-nodules-v1` ZIPs require re-export from the original
-workspace; they cannot be safely upgraded by renaming a field. Standalone export
-still requires local CT review by default; the dedicated MHCRA bridge exports
-**pending** review so MHCRA can perform its own authenticated acceptance.
+LOVISA gained candidate navigation, source-plane caliper preview and authenticated
+imaging acceptance bound to exact decisions. Fixture/pretrained workers complement
+the retained legacy tissue-mask worker. An escaped, evidence-linked appendix is
+covered by final clinical approval; images/notes remain outside reasoning.
 
-The synthetic workbench has bounded volume dimensions. Public research DICOM,
-large-volume review, GPU training and evaluation stay in CT. No full clinical CT
-or cancer-diagnosis support is claimed. [Wire contract/use](IMAGING.md).
+The release passed 146 LOVISA and 81 CT tests, actual local fixture/pretrained/
+legacy transfers, local Ollama smoke and hosted checks. Exact commits/runs are in
+[Evaluation](../EVALUATION.md).
+
+## Compatibility rules
+
+| Existing input/interface | Action |
+| --- | --- |
+| nodule-v2 | Use current candidate/caliper import and review |
+| tissue-mask `mhcra-imaging-v1` | Retained as a distinct legacy path |
+| incomplete `mhcra-lung-nodules-v1` | Re-export original workspace with current CT; do not relabel |
+| Existing package/environment/bridge names | Continue using them; the LOVISA rename is presentation-level |
+| Public research/full-size CT | Keep in standalone CT; LOVISA accepts bounded synthetic studies only |
+
+Standalone CT export requires its local review by default. Its dedicated LOVISA
+bridge exports pending review and never forges approval. LOVISA always requires
+its own authenticated imaging acceptance and separate final clinical approval.
