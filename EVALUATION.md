@@ -317,4 +317,6 @@ Final documentation, CI and publication outcomes are appended after execution.
 
 Final local checks: 32 Markdown files, exact endoscopy contract/worker equality and unchanged CT contract equality passed. Actual CT fixture and configured pretrained CPU smokes passed with 66 artifacts each and approvals pending. An explicit stale `models/luna16` directory first failed its registration check; the configured registered `models/luna16-full` then passed without weakening validation or silently falling back.
 
-The cross-repository endoscopy workflow pins producer `b6de536fbb44351b8a101db69a17a897c7b4978d` and checks fixture plus actually trained artificial ONNX inference against the LOVISA receiver. Hosted outcomes are recorded after completion.
+The cross-repository endoscopy workflow pins producer `bff92c23dd9e2679d38a7dcd4274b1cb5035a35f` and checks fixture plus actually trained artificial ONNX inference against the LOVISA receiver. Hosted outcomes are recorded after completion.
+
+The producer pin includes the Windows POSIX-path correction; shared evidence contracts are unchanged. Local companion tests now total 35; LOVISA remains 231.

@@ -82,4 +82,4 @@ Smokes generate artificial pixels and validate actual worker output; they issue
 no imaging or clinical approvals. Tests use temporary accounts/databases and
 scripted reviewers. [Actual outcomes](../EVALUATION.md).
 
-Hosted cross-repository checks pin producer `b6de536fbb44351b8a101db69a17a897c7b4978d`. Later documentation-only commits do not change this tested contract.
+Hosted cross-repository checks pin producer `bff92c23dd9e2679d38a7dcd4274b1cb5035a35f`. Later documentation-only commits do not change this tested contract.

@@ -103,7 +103,7 @@ jobs:
         uses: actions/checkout@v7
         with:
           repository: LilyC2024/AI-MedImg-Endo
-          ref: b6de536fbb44351b8a101db69a17a897c7b4978d
+          ref: bff92c23dd9e2679d38a7dcd4274b1cb5035a35f
           path: companion-endo
       - uses: actions/setup-python@v7
         with:
