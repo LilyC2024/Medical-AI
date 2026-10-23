@@ -38,4 +38,6 @@ software gates.
     (166 full tests; readable views, guide, cancellation and async responsiveness).
 15. **Demo and publication** — full regression, actual local CT/Ollama timings,
     live browser checks/screenshots, updated guides/evaluation and publication.
-    Remain on localhost as requested. Status: in progress.
+    Remain on localhost as requested. Status: complete — 176 LOVISA / 81 CT tests,
+    actual local model/three CT smokes, browser desktop/narrow checks and all
+    hosted Python/CT/Windows/Linux/container checks passed.

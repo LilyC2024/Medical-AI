@@ -39,6 +39,21 @@ full-size CT latency, patient accuracy or clinical time-saving result is claimed
 The retained legacy workflow remains separate. [Implementation](docs/PERFORMANCE.md)
 · [Workspace screenshots](docs/INTERFACE.md).
 
+### Hosted workspace publication
+
+[LOVISA run 39938918945](https://github.com/LilyC2024/Medical-AI/actions/runs/39938918945)
+passed at `3c5e2d5e8a30c76c0cfda5f1925c740d004bbc5f`: Python 3.10/3.12 regression,
+dependency/document checks, exact shared contracts and actual fixture/pretrained/
+legacy CT transfers using the pinned producer below.
+
+[CT run 39938445818](https://github.com/LilyC2024/ai-medimg-2.5D-CT/actions/runs/39938445818)
+passed at `5ba347cf6cd66b1931eaad3cd7d8cb27d4136606`: Windows/Linux regression,
+actual pretrained inference/bridge and Linux container checks. Both published
+implementation trees matched local staged trees. The verification-record follow-up
+changes documentation only. The local server was restarted with the published
+code and verified at its native narrow viewport without horizontal overflow;
+sidebar collapse/reopen works and the temporary desktop viewport was reset.
+
 ## LOVISA naming/documentation update — 23 October 2026
 
 | Executed check | Result |
