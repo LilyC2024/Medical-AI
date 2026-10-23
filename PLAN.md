@@ -106,5 +106,5 @@ software gates.
     worker, candidate review UI, accepted evidence and report images. Preserve
     safety, frozen snapshots, authentication and CT compatibility. Status: passed — 227 full tests and actual fixture/installed-model exchange smokes.
 28. **Joint verification and publication** — full regressions, local Ollama and
-    producer-consumer smokes, browser review, concise linked documentation and
-    accurate evaluation records; publish both projects after passing. Status: in progress.
+    producer-consumer smokes, automated UI checks, concise linked documentation and
+    accurate evaluation records; publish both projects after passing. Status: complete — 231 LOVISA/35 endoscopy local tests; actual model/CT/endoscopy smokes, Linux/Windows and both Python hosted suites plus all joint imaging jobs passed. Both repositories published; local demo restarted.

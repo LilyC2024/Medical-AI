@@ -320,3 +320,21 @@ Final local checks: 32 Markdown files, exact endoscopy contract/worker equality 
 The cross-repository endoscopy workflow pins producer `bff92c23dd9e2679d38a7dcd4274b1cb5035a35f` and checks fixture plus actually trained artificial ONNX inference against the LOVISA receiver. Hosted outcomes are recorded after completion.
 
 The producer pin includes the Windows POSIX-path correction; shared evidence contracts are unchanged. Local companion tests now total 35; LOVISA remains 231.
+
+
+### Endoscopy release publication verified
+
+[Hosted run 40002402873](https://github.com/LilyC2024/Medical-AI/actions/runs/40002402873)
+passed on implementation/pin source `3774415b602fdc27e6bafcce54fab50221bdcdc1`:
+Python 3.10 and 3.12 tests, endoscopy fixture and actually trained artificial ONNX
+producer-consumer checks, and retained fixture/pretrained/legacy CT checks.
+[Endoscopy Linux/Windows run 40002316931](https://github.com/LilyC2024/AI-MedImg-Endo/actions/runs/40002316931)
+also passed after fixing canonical POSIX split paths. There are 231 local LOVISA
+and 35 local companion tests. Optional OpenVINO CPU parity passed locally; NPU
+hardware remains untested. No imaging or clinical approvals were issued by smokes.
+
+Both source updates are published. The local LOVISA server was restarted to load
+fresh UI modules; loopback health returned HTTP 200. A new sign-in is required.
+The old pending in-memory UI state is not a reviewed report. Final documentation
+updates change no tested runtime behavior. Live visual verification remains
+limited by the saved browser permission described above.
