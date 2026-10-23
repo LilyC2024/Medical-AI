@@ -89,6 +89,7 @@ software gates.
     Status: passed — 13 portable-export, combined-report UI and existing review/CT UI checks.
 24. **Validation and publication** — full regressions, actual local model/CT smokes,
     accurate concise guides/sample report and hosted compatibility checks; publish.
-    Status: local checks complete — 220 final tests, 81 unchanged CT tests, actual
-    local Ollama/pretrained transfer, browser example/app checks and 31/25 document
-    checks passed. Code and aligned CT documentation ready; publication pending.
+    Status: complete — 220 LOVISA / 81 CT tests, actual local Ollama/pretrained
+    transfer, browser example/app checks and 31/25 document checks passed. Hosted
+    Python 3.10/3.12 and fixture/pretrained/legacy compatibility checks passed.
+    Implementation and aligned CT documentation are published; local trees match.

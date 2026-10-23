@@ -41,6 +41,21 @@ CT code/contracts, model weights, the hypothesis catalog and dependencies are
 unchanged. The companion changes only integration documentation. Existing saved
 reports are not rewritten. [Report rules](docs/REPORTS.md).
 
+### Hosted combined-report publication
+
+[Run 39988179817](https://github.com/LilyC2024/Medical-AI/actions/runs/39988179817)
+passed for `40502923d4990ebca9184f7fb0bdd7144e8d3695`: Python 3.10/3.12,
+dependency/compile/document checks, exact shared-contract equality and actual
+fixture, installed-pretrained CPU and legacy CT producer-consumer transfers.
+The published implementation tree matched the staged local tree.
+
+CT integration documentation was published at
+[`a3da979c06c120914193d21371286b0892b15526`](https://github.com/LilyC2024/ai-medimg-2.5D-CT/commit/a3da979c06c120914193d21371286b0892b15526).
+It changes documentation only, passed 81 local tests/25 document checks and skips
+duplicate hosted CI. The producer-code pin is unchanged. Both local checkouts
+matched their published trees. This final verification record changes only
+LOVISA documentation and skips duplicate CI; no actual clinician approval was issued.
+
 ## Focused patient workspace — 23 October 2026
 
 | Executed check | Actual result |
