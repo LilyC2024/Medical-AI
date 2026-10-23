@@ -8,6 +8,19 @@ LangGraph, Streamlit and local Ollama inference. The former project name was
 **MHCRA AI**. LOVISA is the project name; its medical-history and clinical-reasoning
 function remains the same.
 
+## A clearer local workspace
+
+![LOVISA patient workspace and operating guide](docs/images/lovisa-workspace-overview.jpg)
+
+Read the patient story as source-linked cards, inspect CT in its own view, then
+review the clinical draft. A right-hand guide explains each step. Technical JSON
+and hashes remain available under details. Background progress and cancellation
+keep the workspace responsive; processing stops at 110 seconds if needed.
+Actual local synthetic smokes took **1.65s** (fixture CT), **12.43s** (pretrained CT)
+and **23.40s** (Ollama clinical workflow). These are individual CPU runs, not
+clinical performance claims or guarantees. [Workspace](docs/INTERFACE.md) ·
+[Performance and limits](docs/PERFORMANCE.md).
+
 ## Two projects, one reviewed workflow
 
 | Project | Input → output | Responsibility |
@@ -49,11 +62,12 @@ One `MedicalHistoryOrchestrator` runs four sequential specialist roles:
 | --- | --- | --- |
 | History | Python `MedicalHistoryAgent` | Preserve dates, attribution and missing chronology |
 | Medication | Python `MedicationAgent` | Extract supplied orders and documented dose changes |
-| Clinical reasoning | `SpecialistAgent("reasoning", inference)` + local Ollama | Select eligible hypotheses with exact source excerpts |
+| Clinical reasoning | `SpecialistAgent("reasoning", inference)` + local Ollama | Select eligible hypothesis/evidence IDs; Python restores exact excerpts |
 | Safety | Python `SafetyAgent` + versioned policy | Enforce urgent stops and uncertainty-review holds |
 
-Only clinical reasoning calls the installed `gemma4:e2b` LLM. Python validates its
-JSON and citations, calculates measurements and composes the report. The CT
+Only clinical reasoning calls the installed `gemma4:e2b` LLM. It selects bounded
+catalog/evidence IDs; Python restores exact excerpts, validates citations,
+calculates measurements and composes the report. The CT
 companion uses pretrained MONAI 3D RetinaNet; it has no LLM agents. Development
 coding subagents helped earlier reviews but are not part of either app's runtime.
 [Architecture and agent implementation](docs/ARCHITECTURE.md).
@@ -104,9 +118,9 @@ Existing `mhcra-*` formats and `MHCRA_CT_*` settings are stable integration name
 | [Validation](docs/VALIDATION.md) / [Evaluation](EVALUATION.md) | Reproduce checks; distinguish tests from actual inference |
 | [Release history](docs/RELEASE.md) | Changes, naming and migration |
 
-The last compatibility release passed **146 LOVISA tests and 81 CT tests**, real
-local CT/Ollama smokes and hosted checks. Current documentation/branding validation
-is recorded separately in [EVALUATION.md](EVALUATION.md).
+Current software checks, actual local model timings and publication checks are
+recorded in [EVALUATION.md](EVALUATION.md). Scripted tests and live inference are
+reported separately.
 
 Operation uses no paid APIs, cloud inference or remote tracing. Setup may download
 packages and weights explicitly. Keep both apps local; pending work is in memory

@@ -1,4 +1,4 @@
-from test_ui import ui, login  # noqa: F401
+from test_ui import ui, login, open_imaging  # noqa: F401
 from test_nodule_imaging import nodule_bytes
 
 
@@ -6,6 +6,7 @@ def test_nodule_ui_requires_decisions_and_authentication(ui):
     app, path, auth, inference = ui
     login(app)
     app.selectbox(key="patient").set_value("synthetic-checklist").run()
+    open_imaging(app)
     store = app.session_state.imaging_store
     key, proposal = store.prepare(nodule_bytes(), "synthetic-checklist")
     app.session_state.imaging_proposal = (key, proposal)
@@ -28,6 +29,7 @@ def test_nodule_ui_previews_and_preserves_caliper(ui):
     app, path, auth, inference = ui
     login(app)
     app.selectbox(key="patient").set_value("synthetic-checklist").run()
+    open_imaging(app)
     store = app.session_state.imaging_store
     key, proposal = store.prepare(nodule_bytes(), "synthetic-checklist")
     app.session_state.imaging_proposal = (key, proposal)

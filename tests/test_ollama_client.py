@@ -7,7 +7,9 @@ import pytest
 from medical_assistant.ollama_client import BASE_URL, OllamaClient
 
 
-@pytest.mark.parametrize("model", ["example:cloud", "https://ollama.com/model", "x?host=evil", ""])
+@pytest.mark.parametrize(
+    "model", ["example:cloud", "https://ollama.com/model", "x?host=evil", ""]
+)
 def test_cloud_and_invalid_model_names_rejected(model):
     with pytest.raises(ValueError):
         OllamaClient(model)
@@ -34,16 +36,22 @@ def test_only_loopback_schema_and_no_streaming(monkeypatch):
     client.close()
 
 
-@pytest.mark.parametrize("metadata", [
-    {"remote_host": "https://ollama.com", "details": {"parameter_size": "7B"}},
-    {"remote_model": "remote", "details": {"parameter_size": "7B"}},
-    {"details": {"parameter_size": "0B"}}, {},
-])
+@pytest.mark.parametrize(
+    "metadata",
+    [
+        {"remote_host": "https://ollama.com", "details": {"parameter_size": "7B"}},
+        {"remote_model": "remote", "details": {"parameter_size": "7B"}},
+        {"details": {"parameter_size": "0B"}},
+        {},
+    ],
+)
 def test_remote_backed_or_unconfirmed_model_fails_before_chat(metadata):
     paths = []
+
     def handler(request):
         paths.append(request.url.path)
         return httpx.Response(200, json=metadata)
+
     client = OllamaClient(transport=httpx.MockTransport(handler))
     with pytest.raises(ValueError):
         client.assess("system", "user")
@@ -53,9 +61,11 @@ def test_remote_backed_or_unconfirmed_model_fails_before_chat(metadata):
 
 def test_redirects_never_followed():
     paths = []
+
     def handler(request):
         paths.append(str(request.url))
         return httpx.Response(307, headers={"Location": "https://example.invalid"})
+
     client = OllamaClient(transport=httpx.MockTransport(handler))
     with pytest.raises(httpx.HTTPStatusError):
         client.assess("system", "user")
@@ -63,16 +73,24 @@ def test_redirects_never_followed():
     client.close()
 
 
-@pytest.mark.parametrize("result", [
-    {"done": False},
-    {"done": True, "done_reason": "length", "message": {"content": "{}"}},
-    {"done": True, "message": {"content": "not json"}},
-    {"done": True, "message": {"content": '{"unexpected_field": 1}'}},
-])
+@pytest.mark.parametrize(
+    "result",
+    [
+        {"done": False},
+        {"done": True, "done_reason": "length", "message": {"content": "{}"}},
+        {"done": True, "message": {"content": "not json"}},
+        {"done": True, "message": {"content": '{"unexpected_field": 1}'}},
+    ],
+)
 def test_incomplete_or_malformed_output_is_not_accepted(result):
     def handler(request):
-        payload = {"details": {"parameter_size": "7B"}} if request.url.path == "/api/show" else result
+        payload = (
+            {"details": {"parameter_size": "7B"}}
+            if request.url.path == "/api/show"
+            else result
+        )
         return httpx.Response(200, json=payload)
+
     client = OllamaClient(transport=httpx.MockTransport(handler))
     with pytest.raises(ValueError):
         client.assess("system", "user")
@@ -87,7 +105,34 @@ def test_remote_tracing_disabled():
 def test_oversize_prompt_stops_before_any_http_request():
     def handler(request):
         raise AssertionError("No network request should occur for an oversized prompt")
+
     client = OllamaClient(transport=httpx.MockTransport(handler))
     with pytest.raises(ValueError, match="context budget"):
         client.assess("system", "x" * 11_001)
+    client.close()
+
+
+def test_requests_are_bounded_and_model_kept_warm():
+    def handler(request):
+        assert request.extensions["timeout"]["read"] <= 90
+        body = json.loads(request.content)
+        if request.url.path == "/api/show":
+            assert request.extensions["timeout"]["read"] <= 5
+            return httpx.Response(200, json={"details": {"parameter_size": "7B"}})
+        assert body["keep_alive"] == "15m"
+        assert body["options"]["num_predict"] == 2000
+        return httpx.Response(200, json={"done": True, "message": {"content": "{}"}})
+
+    client = OllamaClient(transport=httpx.MockTransport(handler))
+    client.assess("system", "user")
+    client.close()
+
+
+def test_local_model_timeout_does_not_produce_assessment():
+    def handler(request):
+        raise httpx.ReadTimeout("scripted timeout")
+
+    client = OllamaClient(transport=httpx.MockTransport(handler))
+    with pytest.raises(TimeoutError, match="did not respond"):
+        client.assess("system", "user")
     client.close()

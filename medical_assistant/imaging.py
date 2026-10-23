@@ -200,3 +200,26 @@ class ImagingStore:
             self._directory(manifest["patient_id"], manifest["study_id"])
             / artifact["path"]
         )
+
+    def preview_resolver(self, snapshot):
+        """Verify the archive once per view, then hash only requested artifacts.
+
+        Acceptance, composition, completion, export and saving still perform full
+        independent validation. Nothing is globally cached or shared across patients.
+        """
+        self.verify([snapshot])
+        directory = self._directory(
+            snapshot["manifest"]["patient_id"], snapshot["manifest"]["study_id"]
+        )
+        lookup = {
+            (a["role"], a["slice_index"]): a for a in snapshot["manifest"]["artifacts"]
+        }
+
+        def resolve(role, index):
+            item = lookup[(role, index)]
+            path = directory / item["path"]
+            if path.is_symlink() or file_digest(path.read_bytes()) != item["sha256"]:
+                raise ValueError("Displayed imaging artifact changed")
+            return path
+
+        return resolve

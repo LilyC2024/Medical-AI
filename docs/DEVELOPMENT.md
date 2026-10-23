@@ -26,6 +26,14 @@ review, persistence and report/export guards. Implementation followed producer
 checks, consumer checks and joint validation. The LOVISA documentation/branding
 pass uses source review and regression checks; it adds no new runtime agents.
 
+## Workspace release
+
+The response-budget/UI work followed three separately tested phases: background
+workers and integrity-preserving preview access; reusable/lazy UI and right guide;
+actual browser/CT/Ollama verification and documentation. No development subagents
+were run for this release. Compact ID selection keeps runtime specialist roles
+unchanged while Python restores source excerpts. [Details](PERFORMANCE.md).
+
 ## Working method
 
 1. Read [AGENTS.md](../AGENTS.md) and the relevant contract/guide.

@@ -375,3 +375,26 @@ def test_urgent_routing_precedes_corrupt_nodule_optional_artifacts(
     list(events)
     assert workflow.state(case)["safety_decision"]["state"] == "urgent"
     assert not inference.calls
+
+
+def test_viewer_verifies_archive_once_and_checks_each_displayed_artifact(
+    nodule_store, monkeypatch
+):
+    store, token = nodule_store
+    snapshot = approve_nodule(store, token)
+    original = store._verify_directory
+    calls = []
+
+    def checked(*args):
+        calls.append(True)
+        return original(*args)
+
+    monkeypatch.setattr(store, "_verify_directory", checked)
+    resolve = store.preview_resolver(snapshot)
+    source = resolve("source_preview", 0)
+    resolve("overlay_preview", 0)
+    resolve("source_volume", None)
+    assert len(calls) == 1
+    source.write_bytes(b"changed after verification")
+    with pytest.raises(ValueError, match="Displayed imaging artifact changed"):
+        resolve("source_preview", 0)

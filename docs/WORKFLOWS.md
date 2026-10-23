@@ -6,10 +6,11 @@
 
 1. Sign in and select **Taylor Synthetic — checklist case** (`synthetic-checklist`).
    Keep the installed model `gemma4:e2b`.
-2. Inspect the timeline, original sources and medication overview. The fixture has
+2. Open **Patient overview**. Inspect the timeline, original sources and medication overview. The fixture has
    five facts, two encounters, an amlodipine 5 mg → 10 mg documented change and an
    undated patient report. These are fictional software-test inputs.
-3. Click **Generate draft for clinician review**. Missing current screening/blood
+3. Click **Generate draft for clinician review**. Progress/cancel appears immediately;
+   completion opens **Clinical report**. Missing current screening/blood
    pressure triggers **Human safety assessment required before reasoning**.
 4. Review the uncertainty. To continue, an authorized reviewer supplies safety
    notes, the attestation and **Continue after clinician assessment of uncertainty**.
@@ -38,7 +39,7 @@ fixture seeding is a separate development bootstrap. [Record format](RECORDS.md)
 
 ## Add CT research evidence
 
-Before starting a clinical case, open **Imaging workbench**. Generate a synthetic
+Before starting a clinical case, open **CT review**. Generate a synthetic
 fixture/pretrained study or inspect an uploaded synthetic bundle. Review source
 slices, every candidate and optional calipers, then explicitly accept it for the
 research appendix. Pending imaging blocks draft generation. CT attestation,

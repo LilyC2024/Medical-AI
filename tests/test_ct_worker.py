@@ -121,3 +121,19 @@ p.mkdir(parents=True)
 def test_invalid_worker_mode_cannot_fallback(tmp_path, mode, device):
     with pytest.raises(ValueError, match="mode/device"):
         LocalCTJob("synthetic-checklist", root=tmp_path, mode=mode, device=device)
+
+
+def test_ct_watchdog_cannot_exceed_two_minute_response_budget(tmp_path):
+    root = worker_root(tmp_path, "import time\ntime.sleep(.05)\n")
+    job = LocalCTJob(
+        "synthetic-checklist", root=root, jobs=tmp_path / "jobs", timeout=1000
+    )
+    assert job.timeout <= 110
+    job.cancel()
+    job.process.wait(timeout=3)
+
+
+@pytest.mark.parametrize("value", [0, -1, float("nan"), float("inf")])
+def test_invalid_ct_timeout_is_rejected(tmp_path, value):
+    with pytest.raises(ValueError, match="timeout"):
+        LocalCTJob("synthetic-checklist", root=tmp_path, timeout=value)

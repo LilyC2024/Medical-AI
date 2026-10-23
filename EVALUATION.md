@@ -4,6 +4,41 @@ These results concern synthetic software behavior, not diagnostic accuracy,
 clinical safety or clinician time savings. [Reproduce checks](docs/VALIDATION.md)
 · [Eight acceptance requirements](docs/ACCEPTANCE.md).
 
+## Workspace and response-budget release — 23 October 2026
+
+| Executed check | Actual outcome |
+| --- | --- |
+| Full LOVISA regression | **176 passed in 65.48s**; temporary DBs and scripted models/reviewers |
+| Final focused UI/compact regressions | 17 passed in 8.39s after final component formatting |
+| CT regression | 81 passed in 36.99s; 13 focused exchange checks passed in 4.31s after stage-order assertions |
+| Phase gates | Performance foundation: 163 full tests; reusable UI: 166 full tests; final compact protocol: 176 |
+| Actual local Ollama | Missing-data case held; eligible synthetic case reached final review in **23.40s** total smoke time |
+| Earlier actual full-output Ollama smoke | 44.58s; individual runs are not a controlled benchmark |
+| Actual fixture CT → receiver | **1.65s**, generated 32×64×64 input, one non-ML candidate, 66 artifacts checked |
+| Actual installed pretrained CPU CT → receiver | **12.43s**, same generated shape, one candidate, 66 artifacts checked |
+| Actual retained legacy CT → receiver | Passed: 20×48×48, 41 artifacts and ONNX parity; no approvals |
+| Browser checks | Real localhost page, 1440px responsive desktop and native 609px viewport; readable overview, sticky right guide, auto-opening pending CT and safety pause |
+| Integrity/dependencies/docs | Exact shared-contract equality, pip check, compileall and 27 maintained Markdown local-target checks passed |
+| Approval status | No imaging acceptance, safety continuation, final approval or reviewed clinical report issued by actual smokes/browser checks |
+
+The UI now separates overview, CT and report views. Technical data is collapsed;
+source text and attribution remain visible. Clinical tasks expose progress/cancel,
+stop publication at 110 seconds and reject late results. CT has a matching process
+watchdog. Scripted slow-task/cancel/timeout tests establish software behavior;
+actual PC load/browser scheduling can delay display. Successful inference within
+two minutes is not guaranteed on arbitrary hardware.
+
+The local model selects eligible hypothesis/evidence/catalog IDs. Python restores
+exact excerpts and validates the full assessment. Invented/unknown/duplicate IDs,
+extra prose, incomplete JSON and unsupported sources fail closed. A smaller output
+format changes generation cost, not the catalog, safety policy or human review.
+Tests use scripted inference; the Ollama result above is a separate actual run.
+
+No packages, weights or model versions changed. No new GPU/NPU training/execution,
+full-size CT latency, patient accuracy or clinical time-saving result is claimed.
+The retained legacy workflow remains separate. [Implementation](docs/PERFORMANCE.md)
+· [Workspace screenshots](docs/INTERFACE.md).
+
 ## LOVISA naming/documentation update — 23 October 2026
 
 | Executed check | Result |
@@ -83,6 +118,8 @@ reviews, not clinician verification. [Development](docs/DEVELOPMENT.md).
 - Actual new-detector CUDA/NPU execution and GPU training are not demonstrated.
 - Local accounts do not verify qualifications; hashes do not authenticate producer origin.
 - Pending state is in memory; disk storage is unencrypted and administrators are trusted.
-- Interactive browser review was unavailable in the compatibility pass; AppTest exercised UI controls.
+- Interactive browser review was unavailable in the earlier compatibility pass.
+  The workspace release above adds actual browser checks; automated UI tests still
+  use scripted models and reviewer identities.
 
 [Security](SECURITY.md) · [Release/migration](docs/RELEASE.md).

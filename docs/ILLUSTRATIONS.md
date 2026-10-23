@@ -63,3 +63,10 @@ escalation or approve the final report. [Limits and exact contract](IMAGING.md).
 
 This earlier picture shows heuristic tissue classes, counts and overlays from the
 retained legacy bridge. Its segmentation metrics are not nodule-detection results.
+
+## Current workspace
+
+![Readable LOVISA workspace and right-side guide](images/lovisa-workspace-overview.jpg)
+
+The current light interface shows exact fictional source text and policy status.
+[Operating guide](INTERFACE.md) · [Responsiveness and timings](PERFORMANCE.md).

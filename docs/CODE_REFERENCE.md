@@ -8,11 +8,13 @@ and [complete callable/subfunction signatures](reference/CALLABLES.md).
 
 | Area | Modules | Responsibility |
 | --- | --- | --- |
-| UI/bootstrap | app.py, runtime.py | Patient selection, local services, forms and fixture seed |
+| UI/bootstrap | app.py, runtime.py | Patient selection, lazy workspace routing, local services and fixture seed |
+| Design system/forms | ui/components.py, ui/theme.css, ui/history.py, ui/clinical.py | Escaped readable cards, right-hand guide, import/clinical forms and task progress |
+| Response budget | jobs.py | Bounded workers, cancellation, deadline and late-result rejection |
 | Record contracts | models.py, grounding.py | Strict fields and original-source comparisons |
 | Persistence | database.py, storage.py | Parameterized SQLite and guarded report saving |
 | Extraction/import | history.py, history_import.py | Chronology, orders and approved source appends |
-| LLM/references | agents.py, reasoning_constraints.py, ollama_client.py, evidence.py | Bounded hypotheses, local inference and approved text retrieval |
+| LLM/references | agents.py, compact_reasoning.py, reasoning_constraints.py, ollama_client.py, evidence.py | Bounded hypotheses, local inference and approved text retrieval |
 | Safety/auth/graph | safety.py, auth.py, workflow.py | Python policy, content-bound approvals and sequential LangGraph |
 | Reporting | report.py | Seven sections, exact citations and escaped research appendix |
 | CT execution | ct_worker.py | Separate interpreter, mode/device, cancellation and watchdog |

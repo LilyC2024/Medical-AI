@@ -9,15 +9,12 @@ identify stable legacy/protocol interfaces; the application name is LOVISA.
 
 ## [app.py](../../app.py)
 
-LOVISA: loopback-only synthetic history management and clinical review.
+LOVISA local workspace: reusable UI, bounded jobs and human review.
 
 | Callable | Purpose/contract |
 | --- | --- |
 | `account_ui(auth)` | See linked implementation and subject contract. |
-| `make_review(approved, user, checked, notes, sha256)` | See linked implementation and subject contract. |
-| `history_ui(path, auth, token, user, record)` | See linked implementation and subject contract. |
-| `history_ui.replace_proposal(result)` | See linked implementation and subject contract. |
-| `clinical_ui(path, auth, token, user, record, model, *, urgent=False)` | See linked implementation and subject contract. |
+| `reset_case()` | See linked implementation and subject contract. |
 | `main()` | See linked implementation and subject contract. |
 
 ## [medical_assistant/agents.py](../../medical_assistant/agents.py)
@@ -47,6 +44,18 @@ Local password authentication and short-lived in-process clinician sessions.
 | `LocalAuth.verify_receipt(self, receipt, action, content_sha256)` | See linked implementation and subject contract. |
 | `LocalAuth.record_receipt(self, receipt, patient_id, payload)` | See linked implementation and subject contract. |
 
+## [medical_assistant/compact_reasoning.py](../../medical_assistant/compact_reasoning.py)
+
+Compact local-model selection; Python restores exact immutable record excerpts.
+
+| Callable | Purpose/contract |
+| --- | --- |
+| `catalog(prefix, values)` | See linked implementation and subject contract. |
+| `prepare(user)` | See linked implementation and subject contract. |
+| `expand(raw, record, refs, maps)` | See linked implementation and subject contract. |
+| `expand.choose(ids, mapping)` | See linked implementation and subject contract. |
+| `expand.claims(ids)` | See linked implementation and subject contract. |
+
 ## [medical_assistant/ct_worker.py](../../medical_assistant/ct_worker.py)
 
 Bounded local CT subprocesses. No shell, uploads, downloads or model tools.
@@ -55,11 +64,13 @@ Bounded local CT subprocesses. No shell, uploads, downloads or model tools.
 | --- | --- |
 | `configured_ct_root()` | See linked implementation and subject contract. |
 | `configured_ct_model(root=None)` | See linked implementation and subject contract. |
-| `LocalCTJob.__init__(self, patient_id, *, root=None, jobs=None, timeout=180, mode='legacy', model_dir=None, device='cpu')` | See linked implementation and subject contract. |
+| `LocalCTJob.__init__(self, patient_id, *, root=None, jobs=None, timeout=MAX_JOB_SECONDS, mode='legacy', model_dir=None, device='cpu')` | See linked implementation and subject contract. |
 | `LocalCTJob.bundle_path(self)` | See linked implementation and subject contract. |
 | `LocalCTJob._watch(self, timeout)` | See linked implementation and subject contract. |
 | `LocalCTJob.cancel(self, *, timed_out=False)` | See linked implementation and subject contract. |
 | `LocalCTJob.status(self)` | See linked implementation and subject contract. |
+| `LocalCTJob.elapsed(self)` | See linked implementation and subject contract. |
+| `LocalCTJob.progress(self)` | See linked implementation and subject contract. |
 
 ## [medical_assistant/database.py](../../medical_assistant/database.py)
 
@@ -130,6 +141,8 @@ Human-reviewed synthetic imaging storage, separate from clinical source facts.
 | `ImagingStore.snapshots(self, patient_id)` | See linked implementation and subject contract. |
 | `ImagingStore.verify(self, snapshots)` | See linked implementation and subject contract. |
 | `ImagingStore.preview_path(self, snapshot, role, index)` | See linked implementation and subject contract. |
+| `ImagingStore.preview_resolver(self, snapshot)` | Verify the archive once per view, then hash only requested artifacts. |
+| `ImagingStore.preview_resolver.resolve(role, index)` | See linked implementation and subject contract. |
 
 ## [medical_assistant/imaging_contract.py](../../medical_assistant/imaging_contract.py)
 
@@ -154,6 +167,27 @@ Imaging inspection UI; acceptance is separate from final clinical approval.
 | `_viewer(manifest, path_for, key, *, review=None)` | See linked implementation and subject contract. |
 | `imaging_ui(path, auth, token, user, record, *, locked=False)` | See linked implementation and subject contract. |
 | `imaging_ui.prepare(payload, *, study_id=None)` | See linked implementation and subject contract. |
+| `ct_progress(job)` | See linked implementation and subject contract. |
+
+## [medical_assistant/jobs.py](../../medical_assistant/jobs.py)
+
+Session-owned background work with a hard publication deadline; no UI in workers.
+
+| Callable | Purpose/contract |
+| --- | --- |
+| `Budget.__init__(self, seconds=MAX_JOB_SECONDS)` | See linked implementation and subject contract. |
+| `Budget.elapsed(self)` | See linked implementation and subject contract. |
+| `Budget.check(self)` | See linked implementation and subject contract. |
+| `WorkTask.__init__(self, target, *, seconds=MAX_JOB_SECONDS, title='Preparing your workspace')` | See linked implementation and subject contract. |
+| `WorkTask._timeout(self)` | See linked implementation and subject contract. |
+| `WorkTask.progress(self, message)` | See linked implementation and subject contract. |
+| `WorkTask._run(self, target)` | See linked implementation and subject contract. |
+| `WorkTask.cancel(self)` | See linked implementation and subject contract. |
+| `WorkTask.snapshot(self)` | See linked implementation and subject contract. |
+| `WorkTask.result(self)` | See linked implementation and subject contract. |
+| `BudgetInference.__init__(self, inference, budget)` | See linked implementation and subject contract. |
+| `BudgetInference.assess(self, *args, **kwargs)` | See linked implementation and subject contract. |
+| `BudgetInference.close(self)` | See linked implementation and subject contract. |
 
 ## [medical_assistant/models.py](../../medical_assistant/models.py)
 
@@ -282,6 +316,50 @@ Read explicitly selected local JSON records; atomically save reviewed reports.
 | --- | --- |
 | `load_record(path: Path)` | See linked implementation and subject contract. |
 | `save_report(payload: dict, directory: Path=REPORT_DIR, *, auth=None, safety=None)` | See linked implementation and subject contract. |
+
+## [medical_assistant/ui/clinical.py](../../medical_assistant/ui/clinical.py)
+
+Responsive clinical UI; only explicit human actions issue review receipts.
+
+| Callable | Purpose/contract |
+| --- | --- |
+| `make_review(approved, user, checked, notes, sha256)` | See linked implementation and subject contract. |
+| `start_task(path, auth, patient_id, model)` | See linked implementation and subject contract. |
+| `start_task.run(progress, budget)` | See linked implementation and subject contract. |
+| `resume_task(workflow, case, review, token)` | See linked implementation and subject contract. |
+| `resume_task.run(progress, budget)` | See linked implementation and subject contract. |
+| `collect_task()` | Publish only a completed, in-budget result into this Streamlit session. |
+| `task_progress()` | See linked implementation and subject contract. |
+| `action_bar(path, auth, record, model, *, urgent=False)` | See linked implementation and subject contract. |
+| `failure()` | See linked implementation and subject contract. |
+| `report_panel(auth, token, user, record, *, urgent=False)` | See linked implementation and subject contract. |
+
+## [medical_assistant/ui/components.py](../../medical_assistant/ui/components.py)
+
+Reusable presentation components. Escape every source-derived HTML value.
+
+| Callable | Purpose/contract |
+| --- | --- |
+| `safe(value)` | See linked implementation and subject contract. |
+| `styles()` | See linked implementation and subject contract. |
+| `sidebar_brand()` | See linked implementation and subject contract. |
+| `header()` | See linked implementation and subject contract. |
+| `patient_header(record, decision)` | See linked implementation and subject contract. |
+| `timeline(record)` | See linked implementation and subject contract. |
+| `medications(record)` | See linked implementation and subject contract. |
+| `original_sources(record)` | See linked implementation and subject contract. |
+| `empty(title, copy)` | See linked implementation and subject contract. |
+| `guide(view, state=None, *, running=False, signed_in=False)` | See linked implementation and subject contract. |
+| `footer()` | See linked implementation and subject contract. |
+
+## [medical_assistant/ui/history.py](../../medical_assistant/ui/history.py)
+
+Human-approved history import UI; source data is never guessed or overwritten.
+
+| Callable | Purpose/contract |
+| --- | --- |
+| `history_ui(path, auth, token, user, record)` | See linked implementation and subject contract. |
+| `history_ui.replace_proposal(result)` | See linked implementation and subject contract. |
 
 ## [medical_assistant/workflow.py](../../medical_assistant/workflow.py)
 

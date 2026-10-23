@@ -4,6 +4,10 @@ import os
 import signal
 import subprocess
 import threading
+import time
+import math
+
+from medical_assistant.jobs import MAX_JOB_SECONDS
 from pathlib import Path
 from uuid import uuid4
 
@@ -37,7 +41,7 @@ class LocalCTJob:
         *,
         root=None,
         jobs=None,
-        timeout=180,
+        timeout=MAX_JOB_SECONDS,
         mode="legacy",
         model_dir=None,
         device="cpu",
@@ -46,6 +50,10 @@ class LocalCTJob:
 
         if not re.fullmatch(r"[A-Za-z0-9_-]{1,64}", patient_id):
             raise ValueError("Invalid synthetic patient ID")
+        if not math.isfinite(timeout) or timeout <= 0:
+            raise ValueError("A positive finite CT timeout is required")
+        self.timeout = min(timeout, MAX_JOB_SECONDS)
+        self.started = time.monotonic()
         self.patient_id = patient_id
         if (
             mode not in ("legacy", "lung-fixture", "lung-pretrained")
@@ -128,7 +136,11 @@ class LocalCTJob:
         except Exception:
             self._log.close()
             raise
-        threading.Thread(target=self._watch, args=(timeout,), daemon=True).start()
+        threading.Thread(
+            target=self._watch,
+            args=(max(0.01, self.timeout - (time.monotonic() - self.started)),),
+            daemon=True,
+        ).start()
 
     @property
     def bundle_path(self):
@@ -137,6 +149,9 @@ class LocalCTJob:
     def _watch(self, timeout):
         try:
             code = self.process.wait(timeout=timeout)
+            if time.monotonic() - self.started >= self.timeout:
+                self.cancel(timed_out=True)
+                return
             with self._lock:
                 if self.state == "running":
                     self.state = (
@@ -157,7 +172,7 @@ class LocalCTJob:
                 return
             self.state = "timed_out" if timed_out else "cancelled"
             self.error = (
-                "CT worker timed out; no imaging was accepted."
+                "CT processing reached its response limit. No imaging was accepted; try the quick fixture or a smaller synthetic study."
                 if timed_out
                 else "CT job cancelled."
             )
@@ -177,3 +192,26 @@ class LocalCTJob:
     def status(self):
         with self._lock:
             return self.state
+
+    @property
+    def elapsed(self):
+        return time.monotonic() - self.started
+
+    def progress(self):
+        stages = {
+            "starting": "Starting local CT worker",
+            "source": "Creating synthetic CT",
+            "model": "Loading installed detector",
+            "detect": "Finding candidate nodules",
+            "export": "Checking images and preparing review",
+        }
+        try:
+            with self.log_path.open("rb") as handle:
+                handle.seek(max(0, self.log_path.stat().st_size - 4096))
+                lines = handle.read(4096).decode("utf-8", errors="replace").splitlines()
+            for line in reversed(lines):
+                if line.startswith("LOVISA_STAGE="):
+                    return stages.get(line.split("=", 1)[1], "Processing local CT")
+        except OSError:
+            pass
+        return "Starting local CT worker"

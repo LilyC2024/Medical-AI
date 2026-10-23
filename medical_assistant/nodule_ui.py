@@ -31,11 +31,11 @@ def nodule_viewer(manifest, path_for, key, *, review=None):
             "Non-ML generated-phantom fixture finder — not trained lesion detection."
         )
     st.caption(
-        f"Producer status: {bundle.status}. Producer attestation does not approve LOVISA imaging or its final clinical report."
+        "CT review and final clinical approval are separate steps. This study remains research evidence."
     )
     ids = [c.candidate_id for c in study.candidates]
     selected = st.selectbox(
-        "Jump to nodule candidate", ["All slices", *ids], key=key + "_candidate"
+        "Jump to candidate", ["All slices", *ids], key=key + "_candidate"
     )
     candidate = next((c for c in study.candidates if c.candidate_id == selected), None)
     center = (
@@ -44,7 +44,7 @@ def nodule_viewer(manifest, path_for, key, *, review=None):
         else study.geometry.shape_zyx[0] // 2
     )
     index = st.slider(
-        "Source-grid slice",
+        "Slice (zero-based)",
         0,
         study.geometry.shape_zyx[0] - 1,
         center,
@@ -71,7 +71,7 @@ def nodule_viewer(manifest, path_for, key, *, review=None):
         right.image(
             overlay, caption="Candidates and LOVISA-reviewed calipers", width="stretch"
         )
-    st.code(f"Source slice {index} SHA-256: {study.sources[index].sha256}")
+    st.caption(f"Source slice {index} · original evidence is retained with this study.")
     st.dataframe(
         [
             {
@@ -89,7 +89,8 @@ def nodule_viewer(manifest, path_for, key, *, review=None):
         ],
         hide_index=True,
     )
-    with st.expander("Nodule model, source geometry and provenance"):
+    with st.expander("Source evidence, model and geometry · details"):
+        st.code(f"Source slice {index} SHA-256: {study.sources[index].sha256}")
         st.json(manifest)
 
 

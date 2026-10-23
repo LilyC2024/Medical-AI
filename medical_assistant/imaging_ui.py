@@ -61,9 +61,9 @@ def _viewer(manifest, path_for, key, *, review=None):
 
 
 def imaging_ui(path, auth, token, user, record, *, locked=False):
-    st.subheader("Local imaging workbench")
-    st.info(
-        "Inspect generated synthetic CT beside the history. Imaging remains a research appendix, outside diagnostic reasoning. Imaging acceptance does not approve the final report."
+    st.subheader("CT review")
+    st.caption(
+        "Add image context to the patient story. Inspect candidates and optional measurements before accepting a research appendix."
     )
     if "imaging_store" not in st.session_state:
         st.session_state.imaging_store = ImagingStore(path, auth)
@@ -77,7 +77,11 @@ def imaging_ui(path, auth, token, user, record, *, locked=False):
 
     job = st.session_state.get("ct_job")
     running = job is not None and job.status() == "running"
-    st.caption("Companion location: " + str(configured_ct_root()))
+    with st.expander("Local CT connection · settings"):
+        st.text("Companion: " + str(configured_ct_root()))
+        st.caption(
+            "Uses a separate local Python environment. No images are sent to the language model."
+        )
     mode = st.selectbox(
         "CT workflow",
         [
@@ -122,17 +126,23 @@ def imaging_ui(path, auth, token, user, record, *, locked=False):
             st.error(str(error))
     if job:
         status = job.status()
-        st.write(
-            f"CT job: {status} · synthetic patient {job.patient_id} · study {job.study_id}"
-        )
+        if (
+            status == "complete"
+            and job.patient_id == record.patient_id
+            and not getattr(job, "inspection_ready", False)
+            and not locked
+        ):
+            try:
+                prepare(job.bundle_path.read_bytes(), study_id=job.study_id)
+                job.inspection_ready = True
+            except (ValueError, OSError) as error:
+                st.error("The completed CT study could not be verified.")
+                with st.expander("CT validation details"):
+                    st.text(str(error))
+                job.inspection_ready = True
+        st.caption(f"Study {job.study_id} · {status.replace('_', ' ')}")
         if status == "running":
-            st.caption(
-                "Processing in a separate local Python worker. Refresh to check completion; a watchdog stops jobs after three minutes."
-            )
-            st.button("Refresh CT job", key="ct_refresh")
-            if st.button("Cancel CT job", key="ct_cancel"):
-                job.cancel()
-                st.rerun()
+            ct_progress(job)
         elif status == "complete":
             if st.button(
                 "Inspect completed CT bundle",
@@ -148,22 +158,25 @@ def imaging_ui(path, auth, token, user, record, *, locked=False):
         if status != "running" and st.button("Dismiss CT job", key="ct_dismiss"):
             del st.session_state.ct_job
             st.rerun()
-    uploaded = st.file_uploader(
-        "Synthetic CT review bundle (.zip)", type=["zip"], key="ct_bundle"
-    )
-    if st.button(
-        "Inspect uploaded CT bundle",
-        key="ct_upload",
-        disabled=locked or uploaded is None,
-    ):
-        try:
-            prepare(uploaded.getvalue())
-        except (ValueError, OSError) as error:
-            st.error(f"Imaging rejected: {error}")
+    with st.expander("Or upload an existing synthetic CT bundle"):
+        uploaded = st.file_uploader(
+            "Synthetic CT review bundle (.zip)", type=["zip"], key="ct_bundle"
+        )
+        if st.button(
+            "Inspect uploaded CT bundle",
+            key="ct_upload",
+            disabled=locked or uploaded is None,
+        ):
+            try:
+                prepare(uploaded.getvalue())
+            except (ValueError, OSError) as error:
+                st.error("This CT bundle could not be verified.")
+                st.text(str(error))
     if "imaging_proposal" in st.session_state:
         key, proposal = st.session_state.imaging_proposal
         manifest = proposal["manifest"]
-        st.subheader("Pending imaging acceptance — not in the clinical report")
+        st.subheader("Inspect this study before accepting")
+        st.caption("Pending review · not yet included in the clinical report.")
         if manifest["patient_id"] != record.patient_id:
             st.warning("Select the matching patient or discard this proposal.")
         else:
@@ -249,9 +262,26 @@ def imaging_ui(path, auth, token, user, record, *, locked=False):
             )
             _viewer(
                 snapshot["manifest"],
-                lambda role, index: store.preview_path(snapshot, role, index),
+                store.preview_resolver(snapshot),
                 "accepted_ct_slice_" + snapshot["archive_sha256"],
                 review=snapshot.get("nodule_review"),
             )
     except (ValueError, OSError) as error:
         st.error(f"Accepted imaging integrity check failed: {error}")
+
+
+@st.fragment(run_every=1)
+def ct_progress(job):
+    if job.status() != "running":
+        st.rerun()
+    st.info(job.progress(), icon="⏳")
+    st.caption(
+        f"{job.elapsed:.0f} seconds elapsed · automatic stop at {job.timeout:.0f} seconds. The study opens automatically when ready."
+    )
+    left, right = st.columns(2)
+    with left:
+        st.button("Refresh CT job", key="ct_refresh")
+    with right:
+        if st.button("Cancel CT job", key="ct_cancel"):
+            job.cancel()
+            st.rerun()

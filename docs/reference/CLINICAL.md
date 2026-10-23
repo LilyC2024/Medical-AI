@@ -13,6 +13,9 @@
 | MedicationAgent.run | Valid structured orders → medication overview/dose changes; dates and documented source pairs required |
 | LocalEvidenceCollection.retrieve / local_search | Query → at most three approved local hash-checked excerpts ranked by word overlap |
 | SpecialistAgent reasoning | Source snapshot and approved references → schema/catalog-constrained hypotheses with exact excerpts |
+| compact_reasoning.prepare / expand | Same record/catalog → bounded ID schema → exact excerpts and fully revalidated Assessment; invalid/duplicate IDs fail |
+| jobs.Budget / WorkTask / BudgetInference | Finite local operation → staged progress or terminal stop; cancellation/deadline prevents late result publication |
+| ui.components / ui.history / ui.clinical | Escaped display, explicit import/review forms and background actions; workers never write Streamlit state |
 | OllamaClient | Bounded prompt/schema → JSON from fixed-loopback local model; reject remote-backed metadata and oversized requests |
 | SafetyAgent.evaluate | Snapshot, date and versioned policy → urgent/uncertain/ordinary decision with input binding |
 | LocalAuth.create_clinician / login / require | Credentials/token → salted local account / expiring identity; not a credential registry |

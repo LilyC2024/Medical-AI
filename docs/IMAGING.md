@@ -59,12 +59,13 @@ or remote fallback occurs. Missing weights/unavailable CUDA fail explicitly.
 
 ## Inspect and accept in LOVISA
 
-1. Sign in, select the synthetic patient and open **Imaging workbench** before
+1. Sign in, select the synthetic patient and open **CT review** before
    starting a case. Choose fixture, installed pretrained detector or legacy demo.
-2. **Generate synthetic CT demonstration**. Refresh/cancel as needed; a three-minute
-   watchdog bounds execution. Lung modes generate a 32×64×64 phantom; the legacy
+2. **Generate synthetic CT demonstration**. Progress refreshes automatically; cancel
+   when needed. A 110-second watchdog bounds execution. Lung modes generate a 32×64×64 phantom; the legacy
    mode trains a tiny tissue model and checks ONNX parity. No review is approved.
-3. **Inspect completed CT bundle**, or inspect an uploaded ZIP. Patient identity
+3. Completed CT opens automatically for inspection (the manual inspection button
+   remains available). Or inspect an uploaded ZIP. Patient identity
    must match; generated jobs also bind the requested study ID.
 4. Scroll source/overlay slices and jump to candidates. Amber boxes are candidate
    locations. Scores are not malignancy probabilities; box spans are not diameters.
@@ -122,11 +123,12 @@ Wire previews use −1000 to 400 HU and a font-independent NumPy renderer.
 
 Shared ML-free contracts/report/renderer are vendored from CT with one import-path
 rewrite. [Sync/check commands](VALIDATION.md) detect drift. CI pins producer
-`e0704b22177a23b323e4d3aff455c447d0579542`; later documentation commits leave that
+`5ba347cf6cd66b1931eaad3cd7d8cb27d4136606`; later documentation commits leave that
 contract unchanged. [Workflow](../.github/workflows/tests.yml).
 
 Ignored `data/imaging/` holds originals/HU/previews/jobs. SQLite stores accepted
-snapshots/audit separately from clinical facts. Composition, completion, saving
+snapshots/audit separately from clinical facts. Snapshot loading verifies accepted studies; the selected viewer then performs
+one resolver validation and checks each requested preview individually. Composition, completion, saving
 and export recheck artifacts and review bindings. Hashes prove internal consistency,
 not independent synthetic origin/model execution or clinical truth. Local admins
 remain trusted. Interrupted jobs/proposals are not resumable; a completed bundle

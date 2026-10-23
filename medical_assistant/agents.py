@@ -60,7 +60,9 @@ missing_information and clinician_questions. Omit categories outside your role.
 class Inference(Protocol):
     model: str
 
-    def assess(self, system: str, user: str, *, schema: dict | None = None) -> Assessment: ...
+    def assess(
+        self, system: str, user: str, *, schema: dict | None = None
+    ) -> Assessment: ...
 
 
 class SpecialistAgent:
@@ -68,7 +70,9 @@ class SpecialistAgent:
         self.role = role
         self.inference = inference
 
-    def run(self, record: PatientRecord, earlier: dict[str, dict], evidence=None) -> dict:
+    def run(
+        self, record: PatientRecord, earlier: dict[str, dict], evidence=None
+    ) -> dict:
         # Share early safety findings without repeatedly embedding all prior
         # narrative outputs. Every specialist independently sees the full record.
         safety_context = {}
@@ -77,37 +81,63 @@ class SpecialistAgent:
                 key: earlier["safety"].get(key, [])
                 for key in ("safety_flags", "missing_information")
             }
-        user = json.dumps({
-            # Original source payloads stay in SQLite; agents receive grounded facts.
-            "record": record.model_dump(mode="json", exclude={"sources"}),
-            "earlier_assessments": safety_context,
-            "approved_local_evidence": evidence or [],
-        }, ensure_ascii=False)
+        user = json.dumps(
+            {
+                # Original source payloads stay in SQLite; agents receive grounded facts.
+                "record": record.model_dump(mode="json", exclude={"sources"}),
+                "earlier_assessments": safety_context,
+                "approved_local_evidence": evidence or [],
+            },
+            ensure_ascii=False,
+        )
         allowed = {
-            "history": {"findings"}, "medications": {"findings", "medications"},
-            "reasoning": {"findings", "explanations"}, "safety": {"findings", "safety_flags"},
+            "history": {"findings"},
+            "medications": {"findings", "medications"},
+            "reasoning": {"findings", "explanations"},
+            "safety": {"findings", "safety_flags"},
         }[self.role]
         schema = Assessment.model_json_schema()
-        model_fields = ("findings", "medications", "explanations", "safety_flags", "dose_changes", "known_dates", "missing_dates")
+        model_fields = (
+            "findings",
+            "medications",
+            "explanations",
+            "safety_flags",
+            "dose_changes",
+            "known_dates",
+            "missing_dates",
+        )
         for field in model_fields:
             if field not in allowed:
                 del schema["properties"][field]
         # Constrain generation as well as validating it after inference.
         for definition in ("Claim", "Medication", "SafetyFlag"):
-            schema["$defs"][definition]["properties"]["evidence_ids"]["items"]["enum"] = [entry.id for entry in record.entries]
+            schema["$defs"][definition]["properties"]["evidence_ids"]["items"][
+                "enum"
+            ] = [entry.id for entry in record.entries]
         approved_ids = {item["id"] for item in (evidence or [])}
         if self.role == "reasoning":
             schema = constrain_schema(schema, record, sorted(approved_ids))
+            from medical_assistant.compact_reasoning import MARKER
+
+            schema["$comment"] = MARKER
         assessment = self.inference.assess(
-            COMMON + ROLES[self.role], user, schema=schema,
+            COMMON + ROLES[self.role],
+            user,
+            schema=schema,
         ).validate_sources(record)
         if self.role == "reasoning":
             validate_reasoning(assessment, record, approved_ids)
-        if any(ref not in approved_ids for item in assessment.explanations for ref in item.reference_ids):
+        if any(
+            ref not in approved_ids
+            for item in assessment.explanations
+            for ref in item.reference_ids
+        ):
             raise ValueError("Model invented or used an unapproved medical reference")
         if not any(getattr(assessment, field) for field in Assessment.model_fields):
             raise ValueError(f"{self.role} specialist returned an empty assessment")
         for field in model_fields:
             if field not in allowed and getattr(assessment, field):
-                raise ValueError(f"{self.role} specialist returned an out-of-role category")
+                raise ValueError(
+                    f"{self.role} specialist returned an out-of-role category"
+                )
         return assessment.model_dump(mode="json")

@@ -11,6 +11,10 @@
 .venv/bin/python scripts/check_docs.py
 ```
 
+See [response-budget checks](PERFORMANCE.md) and [workspace behavior](INTERFACE.md).
+Timeout/cancellation/late-output, compact-ID grounding and responsive scripted UI
+checks run offline. Browser screenshots and actual CT/Ollama smokes are separate.
+
 These checks use temporary SQLite, synthetic sources and scripted model/reviewer
 identities. They cover dates/orders, grounding, safety bypasses, authenticated
 approvals, archive/pixel integrity, caliper UI and guarded export. No CT install or

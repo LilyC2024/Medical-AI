@@ -37,7 +37,7 @@ steps sequentially. `InMemorySaver` holds pending state; `interrupt()` and
 | --- | --- | --- |
 | History | `MedicalHistoryAgent.run()` | Python chronology and attribution; unknown dates remain unknown |
 | Medication | `MedicationAgent.run()` | Python extraction of supplied structured orders; only dated documented orders establish a dose change |
-| Reasoning | `SpecialistAgent("reasoning", inference)` | Ollama structured JSON, then Python schema/catalog/source validation |
+| Reasoning | `SpecialistAgent("reasoning", inference)` | Local Ollama selects catalog/evidence IDs; Python restores source excerpts and validates schema/catalog/grounding |
 | Safety | `SafetyAgent.evaluate()` | Versioned local Python policy; model output cannot lower escalation |
 
 LangChain `RunnableLambda` wraps history, medication and local reference retrieval.
@@ -63,6 +63,17 @@ The Ollama adapter is fixed to `127.0.0.1:11434`, disables proxies/redirects and
 rejects remote-backed models. Generation requests JSON Schema, temperature zero
 and a 16,384-token context. An 11,000-byte combined prompt/schema budget rejects
 oversized requests. The model has no database, filesystem, shell or approval tools.
+
+The compact reasoning protocol reduces repeated output: the model selects eligible
+hypothesis/support/conflict/reference IDs. Python copies original text and
+attribution and applies the same full assessment checks. It cannot invent prose,
+orders or clinical conclusions. [Implementation/budgets](PERFORMANCE.md).
+
+The interface runs clinical generation/resumption in bounded background tasks and
+polls progress once per second. Cancellation or deadline rejects late publication.
+UI components, imports and clinical controls live in separate `ui/` modules; only
+the selected view renders. The CT worker uses its own process/watchdog. Native
+Streamlit controls and local CSS form the [design system](INTERFACE.md).
 
 ## Safety and review
 

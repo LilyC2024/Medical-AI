@@ -6,6 +6,7 @@ Start with the [project overview](../README.md), then choose one path:
 
 | Your goal | Read |
 | --- | --- |
+| Use the redesigned workspace | [Interface](INTERFACE.md) / [Performance](PERFORMANCE.md) |
 | Understand the two projects visually | [Illustrations](ILLUSTRATIONS.md) |
 | Install LOVISA and create a reviewer account | [Setup](SETUP.md) |
 | Run a case, import history or approve a report | [Workflows](WORKFLOWS.md) |

@@ -22,3 +22,20 @@ Phases 1–12 are complete. Phase 12 preserves the safety policy, model/weights,
 source schemas and exchange identifiers. The visible name and explanatory guides
 change together. Unexecuted clinical/GPU work is not marked completed by these
 software gates.
+
+## Workspace redesign and response budget
+
+13. **Performance foundation** — bounded background jobs with real progress,
+    cancellation and no late-result publication; two-minute maximum response
+    budget, local Ollama request limits, CT watchdog and verified-view image access.
+    Test timeouts/cancellation/late results and preserve all integrity gates before
+    starting the UI phase. Status: passed (163 full LOVISA tests; 86 focused
+    performance/integrity checks and 15 CT producer checks).
+14. **Reusable workspace UI** — local design tokens/components, readable history
+    and medication cards, focused CT/report actions, right-side operating guide,
+    advanced source details and responsive layout. Preserve source escaping,
+    authentication and explicit safety/import/imaging/final review. Status: passed
+    (166 full tests; readable views, guide, cancellation and async responsiveness).
+15. **Demo and publication** — full regression, actual local CT/Ollama timings,
+    live browser checks/screenshots, updated guides/evaluation and publication.
+    Remain on localhost as requested. Status: in progress.

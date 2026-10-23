@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "local-medical-history-assistant"
-version = "0.2.1"
+version = "0.3.0"
 description = "LOVISA: Medical History & Clinical Reasoning Assistant with local inference and human review"
 requires-python = ">=3.10"
 dependencies = [
@@ -26,3 +26,6 @@ include = ["medical_assistant*"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+
+[tool.setuptools.package-data]
+medical_assistant = ["ui/*.css"]

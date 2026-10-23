@@ -43,3 +43,14 @@ legacy transfers, local Ollama smoke and hosted checks. Exact commits/runs are i
 Standalone CT export requires its local review by default. Its dedicated LOVISA
 bridge exports pending review and never forges approval. LOVISA always requires
 its own authenticated imaging acceptance and separate final clinical approval.
+
+## 0.3.0 — local workspace and response budget
+
+Reusable light UI, three lazy views, readable source/medication cards and right-hand
+operating guide. Clinical generation/resumption now runs in bounded background
+tasks with progress, cancellation and late-result rejection. CT has a 110-second
+watchdog, real-stage progress and automatic pending inspection. Verified-view
+preview access removes repeated full-archive work. Compact local reasoning selects
+IDs and restores exact source text in Python. Clinical/import/imaging approvals,
+source integrity, local-only inference and both CT exchange formats are preserved.
+No dependency or model upgrade. [Details](PERFORMANCE.md) · [Evaluation](../EVALUATION.md).
