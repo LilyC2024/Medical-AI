@@ -9,11 +9,13 @@
 2. Read **Patient overview**. Check dates, attribution, medicines and original
    sources in **Source records**. Import/approve any synthetic corrections there
    before preparing the case.
-3. Optionally open **CT review** and **Run CT analysis**. The completed result
-   opens automatically: candidate count, review status, source slices, annotations
+3. Optionally open **CT review** or **Endoscopy review**. **Upload** the supported
+   file and **Analyze**, or select a local example and Analyze without an upload.
+   ZIPs open existing results; permitted endoscopy JPG/PNG files run the local
+   polyp model. The completed result opens automatically: candidate count, review status, source slices, annotations
    and optional calipers. Inspect and accept it, or discard it. A pending study
    blocks the safety preparation so it cannot be silently omitted from the draft.
-4. Open **Safety check** using its tab, **Next action**, or guide step 4. For
+4. Open **Safety check** using its tab, **Next action**, or its labelled guide step. For
    missing current information, optionally add notes, keep the confirmation selected,
    choose **Allow draft generation after my safety assessment**, and **Save safety
    assessment**. This saves the decision and freezes the snapshot; **no model
@@ -35,7 +37,10 @@
 
 If the report has no CT, **Start a new report with CT** opens CT review for the
 same patient. Accept the study before safety preparation; a study added later
-requires a new report snapshot.
+requires a new report snapshot. Upload/Analyze now starts that fresh context
+automatically after valid input; repeat safety and final review. Saved reports
+are preserved. Invalid input shows an error beside Analyze and leaves the old
+report unchanged.
 
 Use **Start a new review** to reassess the same patient after a source change.
 You can choose another patient at any time: unfinished work is cancelled and all

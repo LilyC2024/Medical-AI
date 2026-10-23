@@ -6,6 +6,7 @@ import streamlit as st
 
 from medical_assistant import ollama_client, storage
 from medical_assistant.jobs import BudgetInference, WorkTask
+from medical_assistant.imaging_actions import job_pending
 from medical_assistant.models import Review
 from medical_assistant.report import digest
 from medical_assistant.report_assets import inspection_figures, portable_html
@@ -165,8 +166,8 @@ def bottom_actions(path, auth, record, model, token, user, decision):
     pending = (
         "proposal" in st.session_state
         or "imaging_proposal" in st.session_state
-        or bool(ct and ct.status() in ("running", "complete"))
-        or bool(endo and endo.status() in ("running", "complete"))
+        or job_pending(ct)
+        or job_pending(endo)
     )
     status = state.get("status")
     stale = bool(
@@ -211,7 +212,7 @@ def bottom_actions(path, auth, record, model, token, user, decision):
 
         proposal = st.session_state.get("imaging_proposal")
         if (proposal and is_endoscopy(proposal[1]["manifest"])) or (
-            endo and endo.status() in ("running", "complete")
+            not proposal and job_pending(endo)
         ):
             target = "endoscopy-review"
         st.button(

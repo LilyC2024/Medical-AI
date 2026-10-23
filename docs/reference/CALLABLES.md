@@ -142,7 +142,6 @@ Source-first endoscopy inspection; every candidate needs explicit human review.
 | --- | --- |
 | `image_results(manifest, path_for, review=None)` | See linked implementation and subject contract. |
 | `endoscopy_ui(path, auth, token, user, record, *, locked=False, case_imaging=None)` | See linked implementation and subject contract. |
-| `endo_progress(job)` | See linked implementation and subject contract. |
 
 ## [medical_assistant/endo_worker.py](../../medical_assistant/endo_worker.py)
 
@@ -243,8 +242,6 @@ Imaging inspection UI; acceptance is separate from final clinical approval.
 | `_viewer(manifest, path_for, key, *, review=None)` | See linked implementation and subject contract. |
 | `result_summary(manifest, review=None)` | See linked implementation and subject contract. |
 | `imaging_ui(path, auth, token, user, record, *, locked=False, case_imaging=None)` | See linked implementation and subject contract. |
-| `imaging_ui.prepare(payload, *, study_id=None)` | See linked implementation and subject contract. |
-| `ct_progress(job)` | See linked implementation and subject contract. |
 
 ## [medical_assistant/jobs.py](../../medical_assistant/jobs.py)
 
@@ -491,6 +488,7 @@ Patient-scoped UI lifecycle and fixed, source-independent navigation targets.
 
 | Callable | Purpose/contract |
 | --- | --- |
+| `reset_report_context(state)` | Release only the current draft context; retain uploads and accepted studies. Persisted reports and workflow checkpoints are never edited or approved here. A subsequent draft must pass the safety workflow again. |
 | `clear_patient(state, *, preserve_login=True, preserve_patient=True)` | Cancel abandoned work and drop every patient-specific widget/proposal. |
 | `ensure_patient(state, patient)` | Fail closed before rendering/collecting a mismatched patient snapshot. |
 | `destination(target)` | See linked implementation and subject contract. |
@@ -592,6 +590,37 @@ Vendor/check ML-free CT contracts; no CT model, torch or database tools imported
 ## [scripts/sync_endo_contracts.py](../../scripts/sync_endo_contracts.py)
 
 Check exact ML-free endoscopy contract/worker equality with the companion.
+
+| Callable | Purpose/contract |
+| --- | --- |
+| `main()` | See linked implementation and subject contract. |
+
+## [medical_assistant/imaging_actions.py](../../medical_assistant/imaging_actions.py)
+
+Authenticated image input routing, independent of Streamlit rendering. ZIPs contain existing predictions: Analyze validates and opens them for review. Only a raw, permitted endoscopy image launches inference on uploaded pixels. Nothing in this module accepts a study or approves a clinical report.
+
+| Callable | Purpose/contract |
+| --- | --- |
+| `job_pending(job)` | A collected result is represented by its proposal, not a stale job handle. |
+| `failure_detail(job)` | Return the bounded worker exception, without a traceback or full log dump. |
+| `blocker(state)` | See linked implementation and subject contract. |
+| `analyze(state, store, auth, token, patient, modality, *, upload=None, mode='auto')` | Validate input before retiring a frozen report; never silently use a demo. ``upload`` is (filename, bytes). Mode applies only when there is no upload. An uploaded ZIP always opens its included results, regardless of example mode. Failed input validation leaves the existing report and all approvals intact. |
+| `collect(state, store, modality, patient)` | Publish one completed result without overwriting a pending/frozen review. |
+
+
+## [medical_assistant/ui/imaging_actions.py](../../medical_assistant/ui/imaging_actions.py)
+
+Reusable Upload / Analyze controls and visible local-worker errors.
+
+| Callable | Purpose/contract |
+| --- | --- |
+| `image_actions(modality, store, auth, token, record)` | See linked implementation and subject contract. |
+| `image_progress(job, prefix)` | See linked implementation and subject contract. |
+
+
+## [scripts/smoke_uploads.py](../../scripts/smoke_uploads.py)
+
+Exercise real local Upload/Analyze widgets in a disposable database. Uses prepared research pixels and actual local polyp inference; no scripted model, no LLM call, no image/safety/report approval, and no application database changes. The local research kit and installed companion are prerequisites, not downloads.
 
 | Callable | Purpose/contract |
 | --- | --- |

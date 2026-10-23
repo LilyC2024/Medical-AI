@@ -1,5 +1,45 @@
 # LOVISA evaluation record
 
+## Upload/Analyze repair — 23 October 2026
+
+The original failure was a frozen clinical-context lock on all image actions,
+combined with separate run/import buttons and completed-job handles used as
+cross-panel locks. Both image panels now use Upload/Analyze. Successful input
+starts a fresh unreviewed context; malformed input preserves the existing report.
+Pending review is never overwritten, and neither an upload nor Analyze supplies
+image, safety or clinical approval.
+
+| Executed check | Actual outcome |
+| --- | --- |
+| Action/navigation foundation, before panel integration | 25 passed in 10.32s |
+| Focused actions/uploads/review/report/UI | 39 passed in 49.84s |
+| Full offline regression | **267 passed in 189.43s** under concurrent live-smoke load |
+| Actual CT `ct-real.mhcra.zip` through Upload/Analyze | **0.72s** to visible results, one candidate; existing predictions validated, no inference rerun |
+| Actual `endoscopy-03.endo.zip` through Upload/Analyze | **0.51s** to visible results, two regions; existing predictions validated |
+| Actual `endoscopy-03.jpg` through Upload/Analyze | **2.84s** to visible results, two regions; installed local polyp model ran on exact uploaded bytes |
+| Actual local `gemma4:e2b` smoke | Passed uncertainty hold and separate eligible fictional reasoning; final approval still required |
+| Supporting checks | Dependency consistency, compilation, 33 Markdown file-link checks, focused syntax/undefined-name checks, whitespace and exact CT/endo contract sync passed |
+
+The real-file smoke redirects only services to disposable SQLite; it issues no
+imaging, safety or final approvals and makes no LLM call. Automated UI regressions
+use actual upload widgets with artificial pixels/scripted clinical inference.
+This was not manual browser visual verification. The first smoke-harness startup
+exceeded AppTest's default three-second initialization limit during concurrent
+checks; increasing the harness initialization budget to 30 seconds allowed the
+actual upload checks above. Runtime worker deadlines remain 110 seconds.
+
+Invalid/empty/wrong-patient/wrong-modality files, pending study replacement,
+expired authentication, stale jobs, failed-output collection, retry, exact raw
+image routing and frozen-report preservation are covered. Saved reports and old
+workflow content remain untouched; a new report must pass safety and final review
+again. No model, dependency, safety policy or producer contract was changed.
+CT input here remains a prepared source-mapped review ZIP; full DICOM inference
+is offline companion work. Arbitrary unprovenanced research JPGs are rejected.
+
+[Reproduce upload smoke](docs/VALIDATION.md#uploadanalyze-regressions) ·
+[Operation](docs/INTERFACE.md#upload-and-analyze). Publication and local restart
+outcomes are recorded below after completion.
+
 ## Real-image composite and clearer review — 23 October 2026
 
 | Executed check | Actual outcome |

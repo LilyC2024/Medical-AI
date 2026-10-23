@@ -17,6 +17,37 @@ DESTINATIONS = {
 }
 
 
+def reset_report_context(state):
+    """Release only the current draft context; retain uploads and accepted studies.
+
+    Persisted reports and workflow checkpoints are never edited or approved here.
+    A subsequent draft must pass the safety workflow again.
+    """
+    task = state.get("analysis_task")
+    if task:
+        task.cancel()
+        if task.snapshot()["state"] == "complete":
+            task.result()[0].inference.close()
+    elif "workflow" in state:
+        state["workflow"].inference.close()
+    for key in (
+        "analysis_task",
+        "workflow",
+        "case_id",
+        "run_error",
+        "saved_path",
+        "last_analysis_seconds",
+        "safety_notes",
+        "safety_attest",
+        "safety_action",
+        "review_notes",
+        "attested",
+        "decision",
+        "report_note_changed",
+    ):
+        state.pop(key, None)
+
+
 def clear_patient(state, *, preserve_login=True, preserve_patient=True):
     """Cancel abandoned work and drop every patient-specific widget/proposal."""
     keep = {

@@ -62,14 +62,17 @@ or remote fallback occurs. Missing weights/unavailable CUDA fail explicitly.
 
 ## Inspect and accept in LOVISA
 
-1. Sign in (examples are hidden until login), select the synthetic patient and open **CT review** before
-   starting a case. Choose fixture, installed pretrained detector or legacy demo.
-2. **Run CT analysis**. Progress refreshes automatically; cancel
-   when needed. A 110-second watchdog bounds execution. Lung modes generate a 32×64×64 phantom; the legacy
-   mode trains a tiny tissue model and checks ONNX parity. No review is approved.
-3. Completed CT opens automatically for inspection (the manual inspection button
-   remains available). Or inspect an uploaded ZIP. Patient identity
-   must match; generated jobs also bind the requested study ID.
+1. Sign in, select the patient and open **CT review**.
+2. **Upload** a companion CT review ZIP, then **Analyze**. This validates and opens
+   its existing source images and predictions; it does not rerun the detector.
+   Raw DICOM/HU scans need offline preparation in the CT companion. Preview PNGs
+   cannot replace a CT volume.
+3. Without an upload, **Model / example** selects a non-ML nodule fixture,
+   installed pretrained detector on an artificial phantom, or the legacy tissue
+   example. Select **Local research example** in the Jordan case for its prepared
+   public CT excerpt. Then **Analyze**. Generated jobs retain the 110-second
+   watchdog, automatic progress and cancellation. Lung examples generate a
+   32×64×64 phantom; legacy mode trains a tiny tissue model and checks ONNX parity.
 4. Scroll source/overlay slices and jump to candidates. Amber boxes are candidate
    locations. Scores are not malignancy probabilities; box spans are not diameters.
 5. Explicitly accept/reject every candidate. Uncertain blocks acceptance. Optional
@@ -90,8 +93,11 @@ reviewed calipers; detector scores remain in structured evidence. Pending and ac
 studies remain inspectable in an active clinical snapshot. Empty states explain
 when no CT has been attached.
 
-Pending imaging blocks safety preparation and draft generation. Active cases lock new imaging; later
-imports need a new case. Urgent warnings take priority over optional image checks.
+Pending imaging blocks safety preparation and draft generation. **Analyze** can
+add imaging after a clinical case starts: after input validation, it releases the
+old report context and opens a fresh unreviewed context. Saved reports and old
+approvals remain intact; the new context needs image inclusion and safety review
+again. Invalid files leave the existing report untouched. Urgent warnings take priority over optional image checks.
 Acquisition date remains unknown. Rejected/zero candidates never establish normality.
 
 ## Export from CT
@@ -149,7 +155,8 @@ can be re-imported. Accepted files must remain available for verification.
 ## Real CT example
 
 The signed-in Jordan composite has a prepared LIDC-IDRI source excerpt. Use its
-**Open real CT example** button or upload the research ZIP. Original public
+**Model / example → Local research example**, then **Analyze** with no upload,
+or **Upload** the research ZIP and **Analyze**. Original public
 subject identity, license, whole-volume hash and crop mapping are retained; the
 report states limited coverage/protocol uncertainty. Full-scan CPU processing
 is offline setup, not an interactive two-minute operation. [Commands and terms](RESEARCH_IMAGES.md).

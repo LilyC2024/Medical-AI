@@ -77,6 +77,11 @@ orders or clinical conclusions. [Implementation/budgets](PERFORMANCE.md).
 
 The interface runs clinical generation/resumption in bounded background tasks and
 polls progress once per second. Cancellation or deadline rejects late publication.
+Shared `imaging_actions.py` routes authenticated uploads and collects worker
+results; `ui/imaging_actions.py` renders the common Upload/Analyze controls and
+errors. ZIPs open validated existing results; permitted raw endoscopy images use
+the actual CV worker. Successful Analyze releases an old report context without
+editing it and clears safety/final-review choices. Input failures preserve it.
 UI components, imports and clinical controls live in separate `ui/` modules; only
 the selected view renders. Patient selection is explicit. Switching cancels pending
 work and clears patient-specific widgets/proposals; scope guards run before and

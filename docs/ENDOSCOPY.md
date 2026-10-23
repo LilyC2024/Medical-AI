@@ -15,10 +15,15 @@ Train/register a model explicitly before selecting installed-model mode.
 
 1. Sign in and select one artificial patient.
 2. Open **Endoscopy review** (also linked in the right-hand guide).
-3. Run the artificial example or installed model on the generated phantom, or
-   inspect a supported synthetic/research `.zip`. In the Jordan composite case, open the real example or upload one of the prepared research JPGs to run the model. [Files and sources](RESEARCH_IMAGES.md). Progress and cancellation are immediate;
-   the worker is stopped after 110 seconds. This is a response budget, not a
-   guarantee of a successful model result on every computer.
+3. **Upload** a permitted JPG/PNG or companion review ZIP, then **Analyze**.
+   A JPG/PNG runs the installed local polyp model on the exact uploaded image;
+   a ZIP validates and opens its included results without new inference. Raw
+   public uploads must be one of the three prepared research images in the Jordan
+   composite case. Without an upload, **Model / example** offers an artificial
+   fixture/model input or Jordan's prepared local research example. Uploads always
+   take precedence over example selection. [Files and sources](RESEARCH_IMAGES.md).
+   Progress and cancellation are immediate; the worker stops after 110 seconds.
+   This is a response budget, not a guarantee of success on every computer.
 4. Inspect source and overlay. Areas are mask pixels and image-area fractions,
    not physical lesion size. Scores are model outputs, not cancer probability.
 5. Set every region to accept/reject; uncertain blocks acceptance. An optional
@@ -28,7 +33,9 @@ Train/register a model explicitly before selecting installed-model mode.
 
 Accepted studies appear in the short report and its offline HTML pictures. Exact
 source/model/review provenance remains in JSON evidence; it is not repeated in the
-main prose. A frozen report snapshot requires a new review to add another image.
+main prose. If a report already exists, successful **Analyze** opens a fresh
+unreviewed context and clears the old safety decision. Saved reports stay intact;
+include the images and repeat safety before generating another report.
 CT and endoscopy have separate views and validators but share authenticated
 storage, source verification and final content binding. Only one pending imaging
 proposal is presented at a time. Patient switching cancels endoscopy work and
@@ -84,3 +91,11 @@ no imaging or clinical approvals. Tests use temporary accounts/databases and
 scripted reviewers. [Actual outcomes](../EVALUATION.md).
 
 Hosted cross-repository checks pin producer `81ff9f53a0baa9b40ff396283ef1dd9f430bf170`. Later documentation-only commits do not change this tested contract.
+
+## Errors and retries
+
+Errors appear beside **Analyze**, including unsupported input, wrong case/section,
+missing model, invalid output and worker timeout. A malformed file does not retire
+an existing report. A failed or already-collected job does not lock the other
+panel. A pending candidate review must be included or discarded first; the page
+links directly to the corresponding view. No upload or analysis supplies approval.

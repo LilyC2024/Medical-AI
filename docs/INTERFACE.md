@@ -2,7 +2,7 @@
 
 [Overview](../README.md) · [First case](WORKFLOWS.md) · [Response budgets](PERFORMANCE.md)
 
-## One patient, five focused views
+## One patient, six focused views
 
 Sign in, then choose a patient in the menu above the workspace. No patient is
 selected automatically. The menu lists artificial examples; the page displays
@@ -13,7 +13,8 @@ remain stored for the patient they belong to.
 | View | What you can do |
 | --- | --- |
 | Patient overview | Read dated/undated history, attribution and historical medicines |
-| CT review | Generate/upload synthetic CT, inspect annotations and review candidates/calipers |
+| CT review | Upload/Analyze a review ZIP or local example, inspect annotations and review candidates/calipers |
+| Endoscopy review | Upload/Analyze a permitted image or review ZIP, inspect and decide on each region |
 | Safety check | Assess missing information, save your decision, then generate a draft |
 | Clinical report | Read one concise summary with CT pictures, preview a brief note, then approve or request corrections |
 | Source records | Check original wording, download the input original or approve an additional synthetic record |
@@ -28,7 +29,7 @@ top. Navigation never runs inference or supplies an approval.
 
 ## Safety before generation
 
-Open **Safety check** from its tab, Next action or step 4 in the guide. The form
+Open **Safety check** from its tab, Next action or its labelled guide step. The form
 lists actual policy gaps. Optionally add notes, retain the selected confirmation, choose the intended
 decision and save it. Saving does not call the model. Only after the required
 checks does **Generate draft for clinician review**, at the bottom of this view,
@@ -68,6 +69,8 @@ and device are configured locally, as described in [Imaging](IMAGING.md).
 `ui/theme.css` supplies design tokens, cards and responsive layout;
 `ui/components.py` supplies escaped presentations and the guide;
 `ui/navigation.py` handles fixed destinations and patient cleanup;
+`ui/imaging_actions.py` renders shared Upload/Analyze controls;
+`imaging_actions.py` validates/routes inputs and collects bounded job results;
 `ui/clinical.py` handles safety/report actions; `ui/history.py` handles imports.
 `app.py` renders one selected view. Native Streamlit forms and buttons retain
 keyboard interaction. A small local scroll helper uses only fixed app anchors;
@@ -88,5 +91,18 @@ choices are yellow and allow/approve choices green, with larger decision labels.
 Colour indicates a selection, never a completed approval. Every image candidate
 needs an include/exclude choice before the separate submit action. Blank final
 notes need no preview; changed nonempty notes must be previewed before approval.
-The Jordan composite adds real-image buttons and permitted endoscopy JPG upload.
+The Jordan composite adds local research examples and permitted endoscopy JPG upload.
 Model scores and provenance hashes stay out of primary results. [Research guide](RESEARCH_IMAGES.md).
+
+## Upload and Analyze
+
+Both image views put the same two actions above their results. **Upload** opens
+one file picker; **Analyze** uses the selected file. **Model / example** selects
+an example only when no file is selected. Remove the selected upload to use an
+example instead. No separate inspect/run/import button is needed.
+
+The page explains pending-review and active-job blockers. Errors stay visible
+beside Analyze and retries remain available. Analyze after an existing clinical
+case starts opens a fresh context only after input validation; it never changes
+an old approval or saved report. Image inclusion, safety and final review retain
+separate explicit submissions. Urgent policy warnings still pause image actions.

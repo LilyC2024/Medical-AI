@@ -1,15 +1,11 @@
 """Imaging inspection UI; acceptance is separate from final clinical approval."""
 
-import os
-
 import streamlit as st
 
-from medical_assistant.ct_worker import (
-    LocalCTJob,
-    configured_ct_model,
-)
 from medical_assistant.endo_support import is_endoscopy
 from medical_assistant.imaging import ImagingStore
+from medical_assistant.imaging_actions import collect
+from medical_assistant.ui.imaging_actions import image_actions
 from medical_assistant.imaging_results import summarize
 from medical_assistant.models import Review
 from medical_assistant.nodule_support import imaging_acceptance_digest, is_nodule
@@ -89,11 +85,8 @@ def imaging_ui(path, auth, token, user, record, *, locked=False, case_imaging=No
         st.session_state.imaging_store = ImagingStore(path, auth)
     store = st.session_state.imaging_store
 
-    def prepare(payload, *, study_id=None):
-        result = store.prepare(payload, record.patient_id, study_id=study_id)
-        if "imaging_proposal" in st.session_state:
-            store.discard(st.session_state.imaging_proposal[0])
-        st.session_state.imaging_proposal = result
+    collect(st.session_state, store, "ct", record.patient_id)
+    image_actions("ct", store, auth, token, record)
 
     pending = st.session_state.get("imaging_proposal")
     if pending and is_endoscopy(pending[1]["manifest"]):
@@ -108,24 +101,6 @@ def imaging_ui(path, auth, token, user, record, *, locked=False, case_imaging=No
         )
         return
     job = st.session_state.get("ct_job")
-    if job:
-        status = job.status()
-        if (
-            status == "complete"
-            and job.patient_id == record.patient_id
-            and not getattr(job, "inspection_ready", False)
-            and not locked
-        ):
-            try:
-                prepare(job.bundle_path.read_bytes(), study_id=job.study_id)
-                job.inspection_ready = True
-            except (ValueError, OSError) as error:
-                st.error("The completed CT study could not be verified.")
-                st.caption(
-                    "Discard this study and run it again, or ask the local administrator to check the source bundle."
-                )
-                job.validation_error = str(error)
-                job.inspection_ready = True
     accepted = []
     try:
         accepted = (
@@ -158,9 +133,9 @@ def imaging_ui(path, auth, token, user, record, *, locked=False, case_imaging=No
         st.error(f"Accepted imaging integrity check failed: {error}")
     if not accepted and "imaging_proposal" not in st.session_state:
         st.info(
-            "No CT result is attached to this report snapshot. Start a new case to add CT."
+            "No CT result is attached to this report. Upload a review ZIP and click Analyze to add one."
             if locked
-            else "No CT result yet. Run the local CT analysis below, or upload a supported synthetic bundle. Results will appear here automatically."
+            else "No CT result yet. Upload a review ZIP, then click Analyze. Or choose a local example."
         )
     if locked:
         st.caption(
@@ -242,126 +217,4 @@ def imaging_ui(path, auth, token, user, record, *, locked=False, case_imaging=No
             del st.session_state.imaging_proposal
             if job is not None and job.study_id == manifest["study_id"]:
                 st.session_state.pop("ct_job", None)
-            st.rerun()
-    with st.expander(
-        "Run or upload CT analysis",
-        expanded=not accepted and "imaging_proposal" not in st.session_state,
-    ):
-        job = st.session_state.get("ct_job")
-        running = job is not None and job.status() == "running"
-        other_job = st.session_state.get("endo_job")
-        cannot_add = (
-            locked
-            or not token
-            or "imaging_proposal" in st.session_state
-            or bool(other_job and other_job.status() in ("running", "complete"))
-        )
-        if record.patient_id == "research-composite-demo":
-            st.caption(
-                "Real research example · limited CT excerpt · unrelated to the endoscopy subject"
-            )
-            if st.button(
-                "Open real CT example",
-                key="ct_real_example",
-                disabled=cannot_add or running,
-            ):
-                try:
-                    from medical_assistant.research_examples import example_bundle
-
-                    prepare(example_bundle("ct", record.patient_id))
-                    st.rerun()
-                except (ValueError, OSError):
-                    st.error(
-                        "Prepare the local research-image kit first; see docs/RESEARCH_IMAGES.md."
-                    )
-        mode = st.selectbox(
-            "CT workflow",
-            [
-                "Lung nodule fixture (non-ML)",
-                "Installed pretrained lung detector",
-                "Legacy tissue-mask demonstration",
-            ],
-            key="ct_mode",
-        )
-        modes = {
-            "Lung nodule fixture (non-ML)": "lung-fixture",
-            "Installed pretrained lung detector": "lung-pretrained",
-            "Legacy tissue-mask demonstration": "legacy",
-        }
-        model_dir = None
-        device = "cpu"
-        if modes[mode] == "lung-pretrained":
-            model_dir = str(configured_ct_model())
-            device = os.environ.get("MHCRA_CT_DEVICE", "cpu")
-            st.caption(
-                "Uses the installed detector on artificial CT images. No model download is needed."
-            )
-        if st.button(
-            "Run CT analysis",
-            key="ct_generate",
-            disabled=cannot_add or running,
-        ):
-            try:
-                st.session_state.ct_job = LocalCTJob(
-                    record.patient_id,
-                    jobs=store.root / "jobs",
-                    mode=modes[mode],
-                    model_dir=model_dir,
-                    device=device,
-                )
-                st.rerun()
-            except (ValueError, OSError) as error:
-                st.error(str(error))
-        if job:
-            status = job.status()
-            if getattr(job, "validation_error", None):
-                st.error("CT output could not be verified: " + job.validation_error)
-            st.caption(f"Study {job.study_id} · {status.replace('_', ' ')}")
-            if status == "running":
-                ct_progress(job)
-            elif status == "complete":
-                if st.button(
-                    "Inspect completed CT bundle",
-                    key="ct_inspect",
-                    disabled=locked or job.patient_id != record.patient_id,
-                ):
-                    try:
-                        prepare(job.bundle_path.read_bytes(), study_id=job.study_id)
-                    except (ValueError, OSError) as error:
-                        st.error(f"Imaging rejected: {error}")
-            else:
-                st.warning(job.error)
-            if status != "running" and st.button("Dismiss CT job", key="ct_dismiss"):
-                del st.session_state.ct_job
-                st.rerun()
-        with st.expander("Or upload an existing CT review bundle"):
-            uploaded = st.file_uploader(
-                "CT review bundle (.zip)", type=["zip"], key="ct_bundle"
-            )
-            if st.button(
-                "Inspect uploaded CT bundle",
-                key="ct_upload",
-                disabled=cannot_add or running or uploaded is None,
-            ):
-                try:
-                    prepare(uploaded.getvalue())
-                except (ValueError, OSError) as error:
-                    st.error("This CT bundle could not be verified.")
-                    st.text(str(error))
-
-
-@st.fragment(run_every=1)
-def ct_progress(job):
-    if job.status() != "running":
-        st.rerun()
-    st.info(job.progress(), icon="⏳")
-    st.caption(
-        f"{job.elapsed:.0f} seconds elapsed · automatic stop at {job.timeout:.0f} seconds. The study opens automatically when ready."
-    )
-    left, right = st.columns(2)
-    with left:
-        st.button("Refresh CT job", key="ct_refresh")
-    with right:
-        if st.button("Cancel CT job", key="ct_cancel"):
-            job.cancel()
             st.rerun()

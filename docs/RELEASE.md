@@ -122,3 +122,18 @@ local preparation scripts provide real upload files. Imaging prose is shorter;
 notes are optional; confirmations start selected; colour and larger decisions
 make pauses/approval clearer. Explicit submission, uncertain-candidate blocks,
 safety routing and final content binding remain. [Experiment details](RESEARCH_IMAGES.md).
+
+## Upload/Analyze repair — 23 October 2026
+
+Both image views use Upload/Analyze and optional model/example selection. Uploads
+never silently launch generated-demo inference. CT/endoscopy review ZIPs open
+existing results; permitted raw endoscopy images run the local model. A successful
+Analyze after case creation opens a fresh unreviewed context, clearing old safety
+and final-review choices while preserving stored reports. Invalid uploads leave
+the old context intact. Pending reviews and running jobs have visible blockers;
+completed/failed job handles no longer disable the other panel. Runtime and
+validation errors are displayed beside Analyze, with retry available.
+
+Reused environments/models and unchanged producer contracts. Source validation,
+urgent routing, explicit image/safety/final approvals and immutable accepted
+studies remain enforced. [Operation](INTERFACE.md) · [Actual checks](../EVALUATION.md).

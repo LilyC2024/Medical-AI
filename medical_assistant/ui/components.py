@@ -181,13 +181,15 @@ def next_action(state=None, *, urgent=False):
 
     if proposal and is_endoscopy(proposal[1]["manifest"]):
         return "endoscopy-review", "Next action: review or discard the endoscopy image"
+    if proposal:
+        return "ct-review", "Next action: review or discard the CT study"
+    from medical_assistant.imaging_actions import job_pending
+
     endo_job = st.session_state.get("endo_job")
-    if endo_job and endo_job.status() in ("running", "complete"):
+    if job_pending(endo_job):
         return "endoscopy-review", "Next action: inspect the endoscopy result"
     job = st.session_state.get("ct_job")
-    if "imaging_proposal" in st.session_state or (
-        job and job.status() in ("running", "complete")
-    ):
+    if job_pending(job):
         return "ct-review", "Next action: review or discard the CT study"
     if state.get("status") in ("awaiting_clinician_review", "complete"):
         return "clinical-report", "Next action: open the clinical report"

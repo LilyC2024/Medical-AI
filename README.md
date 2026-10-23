@@ -97,9 +97,15 @@ and the CT connection.
 Select **Jordan — real-image research composite** after login. Its fictional
 history can include a real LIDC-IDRI CT excerpt and a real Kvasir-SEG endoscopy
 image. They come from **unrelated research subjects**, not one real patient.
-Use **Open real CT example** and **Open real endoscopy example**, or upload the
-prepared files. You can also re-run the polyp model on three supplied research
-JPGs. [Prepare files, data terms and exact commands](docs/RESEARCH_IMAGES.md).
+Both imaging views use **Upload → Analyze**. Upload the CT review ZIP or an
+endoscopy JPG/PNG/review ZIP, then Analyze. A ZIP opens its included results; a
+permitted JPG/PNG runs the installed local polyp model. For a prepared example,
+choose **Local research example** under **Model / example** and Analyze with no
+upload. You can re-run the polyp model on three supplied research JPGs. [Prepare files, data terms and exact commands](docs/RESEARCH_IMAGES.md).
+
+Adding images after a report starts creates a fresh, unreviewed context; include
+the images and repeat the safety check. Saved reports remain intact. Errors appear
+beside Analyze, with retry available.
 
 Imaging panels show source, annotations and inspected results. Model scores,
 checkpoint identifiers and verbose provenance stay out of the main presentation.

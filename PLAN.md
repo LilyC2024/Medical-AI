@@ -130,3 +130,18 @@ software gates.
     for the actual research-image pair, full regressions/smokes and honest outcomes,
     updated instructions/sample manifest and a refreshed local demo. Publish
     compatible changes after passing. Status: complete for the feasible local release — 243 LOVISA / 83 CT / 37 endoscopy tests; actual 11.98s CT ROI, 3.16s endoscopy and 34.32s combined local-LLM smoke. All three repositories published, all hosted workflows passed, and the localhost demo restarted with the real-image kit. Full CT training was not executed because CUDA hardware is unavailable; its documented separate workflow is retained.
+
+## Upload and Analyze repair
+
+33. **Imaging action foundation** — reproduce the active-report lock, centralize
+    authenticated upload routing and fresh unreviewed report contexts; preserve
+    evidence validation, pending-candidate decisions and patient isolation. Test
+    the service layer before UI integration. Status: passed — 25 focused action and
+    navigation tests in 10.32 seconds, before panel integration.
+34. **Two-action imaging interface** — consistent Upload/Analyze controls, optional
+    local example/model selection, visible blockers, retryable errors and bounded
+    progress; no silent demo substitution for uploaded data. Status: passed — 39
+    focused action, upload, report, review and UI tests in 49.84 seconds.
+35. **Verification and delivery** — full regression, real-file upload/model smoke,
+    local Ollama smoke, corrected operating guides and refreshed localhost demo.
+    Record actual outcomes and publish tested changes. Status: in progress.

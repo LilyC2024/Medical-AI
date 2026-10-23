@@ -5,6 +5,11 @@
 | API / helper | Input → result and invariant |
 | --- | --- |
 | configured_ct_root / configured_ct_model | Existing MHCRA_CT_* settings or sibling defaults → resolved local paths |
+| imaging_actions.analyze | Authenticated file/mode → pending validated ZIP or actual raw-image CV job; successful input retires only the old report context; no approvals |
+| imaging_actions.collect / job_pending | Completed worker → one pending proposal without replacement; collected/invalid results cannot hold safety through stale handles |
+| imaging_actions.blocker / failure_detail | Pending import/study/running job → clear action; bounded worker exception → visible error without full log |
+| ui.imaging_actions.image_actions / image_progress | Shared Upload/Analyze controls, model/example selector, immediate errors and bounded cancellable progress |
+| ui.navigation.reset_report_context | Cancel old clinical work/close client, clear safety/final choices; retain selected patient, upload, accepted studies and saved reports |
 | LocalCTJob.__init__ | Synthetic patient, mode, device and paths → separate no-shell CT subprocess with unique study/output |
 | LocalCTJob._watch / cancel / status | Process/watchdog → bounded state and process-group termination; no auto approval |
 | validate_bundle | Bounded ZIP and patient → separately validated synthetic/public CT or endoscopy schemas and legacy tissue-v1; old incomplete nodule-v1 rejected |

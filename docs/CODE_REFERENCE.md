@@ -20,6 +20,7 @@ and [complete callable/subfunction signatures](reference/CALLABLES.md).
 | Reporting | report.py, report_notes.py, report_binding.py | One-section summary, detailed evidence index and signed reviewer-note verification |
 | Report pictures/export | report_assets.py | Verified representative CT/caliper pictures and approval-gated self-contained HTML |
 | CT result summaries | imaging_results.py | Deterministic candidate/review/caliper summary shared by the viewer and concise report |
+| Imaging actions | imaging_actions.py, ui/imaging_actions.py | Authenticated upload/example routing, fresh report context, shared Upload/Analyze, visible worker errors and retries |
 | CT execution | ct_worker.py | Separate interpreter, mode/device, cancellation and watchdog |
 | CT validation/storage | imaging_contract.py, imaging.py | Version dispatch, pending originals and immutable accepted snapshots |
 | Nodule contract | nodule_models.py, nodule_exchange.py | Vendored typed geometry/review, canonical report and wire renderer |
@@ -61,3 +62,6 @@ and [complete callable/subfunction signatures](reference/CALLABLES.md).
 | `scripts/smoke_research_pair.py` | Actual image-pair report smoke with scripted approvals in an isolated temporary database |
 
 [Data sources, commands and limits](RESEARCH_IMAGES.md).
+
+`scripts/smoke_uploads.py` exercises real CT ZIP/endoscopy ZIP/JPG uploads and actual
+local polyp inference through Streamlit in a temporary database, issuing no reviews.

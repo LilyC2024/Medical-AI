@@ -23,6 +23,7 @@ from medical_assistant.ui.navigation import (
     ensure_patient,
     focus_pending,
     go_to,
+    reset_report_context,
 )
 
 
@@ -69,30 +70,7 @@ def switch_patient():
 
 
 def reset_case():
-    task = st.session_state.get("analysis_task")
-    if task is not None:
-        task.cancel()
-    elif "workflow" in st.session_state:
-        st.session_state.workflow.inference.close()
-    for key in (
-        "analysis_task",
-        "workflow",
-        "case_id",
-        "run_error",
-        "saved_path",
-        "last_analysis_seconds",
-    ):
-        st.session_state.pop(key, None)
-    for key in (
-        "safety_notes",
-        "safety_attest",
-        "safety_action",
-        "review_notes",
-        "attested",
-        "decision",
-        "report_note_changed",
-    ):
-        st.session_state.pop(key, None)
+    reset_report_context(st.session_state)
     st.session_state.navigate_to = "Patient overview"
     st.session_state.focus_target = "patient-overview"
 

@@ -185,7 +185,7 @@ def main():
     (a.output / "examples.json").write_text(json.dumps(manifest, indent=2))
     (a.output / "README.txt").write_text(
         "LOVISA real-image research examples\n\nSign in and select Jordan — real-image research composite.\n"
-        "CT review: upload ct-real.mhcra.zip. Endoscopy review: upload endoscopy-01.endo.zip, or analyse endoscopy-01.jpg.\n"
+        "CT review: Upload ct-real.mhcra.zip, then Analyze. Endoscopy review: Upload endoscopy-01.endo.zip or endoscopy-01.jpg, then Analyze.\n"
         "Inspect each proposed region and explicitly include the study. Then complete Safety check and generate the report.\n"
         "These images are from unrelated research subjects. The CT ZIP contains a limited source-mapped excerpt, not a full scan.\n"
         "ct-source_preview.png is for viewing only: PNG screenshots cannot replace DICOM HU/geometry for CT inference.\n"

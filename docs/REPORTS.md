@@ -22,7 +22,9 @@ probability, physical endoscopy measurement, symptom explanation or diagnosis.
 
 Inspect and explicitly accept CT/endoscopy **before** preparing safety. Preparation
 freezes accepted studies into the report. Pending/discarded studies are not included;
-new imaging requires a new review. CT review retains all source slices; Endoscopy
+new imaging requires a new review. The Upload/Analyze action now opens that fresh
+context automatically after valid input, preserving saved reports. Include the
+study and complete safety again. CT review retains all source slices; Endoscopy
 review retains its source image and overlay. The prose covers every accepted study;
 representative pictures and short measurement lists are bounded. Exact artifacts
 and full decisions remain available in the local store/evidence package.

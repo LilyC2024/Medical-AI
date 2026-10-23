@@ -42,7 +42,8 @@ def test_completed_ct_automatically_shows_results_and_keeps_them_after_analysis(
     assert not inference.calls
     wait_analysis(app.button(key="generate").click().run())
     open_imaging(app)
-    assert app.button(key="ct_generate").disabled
+    assert not app.button(key="ct_generate").disabled
+    assert any("fresh, unreviewed report" in item.value for item in app.info)
     assert any(h.value == "CT analysis results" for h in app.subheader)
     assert app.metric[0].value == "1" and app.metric[1].value == "1"
     assert len(inference.calls) == 1 and not app.get("download_button")

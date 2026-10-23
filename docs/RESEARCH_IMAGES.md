@@ -12,7 +12,7 @@ the fictional symptoms. Image dates and absent clinical measurements stay unknow
 
 After local preparation, `data/research-demo/README.txt` and `examples.json` list
 all upload files, source identities, hashes and terms. Sign in, select Jordan and
-use the matching imaging view:
+use **Upload → Analyze** in the matching imaging view:
 
 | File | Use |
 | --- | --- |
@@ -21,6 +21,12 @@ use the matching imaging view:
 | `endoscopy-01.jpg` through `endoscopy-03.jpg` | Re-run the local polyp model on these actual research images |
 | `endoscopy-01.endo.zip` through `endoscopy-03.endo.zip` | Inspect prepared source/prediction evidence immediately |
 | `endoscopy-01-reference-mask.jpg` etc. | Dataset annotation for comparison; never a model result or histology |
+
+A review ZIP opens its included predictions; it is not new inference. An uploaded
+permitted JPG/PNG runs the installed polyp model. To open the prepared example
+without a file, choose **Local research example** under **Model / example** and
+Analyze. Adding images after a report starts opens a fresh unreviewed context and
+requires safety review again.
 
 The three endoscopy images are the **first three frozen test-manifest rows**,
 selected without ranking their model results. Include a CT and endoscopy study

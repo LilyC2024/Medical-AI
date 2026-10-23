@@ -103,3 +103,23 @@ safety and final approval with clearly scripted submissions in a disposable DB,
 never the app database. Its exported example visibly says no clinician reviewed
 it. Standard `smoke_local.py` still issues no approvals. Reproduce public model
 training/evaluation separately; artificial unit checks are not real-data tests.
+
+## Upload/Analyze regressions
+
+`tests/test_imaging_actions.py` tests authenticated routing, failed-input rollback,
+frozen-report preservation, exact uploaded bytes, modality/patient checks and job
+collection. `tests/test_upload_analyze_ui.py` uses actual Streamlit file-uploader
+widgets with artificial pixels and scripted clinical inference. It reproduces
+uploading after draft generation in both panels and verifies renewed safety gates,
+visible errors/retries and pending-review navigation.
+
+With the prepared local research kit and installed endoscopy model, run:
+
+```bash
+.venv/bin/python scripts/smoke_uploads.py --kit data/research-demo
+```
+
+This separate smoke uploads actual research ZIP/JPG files through the UI and runs
+actual local polyp inference. Only persistence is redirected to a disposable
+SQLite database; no image, safety or report approval is issued. It is not a
+browser visual check or clinical validation.
