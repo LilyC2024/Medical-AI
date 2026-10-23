@@ -126,7 +126,8 @@ distances. [CT installation, use, wire contract and migration](docs/IMAGING.md).
 ```
 
 Offline tests use temporary databases and scripted inference/reviewers. Real CT
-and Ollama smokes are separate and never approve final clinical reports. See
+and Ollama smokes are separate and never approve final clinical reports. Current release: **146 MHCRA tests and 81 CT tests passed**,
+with hosted cross-project checks also passing. See
 [actual evaluation](EVALUATION.md), [phase gates](PLAN.md) and
 [validation guide](docs/VALIDATION.md) for outcomes and limits.
 
@@ -150,4 +151,4 @@ Single-machine prototype: pending cases/sessions/proposals are in memory; SQLite
 sources, audit and saved reports persist. Storage is not encrypted. Keep Streamlit
 and Ollama local. The structured safety policy is not a comprehensive emergency
 text detector. The evidence collection is empty by default. MHCRA has no selected
-redistribution license; review that and dependency/model licenses before reuse.
+redistribution license; [vendored CT components retain their MIT notice](third_party/README.md); review that and dependency/model licenses before reuse.

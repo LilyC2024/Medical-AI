@@ -56,4 +56,6 @@ must pass its tests before work begins on the next.
     MHCRA overview with detailed linked guides and function/folder reference;
     update CT compatibility docs and publish both tested trees. Local verification
     passed: 146 MHCRA tests, 81 CT tests; real fixture/pretrained/legacy CT smoke
-    and live gemma4:e2b smoke passed. Publication/hosted results in EVALUATION.md.
+    and live gemma4:e2b smoke passed. Both matching updates published; hosted MHCRA Python 3.10/3.12 and all three
+    producer-consumer smokes passed. CT Windows/Linux, Docker and pretrained
+    checks passed. Phase complete; exact commits/runs in EVALUATION.md.

@@ -22,7 +22,8 @@ Offline tests use scripted model/reviewer identities and temporary SQLite, never
 real clinician approval. Candidate decisions and calipers are hash-bound to the
 authenticated actor; no unresolved decision can be accepted. NPY allocation,
 source/overlay pixel, report, patient/public-input and byte-tamper attempts fail
-closed. Source records remain separate from accepted imaging and outside pixels.
+closed. Clinical source facts remain separate from imaging snapshots; pixels stay outside
+the LLM context.
 Imaging never enters the LLM or lowers deterministic safety escalation. Final
 clinical approval remains required even after imaging acceptance.
 
@@ -32,7 +33,22 @@ malignancy accuracy or time-savings interpretation. Actual CUDA/NPU execution wa
 not performed for this update. Local accounts do not verify professional status;
 producer declarations/hashes establish consistency, not independent authenticity.
 Browser visual inspection was unavailable; Streamlit AppTest exercised both
-legacy and nodule controls. Current hosted results are added after execution.
+legacy and nodule controls. Hosted checks passed as recorded below.
+
+## Current hosted verification
+
+[MHCRA Actions run 39922198090](https://github.com/LilyC2024/Medical-AI/actions/runs/39922198090)
+passed at implementation commit `607c8a586fc820f9757b5b5a9b715247005df52f`:
+Python 3.10 and 3.12 regression suites, dependency/doc checks, shared-contract
+equality and actual fixture/pretrained/legacy producer-consumer smokes. CT producer
+is pinned to `e0704b22177a23b323e4d3aff455c447d0579542`.
+
+[CT Actions run 39922103738](https://github.com/LilyC2024/ai-medimg-2.5D-CT/actions/runs/39922103738)
+also passed: Windows/Linux regression, both new bridge commands, actual pretrained
+phantom smoke and Linux container checks. No CUDA or NPU was exercised. Hosted
+inference is open-source model execution on runner CPU, not a cloud inference
+service used by the app; ordinary application inference remains local-only.
+This final documentation-only record does not alter the tested implementation.
 
 ## Previous release evaluation
 
