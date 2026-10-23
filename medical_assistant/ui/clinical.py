@@ -8,8 +8,9 @@ from medical_assistant import ollama_client, storage
 from medical_assistant.jobs import BudgetInference, WorkTask
 from medical_assistant.models import Review
 from medical_assistant.report import digest
+from medical_assistant.report_assets import inspection_figures, portable_html
 from medical_assistant.ui.components import empty
-from medical_assistant.ui.navigation import go_to
+from medical_assistant.ui.navigation import clear_patient, go_to
 from medical_assistant.workflow import MedicalHistoryOrchestrator
 
 STAGES = {
@@ -300,6 +301,52 @@ def failure():
     )
 
 
+def new_report_with_ct():
+    clear_patient(st.session_state)
+    go_to("ct-review")
+
+
+def report_content(state, workflow):
+    """Short summary and verified representative CT images, with optional readable evidence."""
+    with st.container(key="report_paper"):
+        st.markdown(state.get("final_report", state["draft"]))
+        figures = inspection_figures(state, workflow.imaging_store)
+        for figure in figures:
+            left, right = st.columns(2)
+            left.image(figure.source_png, caption="Source CT", width="stretch")
+            right.image(
+                figure.overlay_png, caption="Reviewed CT annotation", width="stretch"
+            )
+            st.caption(figure.caption)
+        if len(state.get("imaging", [])) > len(figures):
+            st.caption(
+                "Representative images from the first three studies are shown; all studies remain in CT review and the evidence package."
+            )
+    if not state.get("imaging"):
+        st.button(
+            "Start a new report with CT",
+            key="new_report_ct",
+            on_click=new_report_with_ct,
+        )
+    indexed = {e["entry_id"]: e for e in state["report_evidence"]["record_entries"]}
+    with st.expander("Evidence behind the analysis · optional"):
+        for hypothesis in state["report_evidence"]["hypotheses"]:
+            st.text(hypothesis["possibility"] + " — unverified hypothesis")
+            for label, field in [
+                ("Model-selected support", "supporting_ids"),
+                ("Model-selected counterevidence", "conflicting_ids"),
+            ]:
+                for entry_id in hypothesis[field]:
+                    entry = indexed[entry_id]
+                    st.text(
+                        f"{label} · {entry['filename']} · {entry['date'] or 'date not supplied'} · {entry['source_type'].replace('_', ' ')}"
+                    )
+                    st.text(entry["excerpt"])
+        st.caption(
+            "Full source links, original documents and CT provenance remain in the evidence package."
+        )
+
+
 def report_panel(auth, token, user, record, *, urgent=False):
     if st.session_state.get("analysis_task"):
         empty(
@@ -334,19 +381,46 @@ def report_panel(auth, token, user, record, *, urgent=False):
             "Analysis stopped for human assessment. No clinical report was completed."
         )
     elif state["status"] == "awaiting_clinician_review":
+        if not state.get("report_evidence"):
+            st.info(
+                "This draft uses the earlier report format. Start a new review to create the concise combined report."
+            )
+            st.button(
+                "Start a new report", key="new_report_ct", on_click=new_report_with_ct
+            )
+            return
+        if st.session_state.pop("report_note_changed", False):
+            st.session_state.pop("attested", None)
+            st.success(
+                "Note added to the preview. Read the updated report, then confirm your review again."
+            )
         st.subheader("Draft report")
         st.caption(
             "Unverified · clinician review required. Hypotheses are not confirmed diagnoses."
         )
-        with st.container(key="report_paper"):
-            st.markdown(state["draft"])
+        try:
+            workflow._verify_report(state)
+            report_content(state, workflow)
+        except (ValueError, OSError, PermissionError):
+            st.error(
+                "Report evidence needs rechecking. Start a new review before approval."
+            )
+            return
         with st.form("clinical_review"):
             st.subheader("Your review decision")
             notes = st.text_area(
-                "Review notes and required corrections", key="review_notes"
+                "Brief clinician note / review feedback",
+                key="review_notes",
+                max_chars=600,
+            )
+            st.caption(
+                "Preview this note to include it in the report. New clinical facts need an approved record import."
+            )
+            preview_note = st.form_submit_button(
+                "Preview note in report", key="preview_report_note", disabled=not token
             )
             checked = st.checkbox(
-                "I verified sources, hypotheses, medication reconciliation and safety limitations.",
+                "I reviewed the clinical summary, CT inspection, source evidence and remaining limitations.",
                 key="attested",
             )
             action = st.radio(
@@ -360,8 +434,22 @@ def report_panel(auth, token, user, record, *, urgent=False):
                 disabled=not token,
                 type="primary",
             )
+        if preview_note:
+            try:
+                workflow.prepare_report_note(case, notes, token)
+                st.session_state.report_note_changed = True
+                st.rerun()
+            except (ValueError, PermissionError, OSError):
+                st.error(
+                    "The note could not be added. Keep it within 600 characters and recheck the report sources."
+                )
         if submit:
             try:
+                if (
+                    action == "Approve report"
+                    and state.get("clinician_note", {}).get("text") != notes.strip()
+                ):
+                    raise ValueError("Preview the changed note before approval")
                 workflow.review(
                     case,
                     make_review(
@@ -375,7 +463,9 @@ def report_panel(auth, token, user, record, *, urgent=False):
                 )
                 st.rerun()
             except (ValueError, PermissionError):
-                st.error("Review rejected. Check your notes, attestation and sign-in.")
+                st.error(
+                    "Preview your current note first, then check the review checkbox and sign-in before approving."
+                )
 
     elif state["status"] == "complete":
         try:
@@ -387,8 +477,16 @@ def report_panel(auth, token, user, record, *, urgent=False):
             st.success(
                 "Reviewed report ready. Approved by " + payload["review"]["reviewer"]
             )
-            a, b = st.columns(2)
+            a, b, c = st.columns(3)
             with a:
+                st.download_button(
+                    "Download report with CT images (HTML)",
+                    portable_html(payload, auth=auth, safety=workflow.safety),
+                    file_name=f"reviewed-{case}.html",
+                    mime="text/html",
+                    width="stretch",
+                )
+            with b:
                 st.download_button(
                     "Download reviewed report (Markdown)",
                     payload["final_report"],
@@ -396,7 +494,7 @@ def report_panel(auth, token, user, record, *, urgent=False):
                     mime="text/markdown",
                     width="stretch",
                 )
-            with b:
+            with c:
                 st.download_button(
                     "Download evidence package (JSON)",
                     json.dumps(payload, indent=2),
@@ -404,7 +502,6 @@ def report_panel(auth, token, user, record, *, urgent=False):
                     mime="application/json",
                     width="stretch",
                 )
-            with st.container(key="report_paper"):
-                st.markdown(payload["final_report"])
+            report_content(payload, workflow)
         except (ValueError, PermissionError, OSError):
             st.error("Final export blocked. The source or approval needs rechecking.")

@@ -17,7 +17,8 @@ and [complete callable/subfunction signatures](reference/CALLABLES.md).
 | Extraction/import | history.py, history_import.py | Chronology, orders and approved source appends |
 | LLM/references | agents.py, compact_reasoning.py, reasoning_constraints.py, ollama_client.py, evidence.py | Bounded hypotheses, local inference and approved text retrieval |
 | Safety/auth/graph | safety.py, auth.py, workflow.py | Python policy, content-bound approvals and sequential LangGraph |
-| Reporting | report.py | Seven sections, exact citations and escaped research appendix |
+| Reporting | report.py, report_notes.py, report_binding.py | One-section summary, detailed evidence index and signed reviewer-note verification |
+| Report pictures/export | report_assets.py | Verified representative CT/caliper pictures and approval-gated self-contained HTML |
 | CT result summaries | imaging_results.py | Deterministic candidate/review/caliper summary shared by the viewer and concise report |
 | CT execution | ct_worker.py | Separate interpreter, mode/device, cancellation and watchdog |
 | CT validation/storage | imaging_contract.py, imaging.py | Version dispatch, pending originals and immutable accepted snapshots |

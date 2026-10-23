@@ -22,8 +22,10 @@ flowchart TD
     E --> R[Local Ollama reasoning]
     R --> V[Validate hypotheses and exact source excerpts]
     V --> F[Recheck safety]
-    F --> D[Compose seven-section draft]
+    F --> D[Compose concise combined summary]
     D --> C[Authenticated final clinician review]
+    C -->|Preview brief note| N[Recompose signed note and require fresh approval]
+    N --> C
     C -->|Corrections| C
     C -->|Approve exact draft| P[Recheck safety, artifacts and receipt; export]
 ```
@@ -105,9 +107,10 @@ must agree. Uploaded hashes establish consistency, not execution authenticity.
 
 LOVISA requires its own authenticated candidate/caliper review. The acceptance
 hash covers the original bundle and exact choices. Python adds an escaped,
-source-linked research appendix after clinical reasoning. Images and imaging
+source-bound CT inspection paragraph after clinical reasoning. Verified source/
+annotation pictures appear in the report and portable HTML. Images and imaging
 notes never enter the LLM or expand its hypothesis catalog. Final approval covers
-the appendix; completion/export/persistence recheck artifacts. Urgent routing
+the combined content; completion/export/persistence recheck artifacts. Urgent routing
 precedes optional image checks. [Contract details](IMAGING.md).
 
 ## Persistence
@@ -121,3 +124,21 @@ precedes optional image checks. [Contract details](IMAGING.md).
 Restarting loses pending work. Storage is not encrypted; process/filesystem/database
 administrators remain trusted. Local authentication does not verify professional
 credentials. [Security](../SECURITY.md).
+
+## Concise report and reviewer comments
+
+`report.summary_parts` supplies one short section for Markdown/HTML. Exact source
+excerpts and model support/counterevidence links remain in `report_evidence`, with
+originals and full CT metadata retained. `report_assets` renders verified
+representative pictures, including reviewer calipers; HTML embeds them locally.
+`storage.validate_reviewed_report` gates every final export.
+
+`prepare_report_note` authenticates a comment author and signs the note against
+its case. It recomposes a pending draft and invalidates previous review state.
+No LLM call follows a note edit. A new explicit approval must bind the new draft
+hash. Notes remain labelled commentary; they cannot modify source facts or safety
+routing. [Report rules](REPORTS.md).
+
+Approval also signs a content manifest covering the source records, model evidence,
+CT snapshots and clinician note. Even when two studies produce identical short
+text, substituting different images or source metadata invalidates the approval.

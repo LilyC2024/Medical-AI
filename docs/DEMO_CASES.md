@@ -23,7 +23,7 @@ symptoms or laboratory results in that fictional history.
 
 Automated tests load all five from temporary SQLite twice to check idempotence,
 validate original sources/unknown dates/dose changes, exercise staged safety and
-check concise source-linked drafts. They use **scripted inference/reviewers** and
+check concise summaries with full source links retained separately. They use **scripted inference/reviewers** and
 never establish clinical correctness. Tests for Casey verify the mandatory stop.
 The actual local Ollama smoke is separate and does not issue clinician approval.
 

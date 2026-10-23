@@ -15,7 +15,7 @@ remain stored for the patient they belong to.
 | Patient overview | Read dated/undated history, attribution and historical medicines |
 | CT review | Generate/upload synthetic CT, inspect annotations and review candidates/calipers |
 | Safety check | Assess missing information, save your decision, then generate a draft |
-| Clinical report | Read the draft, request corrections or explicitly approve the final report |
+| Clinical report | Read one concise summary with CT pictures, preview a brief note, then approve or request corrections |
 | Source records | Check original wording, download the input original or approve an additional synthetic record |
 
 The **Next action** button points to pending record/CT reviews, safety or the
@@ -38,7 +38,9 @@ an **Open pending changes** button so they can be reviewed or discarded first.
 ![Dedicated safety view with assessment and locked generation](images/lovisa-safety-first.jpg)
 
 The locked button demonstrates the gate; it is not a clinical safety conclusion.
-Final report approval remains a separate action in Clinical report. This is a
+Final report approval remains a separate action in Clinical report. Previewing a
+clinician note updates the text and clears the review checkbox; it does not
+approve the report. [Report format and downloads](REPORTS.md). This is a
 research safeguard, not regulatory certification.
 
 ## CT and evidence

@@ -47,3 +47,13 @@ Reference excerpts require redistribution rights. The evidence manifest starts e
 Report suspected vulnerabilities privately when a maintainer channel is available.
 Use a minimal synthetic reproduction; never post real records or credentials in
 public issues. No certification or response-time commitment is claimed.
+
+Brief report notes are authenticated reviewer commentary, not imported record
+facts. A case-bound signed note changes the draft hash and requires fresh final
+approval. Final HTML/Markdown/JSON exports verify exact report text, evidence
+links, note authorship and CT integrity. HTML embeds verified images and permits
+no external assets or scripts. Existing source and safety checks remain mandatory.
+
+Approval also signs a content manifest covering the source records, model evidence,
+CT snapshots and clinician note. Even when two studies produce identical short
+text, substituting different images or source metadata invalidates the approval.

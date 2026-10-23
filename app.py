@@ -89,6 +89,7 @@ def reset_case():
         "review_notes",
         "attested",
         "decision",
+        "report_note_changed",
     ):
         st.session_state.pop(key, None)
     st.session_state.navigate_to = "Patient overview"

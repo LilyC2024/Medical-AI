@@ -35,7 +35,7 @@ from medical_assistant.report import digest
 from medical_assistant.storage import save_report
 
 
-def nodule_bytes(patient="synthetic-checklist", study_id="lung-study", mutate=None):
+def nodule_bytes(patient="synthetic-checklist", study_id="lung-study", mutate=None, *, no_candidates=False):
     g = Geometry(
         shape_zyx=(2, 12, 12),
         spacing_zyx_mm=(2, 1, 1),
@@ -68,7 +68,7 @@ def nodule_bytes(patient="synthetic-checklist", study_id="lung-study", mutate=No
             synthetic_fixture=True,
             score_threshold=0.5,
         ),
-        candidates=[
+        candidates=[] if no_candidates else [
             Candidate(candidate_id="N001", box_zyx=(0, 2, 3, 1, 7, 8), score=0.8)
         ],
     )
@@ -298,9 +298,11 @@ def test_nodule_appendix_is_grounded_separate_from_llm_and_final_review(
         token,
     )
     state = workflow.state(case)
-    assert "5.00 mm" in state["draft"] and "not lesion diameters" in state["draft"]
-    assert "1" * 64 in state["draft"] and "no malignancy diagnosis" in state["draft"]
-    assert state["draft"].count("\n## ") == 7
+    assert "5.00 mm" in state["draft"] and "do not establish malignancy" in state["draft"]
+    assert "1" * 64 not in state["draft"]
+    assert state["report_evidence"]["ct_studies"][0]["study_id"] == "lung-study"
+    assert state["imaging"][0]["manifest"]["study"]["sources"][0]["sha256"] == "1" * 64
+    assert state["draft"].count("# ") == 1
     assert "Scripted synthetic unit fixture" not in json.dumps(inference.calls)
     with pytest.raises(ValueError):
         workflow.export(case)

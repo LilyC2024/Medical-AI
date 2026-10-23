@@ -7,7 +7,7 @@ from medical_assistant.database import get_history, seed
 from medical_assistant.evidence import LocalEvidenceCollection
 from medical_assistant.history import MedicalHistoryAgent, MedicationAgent
 from medical_assistant.models import Assessment
-from medical_assistant.report import compose, digest
+from medical_assistant.report import compose, digest, evidence_index
 
 
 def test_unsupported_assertion_with_real_source_id_still_fails(record):
@@ -59,11 +59,12 @@ def test_report_hypotheses_sources_and_missing_bp_and_history(tmp_path):
         "safety": Assessment(missing_information=["Current screening unavailable."]).model_dump(mode="json"),
         "reasoning": reasoning.model_dump(mode="json"),
     })
-    assert "### Hypothesis:" in report
+    assert "unverified hypotheses" in report
     assert "5 mg → 10 mg" in report
-    assert "date unavailable | symptom-undated" in report
+    assert "Source key" not in report
     assert "Blood-pressure measurements are unavailable" in report
     assert "syncope/falls" in report and "fluid intake" in report
-    assert "No approved local references retrieved" in report
-    for entry in record.entries:
-        assert f"| {entry.id}]" in report
+    assert "No approved reference support was selected" in report
+    # Full original citations remain separately available without cluttering the prose.
+    assert len(report.split()) < 450
+    assert "[S1]" not in report

@@ -1,12 +1,12 @@
-"""Deterministic seven-section composition; citations never come from model text."""
+"""Concise source-bound summaries; detailed provenance stays in the evidence package."""
 
 import hashlib
 import html
 import re
 
-from medical_assistant.models import Assessment, PatientRecord
+from medical_assistant.models import Assessment, PatientRecord, ReportNote
 
-NOTICE = "Educational and experimental fictional case. Not a diagnostic device. All clinical conclusions require clinician verification."
+NOTICE = "Educational, experimental synthetic case. Not a diagnostic device; clinician verification required."
 
 
 def digest(text: str) -> str:
@@ -26,173 +26,193 @@ def inline_text(value) -> str:
     return re.sub(r"(?<!\w)_|_(?!\w)", r"\\_", text)
 
 
+def evidence_index(record, outputs, imaging=None):
+    """Keep every exact source excerpt and selected evidence link outside the short prose."""
+    documents = {source.id: source for source in record.sources}
+    assessments = {
+        role: Assessment.model_validate(value).validate_sources(record)
+        for role, value in outputs.items()
+    }
+    return {
+        "record_entries": [
+            {
+                "entry_id": e.id,
+                "source_id": e.source_id,
+                "filename": documents[e.source_id].filename,
+                "date": e.date.isoformat() if e.date else None,
+                "source_type": e.source_type,
+                "excerpt": e.text,
+            }
+            for e in record.entries
+        ],
+        "hypotheses": [
+            {
+                "possibility": item.possibility,
+                "supporting_ids": list(
+                    dict.fromkeys(i for c in item.supporting for i in c.evidence_ids)
+                ),
+                "conflicting_ids": list(
+                    dict.fromkeys(i for c in item.conflicting for i in c.evidence_ids)
+                ),
+                "reference_ids": item.reference_ids,
+            }
+            for item in assessments["reasoning"].explanations
+        ],
+        "ct_studies": [
+            {
+                "study_id": s["manifest"]["study_id"],
+                "manifest_sha256": s["manifest_sha256"],
+                "archive_sha256": s["archive_sha256"],
+            }
+            for s in imaging or []
+        ],
+    }
+
+
+def ct_summary(imaging):
+    """Aggregate accepted inspections; include reviewed calipers, never box-size diagnoses."""
+    from medical_assistant.imaging_results import summarize
+    from medical_assistant.nodule_support import verify_nodule_snapshot
+
+    if not imaging:
+        return "No accepted CT study is included. Inspect and accept CT before preparing a new report if imaging is needed."
+    results = []
+    for snapshot in imaging:
+        review = verify_nodule_snapshot(snapshot)
+        results.append(
+            summarize(
+                snapshot["manifest"], review.model_dump(mode="json") if review else None
+            )
+        )
+    lung = [result for result in results if "candidate_count" in result]
+    legacy = len(results) - len(lung)
+    parts = [f"{len(results)} accepted artificial CT {'study' if len(results) == 1 else 'studies'} included."]
+    if lung:
+        proposed = sum(r["candidate_count"] for r in lung)
+        accepted = sum(r["accepted_count"] for r in lung)
+        parts.append(
+            f"{proposed} {'candidate' if proposed == 1 else 'candidates'} proposed; inspection accepted {accepted} and rejected {proposed - accepted} for research review."
+        )
+        calipers = [
+            (i, row)
+            for i, result in enumerate(results, 1)
+            for row in result["rows"]
+            if row["Caliper mm"] is not None
+        ]
+        if calipers:
+            parts.append(
+                "Reviewed calipers: "
+                + "; ".join(
+                    f"study {i}, {row['Candidate']} {row['Caliper mm']:.2f} mm"
+                    for i, row in calipers[:3]
+                )
+                + "."
+            )
+            if len(calipers) > 3:
+                parts.append(
+                    f"{len(calipers) - 3} further caliper(s) are in the evidence package."
+                )
+        else:
+            parts.append("No reviewer caliper was supplied.")
+        if any(r["mode"] == "Non-ML fixture" for r in lung):
+            parts.append("Includes a non-ML demonstration fixture.")
+        parts.append(
+            "Candidates do not establish malignancy or explain symptoms; zero/rejected candidates do not establish a normal CT."
+        )
+    if legacy:
+        parts.append(
+            f"{legacy} legacy tissue-mask study/studies; these are not nodule detections or lesion measurements."
+        )
+    parts.append("Acquisition dates are unavailable.")
+    return " ".join(parts)
+
+
+def summary_parts(record, outputs, imaging=None, clinician_note=None):
+    """Plain-text report blocks shared by Markdown and portable HTML presentation."""
+    assessments = {
+        role: Assessment.model_validate(value).validate_sources(record)
+        for role, value in outputs.items()
+    }
+    reasoning = assessments["reasoning"]
+    explanations = reasoning.explanations
+    if explanations:
+        labels = list(dict.fromkeys(e.possibility for e in explanations))
+        analysis = (
+            "; ".join(labels)
+            + ". These are unverified hypotheses selected by the local model, not diagnoses."
+        )
+        kinds = list(
+            dict.fromkeys(
+                ("patient-reported " if c.kind == "patient_reported" else "documented ")
+                + next(e.kind for e in record.entries if e.id == c.evidence_ids[0])
+                + " evidence"
+                for item in explanations
+                for c in item.supporting
+            )
+        )
+        analysis += " The model considered " + ", ".join(kinds) + "."
+        analysis += (
+            " Model-selected counterevidence also needs review."
+            if any(e.conflicting for e in explanations)
+            else " No counterevidence was selected; this does not confirm a cause."
+        )
+    else:
+        analysis = "Insufficient evidence for a model-selected explanation; no cause is established."
+    changes = assessments["medications"].dose_changes
+    if changes:
+        analysis += (
+            " Documented medication changes: "
+            + "; ".join(
+                f"{c.name} {c.previous_dose} → {c.documented_dose} on {c.date}"
+                for c in changes[:2]
+            )
+            + "; reconcile current use."
+        )
+        if len(changes) > 2:
+            analysis += " Further changes are retained in the evidence package."
+    analysis += (
+        " No approved reference support was selected."
+        if not any(e.reference_ids for e in explanations)
+        else "Selected local reference support is retained in the evidence package."
+    )
+    safety = assessments["safety"]
+    gaps = list(dict.fromkeys(safety.missing_information))
+    if not any(e.blood_pressure for e in record.entries) and not any(
+        "blood-pressure" in x.casefold() for x in gaps
+    ):
+        gaps.append("Blood-pressure measurements are unavailable.")
+    followup = " ".join(gaps[:3])
+    followup += " Clarify symptom timing, current medicines, syncope/falls, fluid intake, allergies and current warning signs."
+    if any(f.urgency == "urgent" for f in safety.safety_flags):
+        followup = (
+            "Urgent human assessment is required; automated reasoning must stop. "
+            + followup
+        )
+    note = ReportNote.model_validate(clinician_note) if clinician_note else None
+    note_text = f"{note.reviewer}: {note.text}" if note and note.text else "Not added."
+    return [
+        ("Patient", record.display_name),
+        ("AI history analysis", analysis),
+        ("CT inspection", ct_summary(imaging)),
+        ("For clinician review", followup.strip()),
+        ("Clinician note", note_text),
+    ]
+
+
 def compose(
     record: PatientRecord,
     source_file: str,
     outputs: dict[str, dict],
     evidence=None,
     imaging=None,
+    clinician_note=None,
 ) -> str:
-    """Quote each source once; use compact evidence keys elsewhere, retaining all seven sections."""
-    from medical_assistant.history import chronology
-
-    entries = sorted(record.entries, key=chronology)
-    keys = {e.id: f"S{i + 1}" for i, e in enumerate(entries)}
-    documents = {s.id: s for s in record.sources}
-    assessments = {
-        role: Assessment.model_validate(value).validate_sources(record)
-        for role, value in outputs.items()
-    }
-
-    def refs(ids):
-        return " ".join(f"[{keys[i]}]" for i in dict.fromkeys(ids))
-
-    def unique(values):
-        return list(dict.fromkeys(values))
-
-    lines = [
-        "# Clinical report",
-        NOTICE,
-        "",
-        f"Fictional patient: {inline_text(record.display_name)} ({inline_text(record.patient_id)})",
-        "",
-        "## 1. Medical history timeline",
-    ]
-    for e in entries:
-        lines.append(
-            f"- [{keys[e.id]}] {e.date or 'Date unavailable'} · **{e.source_type}** · {e.kind}: {inline_text(e.text)}"
-        )
-    symptom_refs = refs([e.id for e in entries if e.kind == "symptom"])
-    lines += [
-        "",
-        "## 2. Current clinical summary",
-        f"Supplied symptom history: {symptom_refs or 'not supplied'}. No current cause is established.",
-        "Source history only; current status remains unverified. See the timeline and outstanding questions below.",
-        "",
-        "## 3. Medication overview",
-        "Historical orders; reconcile current use. No treatment changes recommended.",
-    ]
-    for item in assessments["medications"].medications:
-        lines.append(
-            f"- {inline_text(item.name)} {inline_text(item.dose or 'dose unavailable')} · {inline_text(item.frequency or 'frequency unavailable')} ({item.source_type}). {refs(item.evidence_ids)}"
-        )
-    if not assessments["medications"].medications:
-        lines.append("- No structured medication list supplied.")
-    for c in assessments["medications"].dose_changes:
-        lines.append(
-            f"- **Documented dose change**: {inline_text(c.name)} {inline_text(c.previous_dose)} → {inline_text(c.documented_dose)} on {c.date}. {refs(c.evidence_ids)}"
-        )
-    lines += ["", "## 4. Possible diagnostic explanations and evidence"]
-    explanations = assessments["reasoning"].explanations
-    for item in explanations:
-        support = [i for c in item.supporting for i in c.evidence_ids]
-        conflict = [i for c in item.conflicting for i in c.evidence_ids]
-        lines += [
-            f"### Hypothesis: {inline_text(item.possibility)}",
-            f"Support: {refs(support)}. Conflict: {refs(conflict) if conflict else 'none supplied; absence does not confirm a cause'}.",
-        ]
-    if not explanations:
-        lines.append("Insufficient evidence to propose an explanation.")
-    for text in unique(item.uncertainty for item in explanations):
-        lines.append(inline_text(text))
-    if evidence:
-        for item in evidence:
-            lines.append(
-                f"- Approved reference [{inline_text(item['id'])}]: {inline_text(item['title'])} · {inline_text(item['path'])} · SHA-256 {inline_text(item['sha256'])}."
-            )
-    else:
-        lines.append(
-            "No approved local references retrieved; hypotheses lack verified reference support."
-        )
-    lines += ["", "## 5. Missing information"]
-    missing = unique(x for a in assessments.values() for x in a.missing_information)
-    lines += [f"- {inline_text(x)}" for x in missing]
-    if not any(e.blood_pressure for e in entries):
-        lines.append(
-            "- Blood-pressure measurements are unavailable; do not infer normal values."
-        )
-    else:
-        for e in entries:
-            if e.blood_pressure:
-                lines.append(
-                    f"- Historical BP {e.blood_pressure.systolic:g}/{e.blood_pressure.diastolic:g} mmHg; verify current relevance. {refs([e.id])}"
-                )
-    lines.append(
-        "- Clarify symptom timing, syncope/falls, fluid intake, comorbidities, allergies and current warning signs."
+    """One concise section; full exact excerpts/citations remain in report_evidence and originals."""
+    parts = summary_parts(record, outputs, imaging, clinician_note)
+    return (
+        "# Clinical summary\n\n"
+        + "\n\n".join(f"**{label}.** {inline_text(text)}" for label, text in parts)
+        + "\n\n"
+        + NOTICE
+        + "\n"
     )
-    lines += [
-        "",
-        "## 6. Safety flags",
-        "This prototype cannot exclude an emergency. Current warning signs require urgent professional assessment; do not wait for this report.",
-    ]
-    for f in assessments["safety"].safety_flags:
-        lines.append(
-            f"- **{f.urgency.upper()}**: {inline_text(f.text)} {refs(f.evidence_ids)} Action: {inline_text(f.escalation)}"
-        )
-    lines += ["", "## 7. Questions for clinician review"]
-    questions = unique(
-        [x for a in assessments.values() for x in a.clinician_questions]
-        + [x for item in explanations for x in item.clinician_may_consider]
-    )
-    lines += [f"- {inline_text(x)}" for x in questions]
-    lines += [
-        "- Verify sources, hypotheses, current medicines and unresolved safety information.",
-        "",
-        "### Source key",
-    ]
-    for e in entries:
-        name = (
-            documents[e.source_id].filename if e.source_id in documents else source_file
-        )
-        lines.append(
-            f"- [{keys[e.id]}] [{inline_text(name)} | {e.date.isoformat() if e.date else 'date unavailable'} | {inline_text(e.id)}]"
-        )
-    if imaging:
-        lines += imaging_appendix(imaging)
-    return "\n".join(lines) + "\n"
-
-
-def imaging_appendix(imaging):
-    """Brief reviewed result; full source/model/review metadata remains in the JSON export."""
-    from medical_assistant.imaging_results import summarize
-    from medical_assistant.nodule_support import verify_nodule_snapshot
-
-    lines = [
-        "",
-        "### Research imaging appendix",
-        "Accepted synthetic artifacts, not confirmed clinical findings. Imaging is excluded from LLM reasoning.",
-    ]
-    for snapshot in imaging:
-        manifest = snapshot["manifest"]
-        review = (
-            verify_nodule_snapshot(snapshot)
-            if manifest.get("schema_version") == "mhcra-lung-nodules-v2"
-            else None
-        )
-        result = summarize(manifest, review.model_dump(mode="json") if review else None)
-        lines.append(
-            f"- Study {inline_text(result['study_id'])} · {inline_text(result['mode'])} · acquisition date unavailable. {inline_text(result['conclusion'])}"
-        )
-        for row in result["rows"]:
-            caliper = (
-                f"; reviewer caliper {row['Caliper mm']:.2f} mm"
-                if row["Caliper mm"] is not None
-                else ""
-            )
-            lines.append(
-                f"- {inline_text(row['Candidate'])}: {inline_text(row['Review'])}; score {row['Detector score']:.4f} (not malignancy risk); source slices {row['Source slices']}{caliper}. Box extents are not lesion diameters."
-            )
-            lines.append(f"- Evidence source slice SHA-256 {row['Source SHA-256']}.")
-        if not result["rows"] and "voxel_counts" in result:
-            lines.append(
-                f"- Tissue-class voxel counts: {result['voxel_counts']}; not lesion measurements."
-            )
-        checkpoint = (
-            manifest["study"]["model"]["checkpoint_sha256"]
-            if "study" in manifest
-            else manifest["checkpoint_sha256"]
-        )
-        lines.append(
-            f"- Source imaging-{snapshot['manifest_sha256']} · bundle.json · checkpoint SHA-256 {checkpoint}. Full provenance and review are retained in JSON; producer identity is not independently authenticated."
-        )
-    return lines

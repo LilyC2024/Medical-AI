@@ -22,3 +22,7 @@ Start with the [project overview](../README.md), then choose one path:
 
 [Phase record](../PLAN.md) · [File inventory](FILE_INVENTORY.md) ·
 [Security](../SECURITY.md) · [CT documentation](https://github.com/LilyC2024/ai-medimg-2.5D-CT/blob/main/docs/README.md).
+
+[Concise combined reports](REPORTS.md) explains CT inclusion, note preview,
+simplified citations and the HTML/Markdown/JSON downloads. A clearly labelled
+[scripted example](examples/README.md) demonstrates the format.

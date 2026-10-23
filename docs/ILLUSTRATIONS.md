@@ -47,7 +47,7 @@ flowchart LR
     CT[CT companion: synthetic pixels and local detector] --> ZIP[Validated nodule-v2 bundle]
     ZIP --> VIEW[LOVISA: source, candidates and caliper review]
     VIEW --> ACCEPT[Authenticated imaging acceptance]
-    ACCEPT --> APPENDIX[Research appendix in a new clinical case]
+    ACCEPT --> APPENDIX[CT inspection and images in a new summary]
     HISTORY[Synthetic history and safety-gated reasoning] --> DRAFT[Combined draft]
     APPENDIX --> DRAFT
     DRAFT --> FINAL[Separate final clinician approval]
@@ -74,3 +74,7 @@ The current light interface shows exact fictional source text and policy status.
 The [interface guide](INTERFACE.md) also shows the dedicated Safety check view and an actual
 installed-pretrained result on a generated phantom. These are separate from the
 non-ML fixture figures above.
+
+The current report is one concise Clinical summary section with CT inspection and
+a brief reviewer note. Earlier illustrations show the prior layout; the
+[report guide](REPORTS.md) and its scripted example show the current output.

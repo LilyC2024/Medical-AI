@@ -77,3 +77,12 @@ checks include switching during blocked scripted inference and discarding the
 previous patient's pending CT. Browser checks verify actual scrolling separately
 from scripted AppTest assertions. This pass uses the primary coding agent and
 automated tests; it introduces no subagents or runtime model changes.
+
+## Combined report release
+
+The primary coding agent implemented/tested summary services and signed note
+previews first, then report pictures/HTML and UI actions, followed by regression,
+actual local smokes and documentation. No coding subagents or additional runtime
+LLMs were introduced. History/medication/safety remain Python specialists; Ollama
+selects constrained history hypotheses. CT inspection/measurements are composed
+in Python and remain outside LLM inference. [Report contracts](REPORTS.md).

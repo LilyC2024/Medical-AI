@@ -90,7 +90,7 @@ def result_summary(manifest, review=None):
 def imaging_ui(path, auth, token, user, record, *, locked=False, case_imaging=None):
     st.subheader("CT review")
     st.caption(
-        "Add image context to the patient story. Inspect candidates and optional measurements before accepting a research appendix."
+        "Inspect CT images, candidates and optional calipers. Include the reviewed study before preparing the clinical report."
     )
     if "imaging_store" not in st.session_state:
         st.session_state.imaging_store = ImagingStore(path, auth)
@@ -139,7 +139,7 @@ def imaging_ui(path, auth, token, user, record, *, locked=False, case_imaging=No
                 s for s in accepted if s["manifest"]["study_id"] == selected
             )
             st.caption(
-                f"Accepted by {snapshot['review']['reviewer']}. A new clinical case includes this fixed imaging snapshot in its draft appendix."
+                f"Accepted by {snapshot['review']['reviewer']}. A newly prepared report includes this accepted study."
             )
             result_summary(snapshot["manifest"], snapshot.get("nodule_review"))
             _viewer(
@@ -194,7 +194,7 @@ def imaging_ui(path, auth, token, user, record, *, locked=False, case_imaging=No
                         key="imaging_attest",
                     )
                     submit = st.form_submit_button(
-                        "Accept imaging for research appendix",
+                        "Include reviewed CT in report",
                         key="imaging_accept",
                         disabled=locked or not token,
                     )

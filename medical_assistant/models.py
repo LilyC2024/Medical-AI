@@ -194,3 +194,9 @@ class Review(StrictModel):
         if not value:
             raise ValueError("A clinician must attest to reviewing the report and sources")
         return value
+
+
+class ReportNote(StrictModel):
+    """An attributed reviewer comment, separate from record facts and model output."""
+    reviewer: str = Field(min_length=2, max_length=120)
+    text: str = Field(max_length=600)

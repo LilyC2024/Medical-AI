@@ -67,14 +67,14 @@ def test_complex_demos_keep_exact_sources_and_safe_staged_reports(tmp_path, pati
     state = flow.state(case)
     assert len(inference.calls) == 1 and state["status"] == "awaiting_clinician_review"
     report = state["draft"]
-    assert report.count("\n## ") == 7
-    # Source text occurs once; hypotheses use the evidence key, not repeated quotations.
+    assert report.count("# ") == 1
+    indexed = {item["entry_id"]: item for item in state["report_evidence"]["record_entries"]}
     for e in record.entries:
-        assert report.count(inline_text(e.text)) == sum(
-            other.text == e.text for other in record.entries
-        )
-        assert f"| {e.id}]" in report
-    assert len(report.split()) < 1250
+        assert indexed[e.id]["excerpt"] == e.text
+        assert indexed[e.id]["source_id"] == e.source_id
+        assert indexed[e.id]["date"] == (e.date.isoformat() if e.date else None)
+    assert len(report.split()) < 450
+    assert "Source key" not in report and "No accepted CT study" in report
     with pytest.raises(ValueError):
         flow.export(case)
     if patient in ("demo-01", "demo-02", "demo-05"):

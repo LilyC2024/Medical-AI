@@ -43,8 +43,9 @@ def test_report_escapes_source_fields_and_keeps_generated_structure():
     assert 'https://example.invalid' not in report
     assert r'\!\[remote image\]\(https\://example.invalid/tracker.png\)' in report
     assert '&lt;img' in report
-    assert report.count('\n## ') == 7
-    assert '| date unavailable | entry_1]' in report
+    assert sum(line.startswith('# ') for line in report.splitlines()) == 1
+    assert not any(line.startswith('## ') for line in report.splitlines())
+    assert 'Source key' not in report and '[S1]' not in report
 
 
 def test_escaping_does_not_change_immutable_sources_or_sqlite_facts(tmp_path):

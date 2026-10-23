@@ -1,4 +1,4 @@
-"""Small, deterministic CT summaries shared by the viewer and clinical appendix."""
+"""Small, deterministic CT summaries shared by the viewer and clinical summary."""
 
 import math
 from medical_assistant.nodule_exchange import NoduleBundle

@@ -26,13 +26,18 @@
 | _initial_safety / _safety_review | Policy decision → stop or authenticated interrupt before reasoning |
 | _retrieve_evidence / _reasoning | Eligible case → approved references and checked hypotheses; no image/model tools |
 | _final_safety / _verify_safety_ack | Same snapshot/policy/date → repeated routing and acknowledgment validation |
-| _verify_imaging / _compose | Accepted imaging plus assessments → verified, escaped seven-section draft |
+| _verify_imaging / _compose | Accepted imaging plus assessments → verified concise combined summary with a separate evidence index |
 | _review / _complete | Exact draft and human Review → pending correction or guarded reviewed state |
 | ready_for_analysis / continue_analysis | Prepared history checkpoint + authenticated session → recheck exact safety/imaging and explicitly run reasoning |
 | acknowledge_safety / review / _response | Account/session plus exact case/content Review → authenticated graph resume |
 | revise | Arbitrary text revision is unsupported; factual corrections need an approved new source/case |
 | export / storage.save_report | Reviewed state/payload → recheck sources, safety, artifacts and approval before export/save |
-| report.digest / inline_text / citation helpers | Text/source IDs → content identity and escaped source-linked presentation |
+| report.compose / summary_parts / evidence_index | One concise section plus separate exact source/model/CT links; no inline technical citation list |
+| report_binding.content_digest / verify_content_binding | Signed case-bound hidden evidence/image manifest complements the visible-text approval hash; identical prose cannot authorize different CT/source content |
+| prepare_report_note / report_notes.verify_note | Authenticated, case-bound comment → new preview/hash; stale approvals fail |
+| report_assets.inspection_figures / portable_html | Verified CT previews/calipers → representative figures / final approved offline HTML |
+| storage.validate_reviewed_report | Recheck sources, note receipt, evidence links, CT and exact content before any final export |
+| report.digest / inline_text | Content identity and literal Markdown presentation |
 
 Model facts are not free-text edits. A failed constraint blocks the affected
 operation. No model call follows final approval. All helper signatures, including

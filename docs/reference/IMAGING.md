@@ -27,7 +27,7 @@
 | candidate_controls / build_nodule_review | UI decisions and attestation → typed candidate Review; uncertainty stays blocked |
 | preview_calipers | Source HU + unapproved endpoints → cyan line and physical distance; no persistence |
 | research_report | Verified Study + completed Review → deterministic evidence-linked research summary, no diagnosis |
-| report composition | Accepted snapshot → escaped appendix; preserve producer attestation separately from LOVISA acceptance |
+| report composition | Accepted snapshot → concise inspection results and verified report pictures; preserve producer attestation separately from LOVISA acceptance |
 | sync_ct_contracts.sync | Companion source → equality check or intentional import-path-rewritten vendor update |
 
 The shared models/renderer remain unchanged by the LOVISA branding update. Existing

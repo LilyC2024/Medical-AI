@@ -76,3 +76,19 @@ software gates.
     CT and desktop/narrow browser navigation/isolation checks. Guides and four
     screenshots updated; final hosted Python 3.10/3.12 and all three CT compatibility
     flows passed. Published/local trees match; demo remains on loopback.
+
+## Concise combined clinical and CT report
+
+22. **Source-bound summary services** — one-section report, explicit accepted/no-CT
+    status, structured evidence retained separately, authenticated previewable
+    clinician note and content-bound approval/persistence. Test before UI changes.
+    Status: passed — 76 summary, note-authentication, source, workflow and CT checks.
+23. **Combined report interface and export** — concise summary with inspected CT
+    images, readable optional evidence, note preview before approval and portable
+    HTML export with local embedded images. Preserve safety and review gates.
+    Status: passed — 13 portable-export, combined-report UI and existing review/CT UI checks.
+24. **Validation and publication** — full regressions, actual local model/CT smokes,
+    accurate concise guides/sample report and hosted compatibility checks; publish.
+    Status: local checks complete — 220 final tests, 81 unchanged CT tests, actual
+    local Ollama/pretrained transfer, browser example/app checks and 31/25 document
+    checks passed. Code and aligned CT documentation ready; publication pending.

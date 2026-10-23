@@ -135,10 +135,13 @@ def test_ui_safety_review_rejection_approval_and_export(ui, tmp_path):
     app.button(key="submit_review").click().run()
     assert not app.exception
     assert not app.get("download_button")
+    app.button(key="preview_report_note").click().run()
+    assert not app.checkbox(key="attested").value
+    app.checkbox(key="attested").check()
     app.radio(key="decision").set_value("Approve report")
     app.button(key="submit_review").click().run()
     assert not app.exception
-    assert len(app.get("download_button")) == 2
+    assert len(app.get("download_button")) == 3
     reports = list((tmp_path / "reports").glob("*.json"))
     assert len(reports) == 1
     assert json.loads(reports[0].read_text())["reviewed"] is True

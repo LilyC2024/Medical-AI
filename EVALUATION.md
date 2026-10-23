@@ -4,6 +4,43 @@ These results concern synthetic software behavior, not diagnostic accuracy,
 clinical safety or clinician time savings. [Reproduce checks](docs/VALIDATION.md)
 · [Eight acceptance requirements](docs/ACCEPTANCE.md).
 
+## Concise combined report — 23 October 2026
+
+| Executed check | Actual outcome |
+| --- | --- |
+| Final complete regression | **220 passed in 79.04s** |
+| Earlier full regressions before content-manifest binding | 218 passed in 77.75s; 218 passed in 105.05s during a separate actual local Ollama smoke |
+| Summary/note/source/CT foundation | 76 focused checks passed in 35.96s |
+| Portable export and combined UI | 13 focused checks passed in 19.43s; 17 later checks passed in 19.67s |
+| CT companion regression | **81 passed in 22.42s**, with 11 existing dependency/legacy-export warnings; 25 documentation files passed local-target checks |
+| Final actual local gemma4:e2b smoke | Passed: missing-data hold, eligible reasoning and final clinician-review pause; no approval |
+| Actual installed-pretrained CPU transfer | Passed: generated 32×64×64 source, one candidate, 66 verified artifacts; no imaging or final approval |
+| Scripted documentation example | 178 words, one heading, generated non-ML phantom and 8.00 mm scripted caliper; no actual clinician verification |
+| Browser example verification | One heading, no subheadings; both 64×64 embedded source/annotation images loaded; no horizontal overflow |
+| Actual app browser | Demo sign-in and patient/report navigation; generated fixture opened automatically with explicit Include reviewed CT in report action |
+| Approvals in actual app/smokes | None issued. The local CT study remains pending; example/test reviewer decisions exist only in temporary scripted databases |
+
+The report now combines history hypotheses, accepted CT inspection, essential gaps
+and an attributed brief reviewer note in one section. Exact source excerpts,
+filenames/dates/IDs and model support/counterevidence stay in `report_evidence` and
+the JSON package. Markdown remains text-only; approved HTML embeds verified CT
+source/annotation pictures and reviewer calipers. Images/notes remain outside the
+LLM; no clinical vocabulary or diagnostic capability was added.
+
+A signed content manifest binds approval to the underlying record, model evidence,
+CT snapshots and note, as well as the visible-text hash. A regression substitutes
+a different valid accepted CT with identical short prose and verifies that saving
+and HTML export reject it. Other checks cover changed notes/stale approval,
+forged authorship/evidence, zero candidates, absent CT, legacy-mask HTML, later CT
+acceptance requiring a new report, script/markup injection and altered images.
+
+Automated tests and the example use scripted inference/reviewers. The separate
+actual local Ollama smoke exercises real inference and stops at clinician review.
+No actual clinical safety decision or qualified clinician approval is established.
+CT code/contracts, model weights, the hypothesis catalog and dependencies are
+unchanged. The companion changes only integration documentation. Existing saved
+reports are not rewritten. [Report rules](docs/REPORTS.md).
+
 ## Focused patient workspace — 23 October 2026
 
 | Executed check | Actual result |

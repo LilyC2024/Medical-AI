@@ -27,13 +27,14 @@ clinical performance claims or guarantees. [Workspace](docs/INTERFACE.md) ·
 
 | Project | Input → output | Responsibility |
 | --- | --- | --- |
-| **LOVISA** — this repository | Synthetic history → seven-section clinical draft | Organize facts, identify gaps, propose constrained hypotheses and require clinician approval |
+| **LOVISA** — this repository | Synthetic history + accepted CT → concise clinical summary | Organize facts, identify gaps, propose constrained hypotheses and require clinician approval |
 | **[Lung CT Research Assistant](https://github.com/LilyC2024/ai-medimg-2.5D-CT)** | Supported CT → nodule candidates, annotations, calipers and research summary | Support source-image inspection and measurement in a separate local environment |
 
 The CT companion can send a validated **synthetic** study to LOVISA. A reviewer
-checks its candidates and measurements before accepting it as a research appendix.
-The combined clinical draft then requires separate final approval. Images and
-imaging notes stay outside the language model. [Integration guide](docs/IMAGING.md).
+checks its candidates and measurements before accepting the study. The report
+includes those inspection results and representative source/annotation images.
+A brief clinician note is previewed before final approval. Images and imaging
+notes stay outside the language model. [Integration guide](docs/IMAGING.md).
 
 **Research and education only.** Neither project diagnoses cancer, excludes
 disease, prescribes treatment or makes automatic medical decisions. LOVISA accepts
@@ -45,9 +46,15 @@ fictional records only. Local login does not verify clinical qualifications.
 
 Read left to right: local records → safety check → history and medication
 extraction → source-grounded hypotheses → safety recheck → clinician review.
+The report now has **one Clinical summary section**: model-selected hypotheses,
+CT inspection, essential gaps and a brief clinician note. Detailed citations stay
+in the evidence package and an optional evidence view. A portable HTML download
+includes CT pictures. [Report example and rules](docs/REPORTS.md).
+
 An urgent warning stops reasoning. Missing safety information pauses for human
 assessment. A draft becomes reviewed only after explicit approval of its exact
-contents. The retained picture uses the previous **MHCRA AI** name.
+contents. The retained picture uses the previous **MHCRA AI** name and an earlier
+report layout; the current summary replaces its longer report presentation.
 
 ![Synthetic CT source, candidate box and demonstration caliper](docs/images/lung-research-workflow.png)
 
@@ -120,6 +127,7 @@ Existing `mhcra-*` formats and `MHCRA_CT_*` settings are stable integration name
 | --- | --- |
 | [Documentation index](docs/README.md) | Choose a guide by task |
 | [Architecture](docs/ARCHITECTURE.md) | Specialists, storage, models and trust boundaries |
+| [Reports and example](docs/REPORTS.md) | Concise combined output, clinician-note preview and image downloads |
 | [Records](docs/RECORDS.md) | Synthetic JSON, sources and local references |
 | [Imaging](docs/IMAGING.md) | Connect, inspect, measure and accept CT results |
 | [Code reference](docs/CODE_REFERENCE.md) | Modules, functions and folders |

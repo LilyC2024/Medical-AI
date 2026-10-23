@@ -23,12 +23,19 @@
 5. Only after these checks does **Generate draft for clinician review**, at the
    bottom of Safety check, become enabled. Click it to run local reasoning.
    Progress/cancel stays in that view; completion opens **Clinical report**.
-6. Read the concise seven-section draft. Source text appears once in the timeline;
-   `[S1]` evidence keys refer to filename/date/entry IDs in **Source key**. CT is a
-   short research appendix. The JSON export retains full provenance and decisions.
-7. Enter final review notes and attestation; choose **Approve report** and submit
-   only after review. The default requests corrections and keeps the draft pending.
-   Approval saves ignored local JSON and enables JSON/Markdown downloads.
+6. Read the single **Clinical summary** section. It combines the local model's
+   history hypotheses, accepted CT inspection, essential gaps and clinician note.
+   Source/annotation pictures appear beneath it. Detailed citations are in the
+   collapsed evidence view and JSON package, not repeated through the prose.
+7. Enter a brief clinician note (up to 600 characters) and **Preview note in report**.
+   Read the changed draft, tick the review checkbox again, choose **Approve report**
+   and submit. The default requests corrections and keeps the draft pending.
+   Approval saves ignored local JSON and enables HTML, Markdown and JSON downloads.
+   HTML embeds CT pictures for offline use; Markdown contains the concise text.
+
+If the report has no CT, **Start a new report with CT** opens CT review for the
+same patient. Accept the study before safety preparation; a study added later
+requires a new report snapshot.
 
 Use **Start a new review** to reassess the same patient after a source change.
 You can choose another patient at any time: unfinished work is cancelled and all

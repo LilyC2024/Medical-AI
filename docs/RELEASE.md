@@ -86,3 +86,25 @@ The local hypothesis catalog, CT format and clinical review boundary are unchang
 
 No dependency, model, safety policy, hypothesis catalog or CT contract upgrade.
 The CT producer is unchanged. [Operation](WORKFLOWS.md) · [Evaluation](../EVALUATION.md).
+
+## 0.6.0 — concise combined clinical and CT report
+
+- Replaced the seven-section presentation with one short Clinical summary:
+  local-model history hypotheses, accepted CT inspection, essential gaps and an
+  attributed clinician note. No full timeline or technical source-key list in prose.
+- Preserved every original excerpt and model evidence link in a separate evidence
+  index and JSON package; optional readable evidence remains available in the UI.
+- Included CT candidate decisions, reviewed calipers and representative source/
+  annotation images. No-CT is explicit, with a direct new-report route; a later CT
+  acceptance requires a fresh report snapshot.
+- Added authenticated note preview (600 characters), signed authorship and fresh
+  content-bound approval after edits. Notes do not become record facts or trigger
+  another model call.
+- Added approval-gated HTML downloads with embedded verified CT pictures alongside
+  concise Markdown and full JSON. Export/save recompute and verify report text,
+  evidence links, notes, approvals and imaging integrity.
+- Updated operating, architectural and function guides and a labelled scripted
+  example. Existing saved reports retain their historical format and approval.
+
+No dependency, model, hypothesis catalog, safety policy or CT producer/contract
+change. The CT project remains compatible. [Reports](REPORTS.md) · [Evaluation](../EVALUATION.md).

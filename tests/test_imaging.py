@@ -245,10 +245,10 @@ def test_appendix_is_review_bound_and_excluded_from_llm(imaging_store, inference
     workflow.acknowledge_safety(case, Review(approved=True, reviewer="dr.example", clinician_attestation=True,
         notes="Assessed synthetic uncertainty.", draft_sha256=state["safety_decision"]["decision_sha256"]), token)
     state = workflow.state(case)
-    assert state["draft"].count("\n## ") == 7
-    assert "Research imaging appendix" in state["draft"]
-    assert "acquisition date unavailable" in state["draft"]
-    assert "confirmed clinical findings" in state["draft"]
+    assert state["draft"].count("# ") == 1
+    assert "CT inspection" in state["draft"]
+    assert "Acquisition dates are unavailable" in state["draft"]
+    assert "not nodule detections" in state["draft"]
     assert len(inference.calls) == 1
     assert "UNetSmall" not in json.dumps(inference.calls[0][1])
     with pytest.raises(ValueError):

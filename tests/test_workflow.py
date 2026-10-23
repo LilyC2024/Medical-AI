@@ -56,8 +56,8 @@ def test_authenticated_approval_required_before_reviewed_and_audited(record, inf
     orchestrator.review(case_id, review_for(state), token)
     payload = orchestrator.export(case_id)
     assert payload["status"] == "complete" and payload["reviewed"] is True
-    assert payload["final_report"].count("\n## ") == 7
-    assert "fictional_patient.json | 2025-03-10 | report-2025-03-10" in payload["final_report"]
+    assert payload["final_report"].count("# ") == 1
+    assert any(e["filename"] == "fictional_patient.json" and e["date"] == "2025-03-10" and e["entry_id"] == "report-2025-03-10" for e in payload["report_evidence"]["record_entries"])
     assert payload["review"]["reviewer"] == "dr.example" and payload["reviewed_at"]
     assert len(payload["review_history"]) == 1
     assert save_report(payload, tmp_path, auth=orchestrator.auth, safety=orchestrator.safety).exists()

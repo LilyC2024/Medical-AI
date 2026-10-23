@@ -15,11 +15,13 @@ from medical_assistant.database import get_history
 from medical_assistant.evidence import LocalEvidenceCollection
 from medical_assistant.grounding import validate_record_grounding
 from medical_assistant.history import MedicalHistoryAgent, MedicationAgent
-from medical_assistant.models import PatientRecord, Review
-from medical_assistant.report import compose, digest
+from medical_assistant.imaging import ImagingStore
+from medical_assistant.models import PatientRecord, ReportNote, Review
+from medical_assistant.report import compose, digest, evidence_index
+from medical_assistant.report_binding import content_digest, verify_content_binding
+from medical_assistant.report_notes import verify_note
 from medical_assistant.safety import SafetyAgent
 from medical_assistant.storage import ROOT
-from medical_assistant.imaging import ImagingStore
 
 
 class CaseState(TypedDict, total=False):
@@ -43,6 +45,10 @@ class CaseState(TypedDict, total=False):
     reviewed_at: str
     final_report: str
     imaging: list[dict]
+    report_evidence: dict
+    clinician_note: dict
+    note_receipt: dict
+    report_content_receipt: dict
 
 
 class MedicalHistoryOrchestrator:
@@ -225,10 +231,38 @@ class MedicalHistoryOrchestrator:
         return {
             "draft": draft,
             "generated_draft": draft,
+            "report_evidence": evidence_index(
+                PatientRecord.model_validate(state["record"]),
+                state["assessments"],
+                state.get("imaging", []),
+            ),
             "status": "awaiting_clinician_review",
         }
 
+    def _verify_report(self, state):
+        verify_note(state, self.auth)
+        record = validate_record_grounding(
+            PatientRecord.model_validate(state["record"])
+        )
+        expected = compose(
+            record,
+            state["source_file"],
+            state["assessments"],
+            state["evidence"],
+            state.get("imaging", []),
+            state.get("clinician_note"),
+        )
+        if state["draft"] != expected or state["generated_draft"] != expected:
+            raise ValueError(
+                "Clinical report no longer matches its grounded source snapshot"
+            )
+        if state.get("report_evidence") != evidence_index(
+            record, state["assessments"], state.get("imaging", [])
+        ):
+            raise ValueError("Clinical report evidence links changed")
+
     def _review(self, state):
+        self._verify_report(state)
         response = interrupt(
             {
                 "type": "clinician_review_required",
@@ -238,6 +272,9 @@ class MedicalHistoryOrchestrator:
             }
         )
         review = self._checked_review(state, response, "clinical-review")
+        verify_content_binding(
+            state, response.get("content_receipt"), self.auth, review.reviewer
+        )
         if review.draft_sha256 != digest(state["draft"]):
             raise ValueError("Review does not match the current report")
         self.auth.record_receipt(
@@ -246,6 +283,7 @@ class MedicalHistoryOrchestrator:
         return {
             "review": review.model_dump(),
             "approval_receipt": response["receipt"],
+            "report_content_receipt": response["content_receipt"],
             "review_history": [
                 *state.get("review_history", []),
                 {
@@ -260,7 +298,11 @@ class MedicalHistoryOrchestrator:
     def _complete(self, state):
         self._verify_safety_ack(state)
         self._verify_imaging(state)
+        self._verify_report(state)
         review = Review.model_validate(state["review"])
+        verify_content_binding(
+            state, state.get("report_content_receipt"), self.auth, review.reviewer
+        )
         self.auth.verify_receipt(
             state["approval_receipt"],
             "clinical-review:" + state["case_id"],
@@ -333,12 +375,20 @@ class MedicalHistoryOrchestrator:
             raise PermissionError(
                 "Reviewer identity must match authenticated clinician account"
             )
-        return {
+        response = {
             "review": review.model_dump(),
             "receipt": self.auth.receipt(
                 token, action + ":" + case_id, digest(review.model_dump_json())
             ),
         }
+
+        if action == "clinical-review":
+            response["content_receipt"] = self.auth.receipt(
+                token,
+                "clinical-content:" + case_id,
+                content_digest(self.state(case_id)),
+            )
+        return response
 
     def acknowledge_safety(
         self, case_id, review: Review, token=None, *, safety_only=False
@@ -396,14 +446,60 @@ class MedicalHistoryOrchestrator:
         )
         self.graph.update_state(
             self.config(case_id),
-            {"draft": draft, "review": {}, "approval_receipt": {}},
+            {
+                "draft": draft,
+                "review": {},
+                "approval_receipt": {},
+                "report_content_receipt": {},
+            },
             as_node="orchestrator",
         )
+
+    def prepare_report_note(self, case_id, text, token=None):
+        """Preview a signed reviewer comment; any changed report requires fresh approval."""
+        actor = self.auth.require(token)
+        state = self.state(case_id)
+        if state.get("status") != "awaiting_clinician_review":
+            raise ValueError("A report note can only be changed on a pending draft")
+        self._verify_safety_ack(state)
+        self._verify_imaging(state)
+        self._verify_report(state)
+        note = ReportNote(reviewer=actor, text=text)
+        receipt = self.auth.receipt(
+            token, "report-note:" + case_id, digest(note.model_dump_json())
+        )
+        draft = compose(
+            PatientRecord.model_validate(state["record"]),
+            state["source_file"],
+            state["assessments"],
+            state["evidence"],
+            state.get("imaging", []),
+            note.model_dump(),
+        )
+        self.auth.record_receipt(
+            receipt, state["record"]["patient_id"], note.model_dump()
+        )
+        self.graph.update_state(
+            self.config(case_id),
+            {
+                "draft": draft,
+                "generated_draft": draft,
+                "clinician_note": note.model_dump(),
+                "note_receipt": receipt,
+                "review": {},
+                "approval_receipt": {},
+                "report_content_receipt": {},
+                "reviewed": False,
+            },
+            as_node="orchestrator",
+        )
+        return self.state(case_id)
 
     def review(self, case_id, review: Review, token=None):
         state = self.state(case_id)
         if state.get("status") != "awaiting_clinician_review":
             raise ValueError("No report is awaiting clinician review")
+        self._verify_report(state)
         response = self._response(case_id, review, token, "clinical-review")
         if review.draft_sha256 != digest(state["draft"]):
             raise ValueError("Stale review: inspect the current draft before approving")
@@ -420,7 +516,11 @@ class MedicalHistoryOrchestrator:
             raise ValueError("Report is not complete: clinician approval is required")
         self._verify_safety_ack(state)
         self._verify_imaging(state)
+        self._verify_report(state)
         review = Review.model_validate(state["review"])
+        verify_content_binding(
+            state, state.get("report_content_receipt"), self.auth, review.reviewer
+        )
         self.auth.verify_receipt(
             state["approval_receipt"],
             "clinical-review:" + case_id,

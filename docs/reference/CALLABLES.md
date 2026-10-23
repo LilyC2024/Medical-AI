@@ -162,7 +162,7 @@ Bounded synthetic imaging exchange. Model artifacts are never clinical facts.
 
 ## [medical_assistant/imaging_results.py](../../medical_assistant/imaging_results.py)
 
-Small, deterministic CT summaries shared by the viewer and clinical appendix.
+Small, deterministic CT summaries shared by the viewer and clinical summary.
 
 | Callable | Purpose/contract |
 | --- | --- |
@@ -292,16 +292,42 @@ Limited synthetic hypothesis selection, not general clinical reasoning.
 
 ## [medical_assistant/report.py](../../medical_assistant/report.py)
 
-Deterministic seven-section composition; citations never come from model text.
+Concise source-bound summaries; detailed provenance stays in the evidence package.
 
 | Callable | Purpose/contract |
 | --- | --- |
 | `digest(text: str)` | See linked implementation and subject contract. |
 | `inline_text(value)` | Render untrusted data as one literal Markdown line, never active markup. |
-| `compose(record: PatientRecord, source_file: str, outputs: dict[str, dict], evidence=None, imaging=None)` | Quote each source once; use compact evidence keys elsewhere, retaining all seven sections. |
-| `compose.refs(ids)` | See linked implementation and subject contract. |
-| `compose.unique(values)` | See linked implementation and subject contract. |
-| `imaging_appendix(imaging)` | Brief reviewed result; full source/model/review metadata remains in the JSON export. |
+| `evidence_index(record, outputs, imaging=None)` | Keep every exact source excerpt and selected evidence link outside the short prose. |
+| `ct_summary(imaging)` | Aggregate accepted inspections; include reviewed calipers, never box-size diagnoses. |
+| `summary_parts(record, outputs, imaging=None, clinician_note=None)` | Plain-text report blocks shared by Markdown and portable HTML presentation. |
+| `compose(record: PatientRecord, source_file: str, outputs: dict[str, dict], evidence=None, imaging=None, clinician_note=None)` | One concise section; full exact excerpts/citations remain in report_evidence and originals. |
+
+## [medical_assistant/report_assets.py](../../medical_assistant/report_assets.py)
+
+Verified representative CT images and self-contained, approval-gated HTML reports.
+
+| Callable | Purpose/contract |
+| --- | --- |
+| `inspection_figures(state, store)` | Render at most three representative study slices, never omit summary counts. |
+| `portable_html(payload, *, auth, safety=None)` | Final download with embedded verified CT pictures; no scripts, external assets or draft export. |
+
+## [medical_assistant/report_binding.py](../../medical_assistant/report_binding.py)
+
+Bind approval to hidden evidence/images as well as simplified visible report text.
+
+| Callable | Purpose/contract |
+| --- | --- |
+| `content_digest(state)` | Stable clinical content only; mutable workflow/review bookkeeping is excluded. |
+| `verify_content_binding(state, receipt, auth, reviewer)` | See linked implementation and subject contract. |
+
+## [medical_assistant/report_notes.py](../../medical_assistant/report_notes.py)
+
+Authenticate report-note authorship without treating commentary as clinical facts.
+
+| Callable | Purpose/contract |
+| --- | --- |
+| `verify_note(state, auth)` | See linked implementation and subject contract. |
 
 ## [medical_assistant/runtime.py](../../medical_assistant/runtime.py)
 
@@ -327,6 +353,7 @@ Read explicitly selected local JSON records; atomically save reviewed reports.
 | Callable | Purpose/contract |
 | --- | --- |
 | `load_record(path: Path)` | See linked implementation and subject contract. |
+| `validate_reviewed_report(payload: dict, *, auth, safety=None)` | Recheck approval, sources, note authorship and CT integrity before any final export. |
 | `save_report(payload: dict, directory: Path=REPORT_DIR, *, auth=None, safety=None)` | See linked implementation and subject contract. |
 
 ## [medical_assistant/ui/clinical.py](../../medical_assistant/ui/clinical.py)
@@ -347,6 +374,8 @@ Responsive clinical UI; only explicit human actions issue review receipts.
 | `generate_task.run(progress, budget)` | See linked implementation and subject contract. |
 | `bottom_actions(path, auth, record, model, token, user, decision)` | Safety first, then one explicit bottom-of-page generation action. |
 | `failure()` | See linked implementation and subject contract. |
+| `new_report_with_ct()` | See linked implementation and subject contract. |
+| `report_content(state, workflow)` | Short summary and verified representative CT images, with optional readable evidence. |
 | `report_panel(auth, token, user, record, *, urgent=False)` | See linked implementation and subject contract. |
 
 ## [medical_assistant/ui/components.py](../../medical_assistant/ui/components.py)
@@ -406,6 +435,7 @@ Clinical-review graph with deterministic safety holds and authenticated review.
 | `MedicalHistoryOrchestrator._final_safety(self, state)` | See linked implementation and subject contract. |
 | `MedicalHistoryOrchestrator._verify_imaging(self, state)` | See linked implementation and subject contract. |
 | `MedicalHistoryOrchestrator._compose(self, state)` | See linked implementation and subject contract. |
+| `MedicalHistoryOrchestrator._verify_report(self, state)` | See linked implementation and subject contract. |
 | `MedicalHistoryOrchestrator._review(self, state)` | See linked implementation and subject contract. |
 | `MedicalHistoryOrchestrator._complete(self, state)` | See linked implementation and subject contract. |
 | `MedicalHistoryOrchestrator.config(case_id)` | See linked implementation and subject contract. |
@@ -417,6 +447,7 @@ Clinical-review graph with deterministic safety holds and authenticated review.
 | `MedicalHistoryOrchestrator.ready_for_analysis(self, case_id, token=None)` | Authenticate and recheck the exact prepared snapshot before generation. |
 | `MedicalHistoryOrchestrator.continue_analysis(self, case_id, token=None)` | See linked implementation and subject contract. |
 | `MedicalHistoryOrchestrator.revise(self, case_id, draft: str, token=None)` | See linked implementation and subject contract. |
+| `MedicalHistoryOrchestrator.prepare_report_note(self, case_id, text, token=None)` | Preview a signed reviewer comment; any changed report requires fresh approval. |
 | `MedicalHistoryOrchestrator.review(self, case_id, review: Review, token=None)` | See linked implementation and subject contract. |
 | `MedicalHistoryOrchestrator.export(self, case_id)` | See linked implementation and subject contract. |
 

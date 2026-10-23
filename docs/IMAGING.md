@@ -14,7 +14,7 @@ sent to Ollama; imaging cannot change safety escalation or the hypothesis catalo
 | --- | --- |
 | `mhcra-lung-nodules-v2` | Source HU, all-slice previews, candidates, provenance and optional CT review |
 | Non-ML fixture / installed pretrained detector | Both launchable locally; explicit CPU or available CUDA for pretrained |
-| `mhcra-imaging-v1` | Retained tissue-mask importer, viewer, worker and appendix |
+| `mhcra-imaging-v1` | Retained tissue-mask importer, viewer, worker and report summary |
 | Incomplete nodule-v1 ZIP | Rejected; re-export the original workspace with current CT |
 | Full-size/public-research CT, dataset preparation/training | Standalone CT only; LOVISA accepts bounded generated-synthetic studies |
 
@@ -77,8 +77,12 @@ or remote fallback occurs. Missing weights/unavailable CUDA fail explicitly.
    edit and preview again. Cyan lines are unapproved previews at this stage.
 6. Add imaging notes, attest association/geometry review and accept. The authenticated
    account and exact decisions/calipers are bound to the acceptance hash.
-7. Start a new clinical case. The accepted study becomes a source-linked research
-   appendix. Review and approve the exact final clinical draft separately.
+7. Complete safety preparation after accepting CT. The short clinical summary
+   includes the accepted inspection and reviewed calipers, with representative
+   source/annotation pictures. Preview the clinician note, then approve the exact
+   combined report separately. The HTML download embeds those pictures.
+   A report prepared before CT acceptance needs a new review to include the study.
+   [Report rules](REPORTS.md).
 
 CT analysis results show counts, review state, source-slice ranges, scores and
 reviewed calipers. Pending and accepted results appear in CT review; accepted
