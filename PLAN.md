@@ -16,9 +16,9 @@ the suite at that gate, not the current total. [Actual evidence](EVALUATION.md).
 | 9 | Shared typed nodule-v2 producer/HU/previews | 26 producer/review tests and adversarial archive checks |
 | 10 | Nodule consumer, candidates/calipers, authenticated acceptance | 144 LOVISA / 81 CT tests |
 | 11 | Joint nodule verification/docs/publication | 146 LOVISA / 81 CT tests; all actual smokes and hosted checks |
-| 12 | LOVISA name, two-project documentation and reused figures | Local checks passed: 146 LOVISA / 81 CT tests, 25 Markdown files per repo, contract equality and actual local Ollama smoke; hosted publication pending |
+| 12 | LOVISA name, two-project documentation and reused figures | Complete: 146 LOVISA / 81 CT tests, 25 Markdown files per repo, local Ollama and contract checks; both published updates passed all hosted jobs |
 
-Phases 1–11 are complete. Phase 12 preserves the safety policy, model/weights,
+Phases 1–12 are complete. Phase 12 preserves the safety policy, model/weights,
 source schemas and exchange identifiers. The visible name and explanatory guides
 change together. Unexecuted clinical/GPU work is not marked completed by these
 software gates.

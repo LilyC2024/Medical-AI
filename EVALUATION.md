@@ -17,9 +17,22 @@ clinical safety or clinician time savings. [Reproduce checks](docs/VALIDATION.md
 | Reused figures | Existing workflow, technical and CT images inspected; historical brand/fixture status explained |
 
 This pass changes documentation, visible branding and the existing title assertion;
-it adds no clinical logic, models or exchange format. Hosted publication checks
-are recorded separately below once executed. Tests use scripted inference/reviewers; the
-Ollama result above is a separate actual local run.
+it adds no clinical logic, models or exchange format. Tests use scripted inference/reviewers; the Ollama result above is a separate
+actual local run.
+
+### Hosted publication checks
+
+[LOVISA run 39929551523](https://github.com/LilyC2024/Medical-AI/actions/runs/39929551523)
+passed at `a37a716b7933a671532ef090781255929bbd1b97`: Python 3.10/3.12, all
+maintained documentation links, dependency checks, contract equality and actual
+fixture/pretrained/legacy CT receiver smokes.
+
+[CT run 39929548618](https://github.com/LilyC2024/ai-medimg-2.5D-CT/actions/runs/39929548618)
+passed at `281c2446d39736075d41aec74ceb9c9fb9002411`: Windows/Linux regression,
+updated link checks, actual pretrained/bridge smoke and Linux container checks.
+Original PNG illustrations remain byte-for-byte unchanged and have current captions.
+Both published trees matched local staged trees. This final verification-record
+commit changes documentation only; it does not alter the tested implementation.
 
 ## Verified compatibility release
 
