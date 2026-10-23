@@ -115,3 +115,19 @@ Review the outcomes in `EVALUATION.md` and precautions in [SECURITY.md](../SECUR
 Do not imply an open-source redistribution license unless one has deliberately
 been selected. The repository does not bundle model weights; users obtain them
 separately and must comply with their applicable license.
+
+## Current CT compatibility pass — 23 October 2026
+
+The prior lung release deliberately exported a new format without a MHCRA
+consumer. This update found that gap by tracing actual worker commands, wire
+schemas, candidate review, artifact storage, report composition and export guards.
+Implementation followed producer, consumer and joint-validation phases in PLAN.md.
+No new development subagents were launched for this pass. The historical reviews
+above describe earlier coding work, not shipped runtime specialists.
+
+The shared contract stays ML-free; MHCRA's existing environment is reused while
+CT keeps its own Python 3.12/PyTorch environment. Candidate/measurement review is
+a typed Python operation with authenticated acceptance, distinct from final
+clinical approval. Actual local fixture/pretrained/legacy transfers and Ollama
+inference are separated from scripted automated tests in EVALUATION.md. Detailed
+changes/migration are in [release notes](RELEASE.md).

@@ -7,7 +7,7 @@ performs persistence and approval checks.
 
 ## Clinical-review graph
 
-The [README](../README.md#how-it-works-in-pictures) includes illustrated clinical
+The [README](ILLUSTRATIONS.md) includes illustrated clinical
 and technical overviews. The graph below is the precise transition reference;
 its [editable technical diagram](images/mhcra-ai-technical-flow-v1.mmd) also shows
 storage, inference and supporting services.
@@ -58,8 +58,9 @@ conflicting IDs fail. No model writes or modifies records.
 | `app.py` | Streamlit record selection and human review forms |
 | `runtime.py` | Idempotently seed bundled fixtures and cache shared local authentication services |
 | `ct_worker.py` | Separate local CT interpreter, bounded jobs, cancellation and watchdog |
-| `imaging_contract.py` | Bounded ZIP/NPY/PNG validation, geometry/count/overlay checks |
+| `imaging_contract.py`, `nodule_exchange.py` | Version dispatch; bounded ZIP/NPY/PNG validation and geometry/overlay checks |
 | `imaging.py`, `imaging_ui.py` | Separate accepted-study storage, authenticated acceptance and source/overlay inspection |
+| `nodule_models.py`, `nodule_support.py`, `nodule_ui.py` | Shared typed nodule schemas; candidate/caliper acceptance binding and viewer |
 | `models.py` | Strict Pydantic records, assessments and review contracts |
 | `database.py` | stdlib SQLite transactions, immutable sources, idempotent seed and reads |
 | `grounding.py` | Compare extracted fields against original JSON entries |
@@ -133,3 +134,20 @@ Composition, completion, export and persistence verify accepted artifact integri
 Urgent clinical cases enter the safety hold without waiting for optional image
 checks. Uploaded execution metadata is a producer declaration; hashes do not
 independently authenticate synthetic origin or model execution.
+
+
+## Current nodule exchange
+
+`imaging_contract.validate_bundle` dispatches nodule-v2 to the shared ML-free
+validator and leaves the legacy mask validator separate. Source HU and every
+preview are checked before a proposal exists. `nodule_support` binds a typed,
+fully resolved candidate review to authenticated imaging acceptance. Original
+producer review is preserved separately; MHCRA decisions are not written back
+into producer files. `nodule_ui` recomputes accepted caliper overlays from original
+HU. The deterministic canonical research report is escaped and placed in the
+research appendix; it never becomes a clinical source fact or LLM prompt.
+
+`verify_nodule_snapshot` checks the decisions/calipers, study digest, authenticated
+reviewer identity and acceptance hash; ImagingStore also validates every accepted
+artifact. Existing graph guards invoke this at composition, completion and export.
+The final draft hash includes the appendix. [Contract and trust limits](IMAGING.md).

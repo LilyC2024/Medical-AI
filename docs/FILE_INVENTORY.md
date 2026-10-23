@@ -1,7 +1,9 @@
-# File inventory
+# Tracked-file inventory
 
-Source, tests, configuration, documentation and deliberately synthetic fixtures.
-Runtime databases, credentials, job logs, CT/model artifacts and exports are ignored.
+[Overview](../README.md) · [Function/folder guide](CODE_REFERENCE.md)
+
+Source, tests, config, synthetic fixtures and documentation. Runtime credentials,
+databases, HU/CT jobs, downloaded weights and report exports stay ignored.
 
 - [.github/workflows/tests.yml](../.github/workflows/tests.yml)
 - [.gitignore](../.gitignore)
@@ -20,9 +22,18 @@ Runtime databases, credentials, job logs, CT/model artifacts and exports are ign
 - [data/patients/fictional_patient.json](../data/patients/fictional_patient.json)
 - [data/reports/.gitkeep](../data/reports/.gitkeep)
 - [docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md)
+- [docs/CODE_REFERENCE.md](../docs/CODE_REFERENCE.md)
 - [docs/DEVELOPMENT.md](../docs/DEVELOPMENT.md)
 - [docs/FILE_INVENTORY.md](../docs/FILE_INVENTORY.md)
+- [docs/ILLUSTRATIONS.md](../docs/ILLUSTRATIONS.md)
 - [docs/IMAGING.md](../docs/IMAGING.md)
+- [docs/README.md](../docs/README.md)
+- [docs/RECORDS.md](../docs/RECORDS.md)
+- [docs/RELEASE.md](../docs/RELEASE.md)
+- [docs/SETUP.md](../docs/SETUP.md)
+- [docs/VALIDATION.md](../docs/VALIDATION.md)
+- [docs/WORKFLOWS.md](../docs/WORKFLOWS.md)
+- [docs/images/lung-research-workflow.png](../docs/images/lung-research-workflow.png)
 - [docs/images/mhcra-ai-technical-flow-v1.mmd](../docs/images/mhcra-ai-technical-flow-v1.mmd)
 - [docs/images/mhcra-ai-technical-flow-v1.png](../docs/images/mhcra-ai-technical-flow-v1.png)
 - [docs/images/mhcra-ai-technical-flow-v1.prompt.txt](../docs/images/mhcra-ai-technical-flow-v1.prompt.txt)
@@ -42,6 +53,10 @@ Runtime databases, credentials, job logs, CT/model artifacts and exports are ign
 - [medical_assistant/imaging_contract.py](../medical_assistant/imaging_contract.py)
 - [medical_assistant/imaging_ui.py](../medical_assistant/imaging_ui.py)
 - [medical_assistant/models.py](../medical_assistant/models.py)
+- [medical_assistant/nodule_exchange.py](../medical_assistant/nodule_exchange.py)
+- [medical_assistant/nodule_models.py](../medical_assistant/nodule_models.py)
+- [medical_assistant/nodule_support.py](../medical_assistant/nodule_support.py)
+- [medical_assistant/nodule_ui.py](../medical_assistant/nodule_ui.py)
 - [medical_assistant/ollama_client.py](../medical_assistant/ollama_client.py)
 - [medical_assistant/reasoning_constraints.py](../medical_assistant/reasoning_constraints.py)
 - [medical_assistant/report.py](../medical_assistant/report.py)
@@ -51,9 +66,11 @@ Runtime databases, credentials, job logs, CT/model artifacts and exports are ign
 - [medical_assistant/workflow.py](../medical_assistant/workflow.py)
 - [pyproject.toml](../pyproject.toml)
 - [requirements.lock.txt](../requirements.lock.txt)
+- [scripts/check_docs.py](../scripts/check_docs.py)
 - [scripts/check_ollama.py](../scripts/check_ollama.py)
 - [scripts/smoke_imaging.py](../scripts/smoke_imaging.py)
 - [scripts/smoke_local.py](../scripts/smoke_local.py)
+- [scripts/sync_ct_contracts.py](../scripts/sync_ct_contracts.py)
 - [tests/conftest.py](../tests/conftest.py)
 - [tests/test_agents.py](../tests/test_agents.py)
 - [tests/test_ct_worker.py](../tests/test_ct_worker.py)
@@ -61,6 +78,8 @@ Runtime databases, credentials, job logs, CT/model artifacts and exports are ign
 - [tests/test_history_management.py](../tests/test_history_management.py)
 - [tests/test_imaging.py](../tests/test_imaging.py)
 - [tests/test_imaging_ui.py](../tests/test_imaging_ui.py)
+- [tests/test_nodule_imaging.py](../tests/test_nodule_imaging.py)
+- [tests/test_nodule_ui.py](../tests/test_nodule_ui.py)
 - [tests/test_ollama_client.py](../tests/test_ollama_client.py)
 - [tests/test_reasoning_constraints.py](../tests/test_reasoning_constraints.py)
 - [tests/test_reasoning_grounding.py](../tests/test_reasoning_grounding.py)
@@ -71,3 +90,5 @@ Runtime databases, credentials, job logs, CT/model artifacts and exports are ign
 - [tests/test_safety_policy.py](../tests/test_safety_policy.py)
 - [tests/test_ui.py](../tests/test_ui.py)
 - [tests/test_workflow.py](../tests/test_workflow.py)
+- [third_party/CT-MIT-LICENSE.txt](../third_party/CT-MIT-LICENSE.txt)
+- [third_party/README.md](../third_party/README.md)

@@ -105,6 +105,18 @@ def compose(record: PatientRecord, source_file: str, outputs: dict[str, dict], e
         lines += ["", "### Research imaging appendix",
                   "Accepted synthetic model artifacts, not confirmed clinical findings. Imaging is excluded from LLM reasoning and cannot establish normality or lower safety escalation."]
         for snapshot in imaging:
+            if snapshot["manifest"].get("schema_version")=="mhcra-lung-nodules-v2":
+                from medical_assistant.nodule_exchange import NoduleBundle
+                from medical_assistant.nodule_models import research_report
+                from medical_assistant.nodule_support import verify_nodule_snapshot
+                bundle=NoduleBundle.model_validate(snapshot["manifest"])
+                nodule_review=verify_nodule_snapshot(snapshot)
+                lines += [f"- Lung nodule study {inline_text(bundle.study_id)}; source bundle.json; acquisition date unavailable; processed {inline_text(bundle.processed_at.isoformat())}.",
+                          f"- Source ID imaging-{snapshot['manifest_sha256']}; original archive SHA-256 {snapshot['archive_sha256']}.",
+                          "- Authenticated MHCRA imaging acceptance is separate from producer attestation and final clinical-report approval."]
+                lines += [f"- {inline_text(line.strip())}" for line in research_report(bundle.study,nodule_review).splitlines()[2:] if line.strip()]
+                lines.append("- Uploaded source/model identities are producer declarations; local consistency checks cannot independently authenticate execution or synthetic origin.")
+                continue
             item = ImagingBundle.model_validate(snapshot["manifest"])
             lines += [f"- Study {inline_text(item.study_id)}; source bundle.json; acquisition date unavailable; processed {inline_text(item.processed_at.isoformat())}.",
                       f"- Source ID imaging-{snapshot['manifest_sha256']}; original archive SHA-256 {snapshot['archive_sha256']}.",

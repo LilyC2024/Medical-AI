@@ -38,3 +38,22 @@ must pass its tests before work begins on the next.
    Implementation/local validation passed: 120 MHCRA tests, 32 CT tests, real CT
    worker/receiver smoke and separate real local Ollama smoke. The coordinated
    release pins its CT producer in hosted integration CI; see EVALUATION.md.
+
+## Current lung CT compatibility
+
+9. **Versioned nodule exchange** — shared lightweight contracts/rendering, bounded
+   source HU and every-slice previews, explicit pending/reviewed status, synthetic
+   patient/study binding and no automatic approval. Test CT producer before receiver.
+   Status: passed (26 CT producer/review tests; pending and reviewed exports,
+   source-grid/caliper checks and 11 adversarial archive mutations).
+10. **MHCRA nodule consumer and worker** — independent bounded validation, typed
+    candidate/caliper review, authenticated imaging acceptance, immutable storage,
+    source-linked appendix and offline fixture/pretrained jobs. Preserve safety,
+    final clinician gate and old tissue-mask compatibility. Status: passed (144 full
+    MHCRA regression tests; CT full suite 81 tests; legacy and new UI paths).
+11. **Joint verification and documentation** — both suites, actual cross-project
+    fixture/pretrained smoke and Ollama smoke; current producer CI pin; concise
+    MHCRA overview with detailed linked guides and function/folder reference;
+    update CT compatibility docs and publish both tested trees. Local verification
+    passed: 146 MHCRA tests, 81 CT tests; real fixture/pretrained/legacy CT smoke
+    and live gemma4:e2b smoke passed. Publication/hosted results in EVALUATION.md.

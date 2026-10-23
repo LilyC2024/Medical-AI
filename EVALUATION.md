@@ -1,3 +1,41 @@
+# Current lung CT compatibility evaluation — 23 October 2026
+
+MHCRA v0.2 and CT v0.10 implement the nodule-v2 exchange; legacy tissue-mask v1
+remains supported. This records software behavior, not clinical performance.
+
+| Executed check | Actual outcome |
+| --- | --- |
+| Previous MHCRA baseline | 120 passed in 32.91s |
+| First nodule/worker/legacy UI focused check | 25 passed in 14.74s |
+| Consumer phase gate | 144 passed in 51.12s, including adversarial and scripted-review tests |
+| Final expanded regression | 146 passed in 44.55s; caliper preview/persistence and urgent-before-optional-nodule tests included |
+| Added caliper UI checks | 2 passed in 4.39s; preview alone persists no acceptance |
+| Actual fixture producer/receiver smoke | PASS; 32×64×64 HU, 1 non-ML candidate, 66 artifacts |
+| Actual installed-pretrained CPU producer/receiver smoke | PASS; 32×64×64 HU, 1 candidate, 66 artifacts; no inference-time download |
+| Actual legacy producer/receiver smoke | PASS; 20×48×48, 41 artifacts, declared ONNX parity true |
+| Actual gemma4:e2b local smoke | PASS; missing-data fixture holds before reasoning; separate eligible synthetic fixture reaches final review |
+| Approval status of actual smokes | No imaging, safety or final report approval issued |
+| Shared schemas/report/renderer | Exact match after one import-path rewrite |
+| Dependencies/documentation | pip check and local Markdown target checks passed; no dependency upgrades |
+
+Offline tests use scripted model/reviewer identities and temporary SQLite, never
+real clinician approval. Candidate decisions and calipers are hash-bound to the
+authenticated actor; no unresolved decision can be accepted. NPY allocation,
+source/overlay pixel, report, patient/public-input and byte-tamper attempts fail
+closed. Source records remain separate from accepted imaging and outside pixels.
+Imaging never enters the LLM or lowers deterministic safety escalation. Final
+clinical approval remains required even after imaging acceptance.
+
+Remaining limits: bounded synthetic-only imaging; full DICOM/public research and
+training stay standalone CT. The generated phantom has no clinical sensitivity,
+malignancy accuracy or time-savings interpretation. Actual CUDA/NPU execution was
+not performed for this update. Local accounts do not verify professional status;
+producer declarations/hashes establish consistency, not independent authenticity.
+Browser visual inspection was unavailable; Streamlit AppTest exercised both
+legacy and nodule controls. Current hosted results are added after execution.
+
+## Previous release evaluation
+
 # Software evaluation — 22 October 2026
 
 These checks use deliberately synthetic records. They establish prototype

@@ -123,6 +123,17 @@ def validate_bundle(payload: bytes, patient_id: str):
     if not payload or len(payload) > MAX_ARCHIVE:
         raise ValueError("Bundle exceeds 64 MiB or is empty")
     try:
+        # Dispatch by explicit manifest version; never reinterpret boxes as masks.
+        with zipfile.ZipFile(io.BytesIO(payload)) as archive:
+            if "nodules.json" in archive.namelist() and "bundle.json" not in archive.namelist():
+                raise ValueError("Old CT nodule v1 export lacks verifiable source pixels; re-export the original CT workspace with the current v2 producer")
+            if archive.getinfo("bundle.json").file_size > 400_000:
+                raise ValueError("Manifest too large")
+            from medical_assistant.nodule_exchange import read_exchange, unique_object
+            header=json.loads(archive.read("bundle.json"),object_pairs_hook=unique_object)
+            if not isinstance(header,dict):raise ValueError("Imaging manifest must be an object")
+            if header.get("schema_version")=="mhcra-lung-nodules-v2":
+                return read_exchange(payload,patient_id)
         with zipfile.ZipFile(io.BytesIO(payload)) as z:
             items = z.infolist()
             if len(items) > 130 or len({i.filename for i in items}) != len(items) or sum(i.file_size for i in items) > MAX_EXPANDED:
