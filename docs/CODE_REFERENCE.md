@@ -46,3 +46,18 @@ and [complete callable/subfunction signatures](reference/CALLABLES.md).
 ## Image-first endoscopy extension
 
 `endo_contracts/` supplies shared ML-free schemas and worker lifecycle; `endo_worker.py` launches local CV; `endo_support.py` binds decisions; `endo_ui.py` renders image review. Shared imaging storage and report modules dispatch by modality. [Contract and behavior](ENDOSCOPY.md).
+
+## Research demo extension
+
+| Module/script | Responsibility |
+| --- | --- |
+| `research_examples._manifest`, `_read` | Bounded local manifest/file loading and hash checks |
+| `research_examples.example_bundle` | Case/modality-specific prepared evidence |
+| `research_examples.matching_endoscopy` | Exact permitted JPG bytes → declared dataset provenance |
+| `endo_worker.LocalEndoscopyJob` | Artificial or public RGB subprocess, fixed local model and watchdog |
+| `endo_contracts.PublicResearchSource`, `Bundle` | Separate public/synthetic formats; derived pixel validation |
+| `nodule_exchange.NoduleBundle.verify_research_crop` | Physical geometry, source slices and enclosed boxes against original metadata |
+| `scripts/prepare_research_demo.py` | Build unapproved CT/endo evidence and upload examples from local research data |
+| `scripts/smoke_research_pair.py` | Actual image-pair report smoke with scripted approvals in an isolated temporary database |
+
+[Data sources, commands and limits](RESEARCH_IMAGES.md).

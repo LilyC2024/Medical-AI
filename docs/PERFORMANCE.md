@@ -64,3 +64,11 @@ Use fixture mode for the fastest walkthrough. For pretrained CT choose CPU or an
 actually available CUDA device; unavailable acceleration fails explicitly. Fetch
 weights during setup, never inference. Existing companion training/evaluation
 workflows remain available separately; they are not two-minute UI operations.
+
+## Real research data
+
+Full CT inference and model training are offline setup and may exceed two minutes.
+The interface opens prepared, bounded real CT evidence instead of running a whole
+scan synchronously. Research endoscopy uploads run in the bounded local worker;
+progress/cancellation/110-second termination remain. Real-image inference timing
+is distinct from setup/training and is recorded in [evaluation](../EVALUATION.md).

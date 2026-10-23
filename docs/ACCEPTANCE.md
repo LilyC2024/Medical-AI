@@ -24,4 +24,4 @@ extend the original checklist. [Report details](REPORTS.md).
 
 ## Image-first endoscopy extension
 
-Endoscopy adds explicit candidate review, source/overlay reconstruction checks, artificial-only import, patient-switch cleanup and combined report/export binding. Tests use scripted reviewers; real worker smokes stop before approval. [Scope](ENDOSCOPY.md).
+Endoscopy adds explicit candidate review, source/overlay reconstruction checks, separate artificial/public-research import schemas, patient-switch cleanup and combined report/export binding. Tests use scripted reviewers; real worker smokes stop before approval. [Scope](ENDOSCOPY.md).

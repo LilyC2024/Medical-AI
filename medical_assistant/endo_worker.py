@@ -21,12 +21,14 @@ def configured_endo_root():
 
 def configured_endo_model(root=None):
     root = Path(root or configured_endo_root())
+    preferred = root / "artifacts/kvasir-research-v2"
+    default = (
+        preferred
+        if (preferred / "registration.json").is_file()
+        else root / "artifacts/kvasir-model"
+    )
     return (
-        Path(
-            os.environ.get(
-                "LOVISA_ENDO_MODEL_DIR", str(root / "artifacts/kvasir-model")
-            )
-        )
+        Path(os.environ.get("LOVISA_ENDO_MODEL_DIR", str(default)))
         .expanduser()
         .resolve()
     )
@@ -43,8 +45,28 @@ class LocalEndoscopyJob(LocalJob):
         model_dir=None,
         backend="onnx-cpu",
         timeout=110,
+        image_bytes=None,
+        research=None,
     ):
         TypeAdapter(Id).validate_python(patient_id)
+        if image_bytes is not None:
+            import hashlib
+
+            from medical_assistant.endo_contracts import PublicResearchSource
+
+            provenance = PublicResearchSource.model_validate(research)
+            if (
+                mode != "installed"
+                or not patient_id.startswith("research-composite-")
+                or not image_bytes
+                or len(image_bytes) > 16 * 1024**2
+                or hashlib.sha256(image_bytes).hexdigest() != provenance.original_sha256
+            ):
+                raise ValueError(
+                    "Public image requires installed model, exact provenance and composite case"
+                )
+        elif research is not None:
+            raise ValueError("Research provenance has no source image")
         if (
             mode not in ("fixture", "installed")
             or backend not in ("onnx-cpu", "openvino-cpu", "openvino-npu")
@@ -67,7 +89,7 @@ class LocalEndoscopyJob(LocalJob):
             str(python),
             "-m",
             "endo.cli",
-            "bridge",
+            "infer" if image_bytes is not None else "bridge",
             "--patient-id",
             patient_id,
             "--study-id",
@@ -77,6 +99,19 @@ class LocalEndoscopyJob(LocalJob):
             "--backend",
             backend,
         ]
+        inputs = None
+        if image_bytes is not None:
+            inputs = {
+                "input.image": image_bytes,
+                "research.json": provenance.model_dump_json().encode(),
+            }
+            command += [
+                "--image",
+                str(directory / "input.image"),
+                "--research-provenance",
+                str(directory / "research.json"),
+                "--research-use-attested",
+            ]
         if mode == "installed":
             command += [
                 "--model-dir",
@@ -92,4 +127,5 @@ class LocalEndoscopyJob(LocalJob):
             directory=directory,
             output=output / "bundle.endo.zip",
             timeout=timeout,
+            input_files=inputs,
         )

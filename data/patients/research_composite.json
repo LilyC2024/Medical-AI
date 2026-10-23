@@ -1,0 +1,28 @@
+{
+  "fictional": true,
+  "patient_id": "research-composite-demo",
+  "display_name": "Jordan \u2014 real-image research composite",
+  "entries": [
+    {
+      "id": "composite-context",
+      "date": null,
+      "source_type": "documented",
+      "kind": "encounter",
+      "text": "Fictional composite teaching case. Public CT and endoscopy images belong to unrelated research subjects, not this fictional person. No cross-modal diagnosis, common cause or real clinical history is established."
+    },
+    {
+      "id": "composite-fatigue",
+      "date": null,
+      "source_type": "patient_reported",
+      "kind": "symptom",
+      "text": "Fictional teaching history: intermittent tiredness and irregular sleep during shift work; duration and examination findings are not supplied. Blood pressure and current warning-sign screening are not available."
+    },
+    {
+      "id": "composite-images",
+      "date": null,
+      "source_type": "documented",
+      "kind": "procedure",
+      "text": "Fictional demonstration plan: inspect a public lung CT excerpt and an unrelated endoscopy research image separately. Dataset acquisition dates, CT protocol confirmation, endoscopic location, histology and follow-up are not supplied. Image predictions require separate human inspection."
+    }
+  ]
+}

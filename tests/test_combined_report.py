@@ -84,7 +84,10 @@ def test_ct_inspection_measurements_and_evidence_are_in_combined_report(
     flow.acknowledge_safety(case, review_for(flow.state(case), safety=True), token)
     state = flow.state(case)
     assert "CT inspection" in state["draft"] and "1 candidate" in state["draft"]
-    assert "5.00 mm" in state["draft"] and "non-ML" in state["draft"]
+    assert "5.00 mm" in state["draft"]
+    assert (
+        state["imaging"][0]["manifest"]["study"]["model"]["synthetic_fixture"] is True
+    )
     assert "No accepted CT study" not in state["draft"]
     assert "SHA-256" not in state["draft"] and "Source key" not in state["draft"]
     assert (

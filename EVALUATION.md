@@ -1,7 +1,57 @@
 # LOVISA evaluation record
 
-These results concern synthetic software behavior, not diagnostic accuracy,
-clinical safety or clinician time savings. [Reproduce checks](docs/VALIDATION.md)
+## Real-image composite and clearer review — 23 October 2026
+
+| Executed check | Actual outcome |
+| --- | --- |
+| Final LOVISA regression | **243 passed in 102.56s** |
+| CT companion final regression | **83 passed in 34.61s**, 11 existing dependency/legacy warnings |
+| Endoscopy companion final regression | **37 passed in 5.15s**, two existing ONNX-export deprecation warnings |
+| Real CT excerpt inference | **11.98s**, registered pretrained MONAI CPU, one candidate, declared 32×96×96 ROI at (168,313,300) |
+| Real raw endoscopy -> worker -> LOVISA validation | **3.16s**, five regions, four verified artifacts; no approvals |
+| Actual local gemma4:e2b standard smoke | Passed uncertainty hold and eligible fictional reasoning; final review still required |
+| Actual real CT + endoscopy + local LLM combined-report smoke | **34.32s**, 170 words, one heading and four embedded source/annotation images |
+| Approval simulation | Scripted solely in a disposable test database; no actual-app imaging, safety or final approval issued |
+| Review UX | Checked confirmation defaults, optional blank notes, explicit submit, paused defaults, candidate uncertainty blocks, patient-switch reset and changed-note preview tested |
+| Data boundaries | Separate public/synthetic schemas, exact pixels/boxes/crop coverage, old stored synthetic-manifest compatibility and local example path/hash guards tested |
+| Source/dependencies | Shared contracts match; pip consistency, compilation, Ruff checks and local documentation links passed |
+
+The signed-in Jordan example has **fictional history** and unrelated public imaging:
+TCIA LIDC-IDRI-0002 (CC BY 3.0) and Kvasir-SEG (research/education terms; subject
+identity unknown). Their original sources, predictions, reference annotations,
+permission declarations and acquisition-date uncertainty remain distinct.
+The local kit has three fixed Kvasir JPEGs and pending result ZIPs; no pixels,
+weights, accounts or runtime reports were committed.
+
+The CT ROI was selected using an official reader contour **before inference**.
+Two reader observations matched a declared localization proxy; this is neither
+detection accuracy nor an independent benchmark, and LUNA overlap is possible.
+The whole-scan CPU attempt was stopped after roughly 28 minutes without a result.
+**Full CT training was not run** because this host lacks the required CUDA GPU.
+The successful excerpt test must not be read as full-examination coverage.
+
+Endoscopy was actually retrained for 24 CPU epochs (365.949s under concurrent CT
+load), with validation-loss checkpoint selection. Mean Dice **0.5439824** and IoU
+**0.4131187** on 168 positive images improve on the earlier 0.446 baseline, but
+this previously examined split is exploratory, has no negatives and does not
+establish patient independence. No cancer/clinical performance claim follows.
+[Commands, data terms and reproducibility](docs/RESEARCH_IMAGES.md).
+
+The report is shorter and hides model scores/hashes from primary panels while
+retaining content-bound evidence. Blank final notes no longer demand a note
+preview; changed nonempty notes still do. Preselected confirmations record no
+approval until explicit authenticated submission. Urgent routing and model
+grounding remain enforced in Python. Browser styling is covered by automated
+Streamlit/UI checks; no new manual browser-layout screenshot is claimed.
+
+Compatible producer commits: CT `b73a72188efda899f9d0a0d321f905002bc7dac3`,
+endoscopy `81ff9f53a0baa9b40ff396283ef1dd9f430bf170`. Hosted publication outcomes
+are recorded after the corresponding runs finish.
+
+The sections below are historical evidence, with their then-current scope/counts.
+
+Results distinguish manufactured software tests from actual local model/research-image
+experiments. None establishes diagnostic accuracy, clinical safety or clinician time savings. [Reproduce checks](docs/VALIDATION.md)
 · [Eight acceptance requirements](docs/ACCEPTANCE.md).
 
 ## Concise combined report — 23 October 2026

@@ -1,5 +1,6 @@
-from test_ui import ui, login, open_imaging  # noqa: F401
+# ruff: noqa: F811
 from test_nodule_imaging import nodule_bytes
+from test_ui import login, open_imaging, ui  # noqa: F401
 
 
 def test_nodule_ui_requires_decisions_and_authentication(ui):
@@ -18,7 +19,7 @@ def test_nodule_ui_requires_decisions_and_authentication(ui):
     app.checkbox(key="imaging_attest").check()
     app.button(key="imaging_accept").click().run()
     assert app.error and not store.snapshots("synthetic-checklist")
-    app.selectbox(key=key + "_decision_N001").set_value("accept")
+    app.radio(key=key + "_decision_N001").set_value("accept")
     app.button(key="imaging_accept").click().run()
     assert not app.exception and len(store.snapshots("synthetic-checklist")) == 1
     assert not any(b.key == "generate" for b in app.button) and not inference.calls
@@ -34,7 +35,7 @@ def test_nodule_ui_previews_and_preserves_caliper(ui):
     key, proposal = store.prepare(nodule_bytes(), "synthetic-checklist")
     app.session_state.imaging_proposal = (key, proposal)
     app.run()
-    app.selectbox(key=key + "_decision_N001").set_value("accept")
+    app.radio(key=key + "_decision_N001").set_value("accept")
     app.checkbox(key=key + "_caliper_N001").check()
     app.button(key="nodule_measurement_preview").click().run()
     assert not app.exception

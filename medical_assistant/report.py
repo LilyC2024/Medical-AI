@@ -87,67 +87,52 @@ def evidence_index(record, outputs, imaging=None):
 
 
 def ct_summary(imaging):
-    """Aggregate accepted inspections; include reviewed calipers, never box-size diagnoses."""
+    """Short inspected result; exact source/model/coverage evidence stays bound separately."""
     from medical_assistant.imaging_results import summarize
     from medical_assistant.nodule_support import verify_nodule_snapshot
 
-    imaging = [s for s in imaging or [] if not is_endoscopy(s["manifest"])]
-    if not imaging:
-        return "No accepted CT study is included. Inspect and accept CT before preparing a new report if imaging is needed."
+    studies = [s for s in imaging or [] if not is_endoscopy(s["manifest"])]
+    if not studies:
+        return "No accepted CT study is included."
     results = []
-    for snapshot in imaging:
+    for snapshot in studies:
         review = verify_nodule_snapshot(snapshot)
         results.append(
             summarize(
                 snapshot["manifest"], review.model_dump(mode="json") if review else None
             )
         )
-    lung = [result for result in results if "candidate_count" in result]
-    legacy = len(results) - len(lung)
-    parts = [
-        f"{len(results)} accepted artificial CT {'study' if len(results) == 1 else 'studies'} included."
-    ]
+    lung = [r for r in results if "candidate_count" in r]
+    parts = []
     if lung:
         proposed = sum(r["candidate_count"] for r in lung)
         accepted = sum(r["accepted_count"] for r in lung)
         parts.append(
-            f"{proposed} {'candidate' if proposed == 1 else 'candidates'} proposed; inspection accepted {accepted} and rejected {proposed - accepted} for research review."
+            f"{proposed} {'candidate' if proposed == 1 else 'candidates'} proposed; {accepted} accepted on inspection."
         )
         calipers = [
-            (i, row)
-            for i, result in enumerate(results, 1)
-            for row in result["rows"]
-            if row["Caliper mm"] is not None
+            row["Caliper mm"]
+            for r in lung
+            for row in r["rows"]
+            if row["Caliper mm"] is not None and row["Review"] == "accept"
         ]
-        if calipers:
-            parts.append(
-                "Reviewed calipers: "
-                + "; ".join(
-                    f"study {i}, {row['Candidate']} {row['Caliper mm']:.2f} mm"
-                    for i, row in calipers[:3]
-                )
-                + "."
-            )
-            if len(calipers) > 3:
-                parts.append(
-                    f"{len(calipers) - 3} further caliper(s) are in the evidence package."
-                )
-        else:
-            parts.append("No reviewer caliper was supplied.")
-        if any(r["mode"] == "Non-ML fixture" for r in lung):
-            parts.append("Includes a non-ML demonstration fixture.")
         parts.append(
-            "Candidates do not establish malignancy or explain symptoms; zero/rejected candidates do not establish a normal CT."
+            "Reviewed calipers: " + ", ".join(f"{v:.2f} mm" for v in calipers[:3]) + "."
+            if calipers
+            else "No reviewer caliper supplied."
         )
-    if legacy:
+    if len(results) > len(lung):
         parts.append(
-            f"{legacy} legacy tissue-mask study/studies; these are not nodule detections or lesion measurements."
+            "Legacy tissue-mask findings are not nodule detections or measurements."
         )
-    parts.append("Acquisition dates are unavailable.")
+    if any(not x["manifest"]["synthetic"] for x in studies):
+        parts.append("Limited public CT excerpt; protocol unverified.")
+    parts.append("Findings do not establish a normal CT or malignancy.")
     return " ".join(parts)
 
 
 def endoscopy_summary(imaging):
+    """Keep the report focused on inspected regions rather than model metadata."""
     studies = [s for s in imaging or [] if is_endoscopy(s["manifest"])]
     if not studies:
         return None
@@ -157,21 +142,10 @@ def endoscopy_summary(imaging):
     ]
     proposed = sum(r["candidate_count"] for r in results)
     accepted = sum(r["accepted_count"] for r in results)
-    areas = [
-        str(row["Area (pixels)"])
-        for r in results
-        for row in r["rows"]
-        if row["Review"] == "accept"
-    ]
-    text = f"{len(studies)} accepted artificial image study/studies; {proposed} candidate region(s), {accepted} accepted on inspection."
-    if areas:
-        text += " Accepted mask areas: " + ", ".join(areas[:3]) + " pixels."
-        if len(areas) > 3:
-            text += " Further areas are retained in the evidence package."
-    if any(r["mode"] == "synthetic-fixture" for r in results):
-        text += " Includes a non-ML demonstration."
-    text += " No calibrated physical size, anatomical location or histology is supplied. These regions do not establish cancer, explain symptoms or exclude missed polyps."
-    return text
+    return (
+        f"{proposed} candidate regions; {accepted} accepted on inspection. "
+        "Physical size and histology unavailable; findings do not diagnose cancer or exclude missed polyps."
+    )
 
 
 def summary_parts(record, outputs, imaging=None, clinician_note=None):
@@ -217,11 +191,6 @@ def summary_parts(record, outputs, imaging=None, clinician_note=None):
         )
         if len(changes) > 2:
             analysis += " Further changes are retained in the evidence package."
-    analysis += (
-        " No approved reference support was selected."
-        if not any(e.reference_ids for e in explanations)
-        else "Selected local reference support is retained in the evidence package."
-    )
     safety = assessments["safety"]
     gaps = list(dict.fromkeys(safety.missing_information))
     if not any(e.blood_pressure for e in record.entries) and not any(
@@ -238,7 +207,15 @@ def summary_parts(record, outputs, imaging=None, clinician_note=None):
     note = ReportNote.model_validate(clinician_note) if clinician_note else None
     note_text = f"{note.reviewer}: {note.text}" if note and note.text else "Not added."
     parts = [
-        ("Patient", record.display_name),
+        (
+            "Patient",
+            record.display_name
+            + (
+                ". Fictional composite; image subjects are unrelated."
+                if any(not x["manifest"]["synthetic"] for x in imaging or [])
+                else ""
+            ),
+        ),
         ("AI history analysis", analysis),
         ("CT inspection", ct_summary(imaging)),
         ("For clinician review", followup.strip()),

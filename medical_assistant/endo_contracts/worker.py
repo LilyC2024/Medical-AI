@@ -10,7 +10,9 @@ from pathlib import Path
 
 
 class LocalJob:
-    def __init__(self, command, *, cwd, directory, output, timeout=110):
+    def __init__(
+        self, command, *, cwd, directory, output, timeout=110, input_files=None
+    ):
         """Initialise the explicit local model or bounded worker without remote fallback."""
         if not math.isfinite(timeout) or timeout <= 0:
             raise ValueError("Positive finite timeout required")
@@ -18,6 +20,16 @@ class LocalJob:
         self.started = time.monotonic()
         self.directory = Path(directory)
         self.directory.mkdir(parents=True, exist_ok=False)
+        for name, payload in (input_files or {}).items():
+            if (
+                Path(name).name != name
+                or "\\" in name
+                or ":" in name
+                or name in ("worker.log", ".", "..")
+                or len(payload) > 16 * 1024**2
+            ):
+                raise ValueError("Invalid local worker input file")
+            (self.directory / name).write_bytes(payload)
         self.bundle_path = Path(output)
         self.log_path = self.directory / "worker.log"
         self._log = self.log_path.open("wb")

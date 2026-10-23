@@ -2,7 +2,9 @@
 
 import os
 
+import numpy as np
 import streamlit as st
+from PIL import Image
 
 from medical_assistant.endo_contracts import Review as EndoReview
 from medical_assistant.endo_contracts import digest
@@ -16,15 +18,36 @@ from medical_assistant.ui.navigation import go_to
 
 def image_results(manifest, path_for, review=None):
     result = summarize_endo(manifest, review)
+    candidates = manifest["study"]["candidates"]
+    focus = st.selectbox(
+        "Highlight a region",
+        ["All regions", *[c["candidate_id"] for c in candidates]],
+        key=("reviewed_" if review else "pending_")
+        + "endo_focus_"
+        + manifest["job_id"],
+    )
+    overlay = str(path_for("overlay_preview", 0))
+    caption = "Candidate outlines · not a diagnosis"
+    if focus != "All regions":
+        with Image.open(overlay) as image:
+            overlay = np.array(image.convert("RGB"))
+        c = next(c for c in candidates if c["candidate_id"] == focus)
+        x0, y0, x1, y1 = c["box_xyxy"]
+        width = max(2, overlay.shape[1] // 250)
+        overlay[y0 : min(y0 + width, y1), x0:x1] = [0, 210, 210]
+        overlay[max(y0, y1 - width) : y1, x0:x1] = [0, 210, 210]
+        overlay[y0:y1, x0 : min(x0 + width, x1)] = [0, 210, 210]
+        overlay[y0:y1, max(x0, x1 - width) : x1] = [0, 210, 210]
+        caption = "Highlighted: " + focus
     a, b = st.columns(2)
     a.image(
         str(path_for("source_preview", 0)),
-        caption="Artificial endoscopy source",
+        caption="Endoscopy source",
         width="stretch",
     )
     b.image(
-        str(path_for("overlay_preview", 0)),
-        caption="Candidate outlines · not a diagnosis",
+        overlay,
+        caption=caption,
         width="stretch",
     )
     st.subheader("Endoscopy analysis results")
@@ -34,21 +57,28 @@ def image_results(manifest, path_for, review=None):
         "Accepted on inspection", result["accepted_count"] if review else "Pending"
     )
     if result["rows"]:
-        st.dataframe(result["rows"], hide_index=True)
+        st.dataframe(
+            [
+                {
+                    k: v
+                    for k, v in row.items()
+                    if k not in ("Model score", "Area (pixels)")
+                }
+                for row in result["rows"]
+            ],
+            hide_index=True,
+        )
     st.caption(
-        "Non-ML demonstration"
-        if result["mode"] == "synthetic-fixture"
-        else "Installed image model · " + result["scope"].replace("-", " ")
+        "Candidate regions require inspection; physical size and histology are unavailable."
     )
-    st.info(
-        "Areas are source-image pixels, not millimetres. Candidate regions do not establish cancer, explain symptoms or exclude missed polyps."
-    )
+    if not manifest["synthetic"]:
+        st.caption("Public research image · fictional composite case")
 
 
 def endoscopy_ui(path, auth, token, user, record, *, locked=False, case_imaging=None):
     st.subheader("Endoscopy review")
     st.caption(
-        "Inspect artificial image candidates and include reviewed findings before preparing the clinical report."
+        "Inspect image candidates and include reviewed findings before preparing the clinical report."
     )
     if "imaging_store" not in st.session_state:
         st.session_state.imaging_store = ImagingStore(path, auth)
@@ -136,20 +166,26 @@ def endoscopy_ui(path, auth, token, user, record, *, locked=False, case_imaging=
                 choices = [
                     {
                         "candidate_id": c["candidate_id"],
-                        "decision": st.selectbox(
+                        "decision": st.radio(
                             "Review " + c["candidate_id"],
                             ["uncertain", "accept", "reject"],
+                            format_func=lambda x: {
+                                "uncertain": "Pause · decide later",
+                                "accept": "Include candidate",
+                                "reject": "Exclude candidate",
+                            }[x],
                             key="endo_decision_" + key + c["candidate_id"],
                         ),
                     }
                     for c in manifest["study"]["candidates"]
                 ]
                 notes = st.text_area(
-                    "Brief image review note", key="endo_notes", max_chars=600
+                    "Image review note (optional)", key="endo_notes", max_chars=600
                 )
                 attested = st.checkbox(
-                    "I inspected the source, candidate outlines, patient association and research limitations.",
+                    "I inspected the image, candidate decisions and case association.",
                     key="endo_attest",
+                    value=True,
                 )
                 submit = st.form_submit_button(
                     "Include reviewed endoscopy in report",
@@ -176,7 +212,7 @@ def endoscopy_ui(path, auth, token, user, record, *, locked=False, case_imaging=
                 st.rerun()
         except (ValueError, OSError, PermissionError):
             st.error(
-                "Review every candidate, add a short note and confirm image inspection before including this study."
+                "Choose include or exclude for every candidate and keep the inspection confirmation selected. Notes are optional."
             )
         if st.button("Discard endoscopy proposal", key="endo_discard"):
             store.discard(key)
@@ -185,13 +221,69 @@ def endoscopy_ui(path, auth, token, user, record, *, locked=False, case_imaging=
             st.rerun()
     elif not accepted:
         st.info(
-            "No endoscopy study yet. Run an artificial example or upload a supported synthetic bundle."
+            "No endoscopy study yet. Run an artificial example or upload a supported research bundle."
         )
     ct = st.session_state.get("ct_job")
     busy_ct = bool(ct and ct.status() in ("running", "complete"))
     with st.expander(
         "Add an endoscopy image study", expanded=not accepted and proposal is None
     ):
+        if record.patient_id == "research-composite-demo":
+            st.caption("Real research example · separate source subject from CT")
+            if st.button(
+                "Open real endoscopy example",
+                key="endo_real_example",
+                disabled=locked
+                or not token
+                or busy_ct
+                or proposal is not None
+                or bool(job and job.status() == "running"),
+            ):
+                try:
+                    from medical_assistant.research_examples import example_bundle
+
+                    st.session_state.imaging_proposal = store.prepare(
+                        example_bundle("endoscopy", record.patient_id),
+                        record.patient_id,
+                    )
+                    st.rerun()
+                except (ValueError, OSError):
+                    st.error(
+                        "Prepare the local research-image kit first; see docs/RESEARCH_IMAGES.md."
+                    )
+            raw_image = st.file_uploader(
+                "Research endoscopy image (JPG/PNG)",
+                type=["jpg", "jpeg", "png"],
+                key="endo_raw_image",
+            )
+            if st.button(
+                "Analyse uploaded research image",
+                key="endo_analyse_raw",
+                disabled=locked
+                or not token
+                or busy_ct
+                or proposal is not None
+                or raw_image is None
+                or bool(job and job.status() == "running"),
+            ):
+                try:
+                    from medical_assistant.research_examples import matching_endoscopy
+
+                    raw = raw_image.getvalue()
+                    provenance = matching_endoscopy(raw, record.patient_id)
+                    st.session_state.endo_job = LocalEndoscopyJob(
+                        record.patient_id,
+                        jobs=store.root / "endo-jobs",
+                        mode="installed",
+                        image_bytes=raw,
+                        research=provenance,
+                        backend=os.environ.get("LOVISA_ENDO_BACKEND", "onnx-cpu"),
+                    )
+                    st.rerun()
+                except (ValueError, OSError):
+                    st.error(
+                        "Use one of the three endoscopy JPGs from the prepared research kit and an installed local model."
+                    )
         mode = st.selectbox(
             "Analysis mode",
             ["Artificial workflow example (non-ML)", "Installed polyp research model"],
@@ -228,7 +320,7 @@ def endoscopy_ui(path, auth, token, user, record, *, locked=False, case_imaging=
                 st.session_state.pop("endo_job", None)
                 st.rerun()
         uploaded = st.file_uploader(
-            "Synthetic endoscopy bundle (.zip)", type=["zip"], key="endo_bundle"
+            "Endoscopy review bundle (.zip)", type=["zip"], key="endo_bundle"
         )
         if st.button(
             "Inspect uploaded endoscopy",
@@ -250,10 +342,10 @@ def endoscopy_ui(path, auth, token, user, record, *, locked=False, case_imaging=
                 st.rerun()
             except (ValueError, OSError):
                 st.error(
-                    "Only verified artificial endoscopy bundles for the selected patient are accepted."
+                    "Use a verified image bundle for the selected case. Public images require the research composite case."
                 )
         st.caption(
-            "Public research images are supported in the standalone endoscopy app; they are not imported into synthetic patient records."
+            "Real research examples are available for the Jordan composite case; sources remain separate from its fictional history."
         )
 
 

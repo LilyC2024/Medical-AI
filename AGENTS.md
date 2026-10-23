@@ -2,7 +2,10 @@
 
 # Architectural constraints
 
-- Synthetic records only. Local Ollama inference only; no paid APIs, remote
+- Synthetic histories only. Explicitly permitted deidentified public research imaging
+  may be used in labelled fictional composite cases with dataset/license/subject
+  provenance. Clinical records and real-patient linkage remain unsupported.
+  Local Ollama inference only; no paid APIs, remote
   inference, remote tracing, or automatic medical decisions.
 - Reuse `.venv` and the installed `gemma4:e2b` model. Inspect versions before
   changing dependencies. Use stdlib SQLite and installed LangChain/LangGraph.

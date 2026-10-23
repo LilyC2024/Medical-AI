@@ -5,37 +5,46 @@ import json
 import zipfile
 
 import numpy as np
-from PIL import Image
 import pytest
+from PIL import Image
 
-from medical_assistant.nodule_models import (
-    Geometry,
-    SourceSlice,
-    ModelProvenance,
-    Candidate,
-    Study,
-    Decision,
-    Caliper,
-    Review as NoduleReview,
-    digest as ndigest,
-)
+from medical_assistant.database import get_history, seed
+from medical_assistant.imaging import ImagingStore
+from medical_assistant.imaging_contract import validate_bundle
+from medical_assistant.models import Review
 from medical_assistant.nodule_exchange import (
     PENDING_REPORT,
-    wire_pixels,
     byte_digest,
-    read_exchange,
+    wire_pixels,
 )
-from medical_assistant.imaging_contract import validate_bundle
-from medical_assistant.imaging import ImagingStore
+from medical_assistant.nodule_models import (
+    Caliper,
+    Candidate,
+    Decision,
+    Geometry,
+    ModelProvenance,
+    SourceSlice,
+    Study,
+)
+from medical_assistant.nodule_models import (
+    Review as NoduleReview,
+)
+from medical_assistant.nodule_models import (
+    digest as ndigest,
+)
 from medical_assistant.nodule_support import imaging_acceptance_digest
-from medical_assistant.models import Review
-from medical_assistant.database import seed, get_history
-from medical_assistant.workflow import MedicalHistoryOrchestrator
 from medical_assistant.report import digest
 from medical_assistant.storage import save_report
+from medical_assistant.workflow import MedicalHistoryOrchestrator
 
 
-def nodule_bytes(patient="synthetic-checklist", study_id="lung-study", mutate=None, *, no_candidates=False):
+def nodule_bytes(
+    patient="synthetic-checklist",
+    study_id="lung-study",
+    mutate=None,
+    *,
+    no_candidates=False,
+):
     g = Geometry(
         shape_zyx=(2, 12, 12),
         spacing_zyx_mm=(2, 1, 1),
@@ -68,9 +77,9 @@ def nodule_bytes(patient="synthetic-checklist", study_id="lung-study", mutate=No
             synthetic_fixture=True,
             score_threshold=0.5,
         ),
-        candidates=[] if no_candidates else [
-            Candidate(candidate_id="N001", box_zyx=(0, 2, 3, 1, 7, 8), score=0.8)
-        ],
+        candidates=[]
+        if no_candidates
+        else [Candidate(candidate_id="N001", box_zyx=(0, 2, 3, 1, 7, 8), score=0.8)],
     )
     hu = np.full(g.shape_zyx, -800, dtype=np.float32)
     hu[:, 3:6, 4:7] = 50
@@ -298,7 +307,10 @@ def test_nodule_appendix_is_grounded_separate_from_llm_and_final_review(
         token,
     )
     state = workflow.state(case)
-    assert "5.00 mm" in state["draft"] and "do not establish malignancy" in state["draft"]
+    assert (
+        "5.00 mm" in state["draft"]
+        and "do not establish a normal CT or malignancy" in state["draft"]
+    )
     assert "1" * 64 not in state["draft"]
     assert state["report_evidence"]["ct_studies"][0]["study_id"] == "lung-study"
     assert state["imaging"][0]["manifest"]["study"]["sources"][0]["sha256"] == "1" * 64
@@ -342,8 +354,9 @@ def test_old_incomplete_nodule_v1_requires_reexport():
 def test_urgent_routing_precedes_corrupt_nodule_optional_artifacts(
     nodule_store, inference
 ):
-    from medical_assistant.history_import import HistoryManagement
     from test_imaging import acceptance
+
+    from medical_assistant.history_import import HistoryManagement
 
     store, token = nodule_store
     snapshot = approve_nodule(store, token)

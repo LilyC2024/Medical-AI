@@ -225,12 +225,11 @@ def bottom_actions(path, auth, record, model, token, user, decision):
             "Assess these gaps first. Saving this decision will not start the model or approve the final report."
         )
         with st.form("safety_form"):
-            notes = st.text_area(
-                "Your assessment of the missing information", key="safety_notes"
-            )
+            notes = st.text_area("Assessment note (optional)", key="safety_notes")
             checked = st.checkbox(
                 "I reviewed these gaps and take responsibility for the decision below.",
                 key="safety_attest",
+                value=True,
             )
             action = st.radio(
                 "Next step",
@@ -268,7 +267,7 @@ def bottom_actions(path, auth, record, model, token, user, decision):
                 st.rerun()
             except (ValueError, PermissionError):
                 st.error(
-                    "Add assessment notes and tick the review checkbox before saving. If the record changed, start a new review."
+                    "Keep the confirmation selected and choose the next step before saving. Notes are optional. If the record changed, start a new review."
                 )
     else:
         st.info(
@@ -401,7 +400,7 @@ def report_panel(auth, token, user, record, *, urgent=False):
         if st.session_state.pop("report_note_changed", False):
             st.session_state.pop("attested", None)
             st.success(
-                "Note added to the preview. Read the updated report, then confirm your review again."
+                "Note added to the preview. Read the updated report, then submit your review decision."
             )
         st.subheader("Draft report")
         st.caption(
@@ -418,7 +417,7 @@ def report_panel(auth, token, user, record, *, urgent=False):
         with st.form("clinical_review"):
             st.subheader("Your review decision")
             notes = st.text_area(
-                "Brief clinician note / review feedback",
+                "Clinician note (optional)",
                 key="review_notes",
                 max_chars=600,
             )
@@ -431,6 +430,7 @@ def report_panel(auth, token, user, record, *, urgent=False):
             checked = st.checkbox(
                 "I reviewed the clinical summary, imaging inspections, source evidence and remaining limitations.",
                 key="attested",
+                value=True,
             )
             action = st.radio(
                 "Review decision",
@@ -456,7 +456,7 @@ def report_panel(auth, token, user, record, *, urgent=False):
             try:
                 if (
                     action == "Approve report"
-                    and state.get("clinician_note", {}).get("text") != notes.strip()
+                    and state.get("clinician_note", {}).get("text", "") != notes.strip()
                 ):
                     raise ValueError("Preview the changed note before approval")
                 workflow.review(
@@ -491,7 +491,8 @@ def report_panel(auth, token, user, record, *, urgent=False):
                 st.download_button(
                     "Download report with imaging (HTML)"
                     if any(
-                        s["manifest"].get("schema_version") == "lovisa-endo-image-v1"
+                        s["manifest"].get("schema_version")
+                        in ("lovisa-endo-image-v1", "lovisa-endo-research-v2")
                         for s in payload.get("imaging", [])
                     )
                     else "Download report with CT images (HTML)",

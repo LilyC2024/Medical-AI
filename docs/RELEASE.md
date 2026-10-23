@@ -112,3 +112,13 @@ change. The CT project remains compatible. [Reports](REPORTS.md) · [Evaluation]
 ## 0.7.0 — Image-first endoscopy
 
 Adds a separate polyp image companion, source/mask/probability/overlay verification, candidate decisions, bounded local processing, patient-isolated UI and accepted endoscopy findings/pictures in the single-section report. The CV adapter is not an LLM; history reasoning remains local and catalog-bounded. Final approval binds both CT and endoscopy snapshots. [Guide](ENDOSCOPY.md).
+
+## Public research-image composite and simpler review
+
+Separate CT-v3/endoscopy-v2 research contracts support real deidentified images
+with distinct subject provenance and bounded CT coverage. Earlier synthetic
+formats/stored manifests remain verifiable. A signed-in composite example and
+local preparation scripts provide real upload files. Imaging prose is shorter;
+notes are optional; confirmations start selected; colour and larger decisions
+make pauses/approval clearer. Explicit submission, uncertain-candidate blocks,
+safety routing and final content binding remain. [Experiment details](RESEARCH_IMAGES.md).

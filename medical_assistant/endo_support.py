@@ -1,10 +1,10 @@
 """Modality-specific candidate review binding; no clinical or safety decisions."""
 
-from medical_assistant.endo_contracts import VERSION, Bundle, Review, digest
+from medical_assistant.endo_contracts import VERSIONS, Bundle, Review, digest
 
 
 def is_endoscopy(manifest):
-    return manifest.get("schema_version") == VERSION
+    return manifest.get("schema_version") in VERSIONS
 
 
 def checked_endo_review(manifest, review, *, reviewer=None):

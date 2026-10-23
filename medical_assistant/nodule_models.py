@@ -114,7 +114,9 @@ class Study(Record):
     model: ModelProvenance
     candidates: Annotated[list[Candidate], Field(max_length=300)]
     protocol_attestation: Literal[
-        "synthetic-phantom", "adult-noncontrast-chest-complete"
+        "synthetic-phantom",
+        "adult-noncontrast-chest-complete",
+        "public-chest-protocol-unverified",
     ]
 
     @model_validator(mode="after")

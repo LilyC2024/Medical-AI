@@ -31,3 +31,11 @@ The hypothesis catalog remains deliberately small: medication contribution,
 sleep contribution or insufficient information. These examples do not add cancer,
 anemia or other diagnostic capabilities. CT scores are not malignancy estimates;
 measurements require review. [Architecture](ARCHITECTURE.md).
+
+## Jordan — real-image research composite
+
+`research-composite-demo` has a fictional tiredness/shift-work history with missing
+dates and current safety observations. Real LIDC-IDRI CT and Kvasir-SEG images are
+from unrelated research subjects. Its research-evidence buttons leave inspection
+pending. CT protocol/coverage and endoscopy physical size/histology stay uncertain.
+[Prepare/upload examples](RESEARCH_IMAGES.md).

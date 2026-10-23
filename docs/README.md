@@ -30,3 +30,5 @@ simplified citations and the HTML/Markdown/JSON downloads. A clearly labelled
 ## Image-first endoscopy extension
 
 For RGB polyp candidates, read [Endoscopy integration](ENDOSCOPY.md).
+
+[Real research images and composite demo](RESEARCH_IMAGES.md): upload files, licenses, CT preparation and actual endoscopy training.

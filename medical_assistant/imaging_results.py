@@ -1,12 +1,16 @@
 """Small, deterministic CT summaries shared by the viewer and clinical summary."""
 
 import math
+
 from medical_assistant.nodule_exchange import NoduleBundle
 from medical_assistant.nodule_models import Review as NoduleReview
 
 
 def summarize(manifest, review=None):
-    if manifest.get("schema_version") != "mhcra-lung-nodules-v2":
+    if manifest.get("schema_version") not in (
+        "mhcra-lung-nodules-v2",
+        "lovisa-ct-research-v3",
+    ):
         return {
             "study_id": manifest["study_id"],
             "mode": "Legacy tissue-mask demo",

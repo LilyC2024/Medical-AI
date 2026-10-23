@@ -24,8 +24,8 @@ def test_pending_endoscopy_guide_blocks_safety_until_explicit_candidate_review(u
     assert app.button(key="generate").disabled
     app.button(key="open_pending").click().run()
     assert app.radio(key="workspace").value == "Endoscopy review"
-    key = next(s.key for s in app.selectbox if str(s.key).startswith("endo_decision_"))
-    app.selectbox(key=key).set_value("accept")
+    key = next(s.key for s in app.radio if str(s.key).startswith("endo_decision_"))
+    app.radio(key=key).set_value("accept")
     app.text_area(key="endo_notes").input("Scripted artificial region inspection.")
     app.checkbox(key="endo_attest").check()
     app.button(key="endo_accept").click().run()

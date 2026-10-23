@@ -1,5 +1,6 @@
-from test_ui import ui, login, wait_analysis, open_imaging, prepare_safety  # noqa: F401
+# ruff: noqa: F811
 from test_imaging import bundle_bytes
+from test_ui import login, open_imaging, prepare_safety, ui, wait_analysis  # noqa: F401
 
 
 def test_imaging_workbench_requires_review_and_keeps_facts_separate(ui):
@@ -15,6 +16,7 @@ def test_imaging_workbench_requires_review_and_keeps_facts_separate(ui):
     app.run()
     assert not app.exception
     assert not any(b.key == "generate" for b in app.button)
+    app.checkbox(key="imaging_attest").uncheck()
     app.button(key="imaging_accept").click().run()
     assert app.error
     assert store.snapshots("synthetic-checklist") == []
@@ -48,10 +50,12 @@ def test_pending_imaging_can_be_discarded_without_acceptance(ui):
 
 def test_urgent_ui_routing_skips_optional_artifact_inspection(ui, monkeypatch):
     import json
+
+    from test_imaging import acceptance
+
     from medical_assistant.database import get_history
     from medical_assistant.history_import import HistoryManagement
     from medical_assistant.imaging import ImagingStore
-    from test_imaging import acceptance
 
     app, path, auth, inference = ui
     login(app)
@@ -91,9 +95,11 @@ def test_urgent_ui_routing_skips_optional_artifact_inspection(ui, monkeypatch):
 
 def test_new_warning_blocks_review_of_an_older_case_snapshot(ui):
     import json
+
+    from test_imaging import acceptance
+
     from medical_assistant.database import get_history
     from medical_assistant.history_import import HistoryManagement
-    from test_imaging import acceptance
 
     app, path, auth, _ = ui
     login(app)

@@ -2,10 +2,7 @@
 
 [Reference index](../CODE_REFERENCE.md) · [Clinical contracts](CLINICAL.md) · [Imaging contracts](IMAGING.md)
 
-This inventory follows the current source AST, including class validators and
-nested helpers. Signatures describe inputs; the subject references explain their
-invariants. Module descriptions quote source docstrings. Shared `mhcra-*` names
-identify stable legacy/protocol interfaces; the application name is LOVISA.
+Current source AST, including validators and nested helpers. See linked implementations for full invariants. Runtime data and model artifacts are excluded.
 
 ## [app.py](../../app.py)
 
@@ -21,7 +18,7 @@ LOVISA local workspace: reusable UI, bounded jobs and human review.
 
 ## [medical_assistant/agents.py](../../medical_assistant/agents.py)
 
-Constrained specialist prompt templates and local inference validation.
+Constrained specialist prompt templates and local inference validation. The clinical graph uses this wrapper for reasoning only. History, medication and safety roles run through dedicated deterministic Python components.
 
 | Callable | Purpose/contract |
 | --- | --- |
@@ -48,7 +45,7 @@ Local password authentication and short-lived in-process clinician sessions.
 
 ## [medical_assistant/compact_reasoning.py](../../medical_assistant/compact_reasoning.py)
 
-Compact local-model selection; Python restores exact immutable record excerpts.
+Compact local-model selection; Python restores exact immutable record excerpts. No new clinical vocabulary, sources or decisions are introduced. The expanded Assessment passes the same grounding/catalog checks as the full-output path.
 
 | Callable | Purpose/contract |
 | --- | --- |
@@ -87,6 +84,75 @@ Transactional SQLite storage. Models have no access to these write functions.
 | `get_history(patient_id: str, path: Path=DATABASE_PATH)` | See linked implementation and subject contract. |
 | `list_patients(path: Path=DATABASE_PATH)` | See linked implementation and subject contract. |
 | `seed(path: Path=DATABASE_PATH)` | Explicit built-in synthetic fixture creation; never imports arbitrary files. |
+
+## [medical_assistant/endo_contracts/__init__.py](../../medical_assistant/endo_contracts/__init__.py)
+
+ML-free, bounded RGB evidence protocol shared with LOVISA. No clinical inference.
+
+| Callable | Purpose/contract |
+| --- | --- |
+| `sha(data)` | Hash supplied bytes with SHA-256 for consistency checking. |
+| `digest(value)` | Hash canonical structured content without claiming producer authenticity. |
+| `ModelInfo.matching(self)` | Keep fixture provenance and evaluation scope consistent. |
+| `Study.bounds(self)` | Check candidate identities, box bounds and fixture scope. |
+| `Review.explicit(cls, value)` | Require a literal true human image-review attestation. |
+| `Review.verify(self, study)` | Recheck original-source association and every derived workspace annotation. |
+| `Artifact.safe(cls, path)` | Reject absolute, traversal and reserved artifact paths. |
+| `PublicResearchSource.explicit_composite(cls, value)` | See linked implementation and subject contract. |
+| `Bundle.consistent(self)` | Require distinct schemas for artificial and deidentified public pixels. |
+| `regions(probability, threshold, min_area)` | 4-connected predicted components, half-open source coordinates; no GT use. |
+| `overlay_pixels(source, mask, candidates)` | Render deterministic amber candidate masks and boxes over source pixels. |
+| `png(array)` | Encode a canonical PNG artifact without external resources. |
+| `array_bytes(array)` | Encode a non-object NumPy array for bounded source verification. |
+| `_image(data, mode, shape)` | Validate image dimensions and format before decoding pixel arrays. |
+| `_probability(data, shape)` | Bound array headers and payload before allocating a finite probability map. |
+| `unique(pairs)` | Reject duplicate JSON keys instead of silently accepting the last value. |
+| `read_exchange(payload, patient_id)` | Verify all bytes and derived pixels before storing; hashes are not authenticity. |
+
+## [medical_assistant/endo_contracts/worker.py](../../medical_assistant/endo_contracts/worker.py)
+
+Bounded local subprocess lifecycle shared by the endoscopy interfaces.
+
+| Callable | Purpose/contract |
+| --- | --- |
+| `LocalJob.__init__(self, command, *, cwd, directory, output, timeout=110, input_files=None)` | Initialise the explicit local model or bounded worker without remote fallback. |
+| `LocalJob._watch(self)` | Publish completion only after successful process exit within the deadline. |
+| `LocalJob.cancel(self, *, timed_out=False)` | Stop the worker process tree and prevent late result publication. |
+| `LocalJob.elapsed(self)` | Return local monotonic time since the job began. |
+| `LocalJob.status(self)` | Read worker lifecycle state under its lock. |
+| `LocalJob.progress(self)` | Read only allowlisted stage markers from the bounded log tail. |
+
+## [medical_assistant/endo_support.py](../../medical_assistant/endo_support.py)
+
+Modality-specific candidate review binding; no clinical or safety decisions.
+
+| Callable | Purpose/contract |
+| --- | --- |
+| `is_endoscopy(manifest)` | See linked implementation and subject contract. |
+| `checked_endo_review(manifest, review, *, reviewer=None)` | See linked implementation and subject contract. |
+| `endo_acceptance_digest(proposal, review)` | See linked implementation and subject contract. |
+| `verify_endo_snapshot(snapshot)` | See linked implementation and subject contract. |
+| `summarize_endo(manifest, review=None)` | See linked implementation and subject contract. |
+
+## [medical_assistant/endo_ui.py](../../medical_assistant/endo_ui.py)
+
+Source-first endoscopy inspection; every candidate needs explicit human review.
+
+| Callable | Purpose/contract |
+| --- | --- |
+| `image_results(manifest, path_for, review=None)` | See linked implementation and subject contract. |
+| `endoscopy_ui(path, auth, token, user, record, *, locked=False, case_imaging=None)` | See linked implementation and subject contract. |
+| `endo_progress(job)` | See linked implementation and subject contract. |
+
+## [medical_assistant/endo_worker.py](../../medical_assistant/endo_worker.py)
+
+Explicit local Endoscopy Agent adapter; bounded CV worker, no LLM or downloads.
+
+| Callable | Purpose/contract |
+| --- | --- |
+| `configured_endo_root()` | See linked implementation and subject contract. |
+| `configured_endo_model(root=None)` | See linked implementation and subject contract. |
+| `LocalEndoscopyJob.__init__(self, patient_id, *, root=None, jobs=None, mode='fixture', model_dir=None, backend='onnx-cpu', timeout=110, image_bytes=None, research=None)` | See linked implementation and subject contract. |
 
 ## [medical_assistant/evidence.py](../../medical_assistant/evidence.py)
 
@@ -139,11 +205,11 @@ Human-reviewed synthetic imaging storage, separate from clinical source facts.
 | `ImagingStore.discard(self, key)` | See linked implementation and subject contract. |
 | `ImagingStore._directory(self, patient_id, study_id)` | See linked implementation and subject contract. |
 | `ImagingStore._verify_directory(directory, snapshot)` | See linked implementation and subject contract. |
-| `ImagingStore.approve(self, key, review, token=None, *, nodule_review=None)` | See linked implementation and subject contract. |
+| `ImagingStore.approve(self, key, review, token=None, *, nodule_review=None, endo_review=None)` | See linked implementation and subject contract. |
 | `ImagingStore.snapshots(self, patient_id)` | See linked implementation and subject contract. |
 | `ImagingStore.verify(self, snapshots)` | See linked implementation and subject contract. |
 | `ImagingStore.preview_path(self, snapshot, role, index)` | See linked implementation and subject contract. |
-| `ImagingStore.preview_resolver(self, snapshot)` | Verify the archive once per view, then hash only requested artifacts. |
+| `ImagingStore.preview_resolver(self, snapshot)` | Verify the archive once per view, then hash only requested artifacts. Acceptance, composition, completion, export and saving still perform full independent validation. Nothing is globally cached or shared across patients. |
 | `ImagingStore.preview_resolver.resolve(role, index)` | See linked implementation and subject contract. |
 
 ## [medical_assistant/imaging_contract.py](../../medical_assistant/imaging_contract.py)
@@ -215,14 +281,15 @@ Validated record, specialist output, and human review contracts.
 
 ## [medical_assistant/nodule_exchange.py](../../medical_assistant/nodule_exchange.py)
 
-Shared, ML-free MHCRA nodule exchange v2 validation and pixel rendering.
+Shared, ML-free MHCRA nodule exchange v2 validation and pixel rendering. Vendored by MHCRA with only the contracts import rewritten; CI checks equality. Hashes bind artifacts but do not authenticate producer execution or synthetic origin.
 
 | Callable | Purpose/contract |
 | --- | --- |
 | `byte_digest(payload)` | See linked implementation and subject contract. |
 | `ExchangeArtifact.safe_path(cls, value)` | See linked implementation and subject contract. |
-| `NoduleBundle.literal_synthetic(cls, value)` | See linked implementation and subject contract. |
+| `PublicResearchSource.explicit_composite(cls, value)` | See linked implementation and subject contract. |
 | `NoduleBundle.consistent(self)` | See linked implementation and subject contract. |
+| `NoduleBundle.verify_research_crop(self)` | Bind a limited HU excerpt to exact original geometry and candidate coordinates. Whole-source hashes record provenance; they do not authenticate a producer. The consumer independently checks excerpt pixels/previews, not absent full scans. |
 | `wire_pixels(study, hu, index, *, calipers=())` | Portable NumPy-only source/box/caliper pixels; no font-version dependency. |
 | `source_pixels(bundle, artifacts)` | Bound NPY header and exact payload before allocating source HU. |
 | `unique_object(pairs)` | See linked implementation and subject contract. |
@@ -253,7 +320,7 @@ Typed nodule review binding; does not change clinical facts or safety routing.
 | --- | --- |
 | `is_nodule(manifest)` | See linked implementation and subject contract. |
 | `checked_nodule_review(manifest, review, *, reviewer=None)` | See linked implementation and subject contract. |
-| `imaging_acceptance_digest(proposal, nodule_review=None)` | See linked implementation and subject contract. |
+| `imaging_acceptance_digest(proposal, nodule_review=None, *, endo_review=None)` | See linked implementation and subject contract. |
 | `verify_nodule_snapshot(snapshot)` | See linked implementation and subject contract. |
 
 ## [medical_assistant/nodule_ui.py](../../medical_assistant/nodule_ui.py)
@@ -282,7 +349,7 @@ Ollama HTTP adapter: fixed loopback, no proxies, redirects, or cloud models.
 
 ## [medical_assistant/reasoning_constraints.py](../../medical_assistant/reasoning_constraints.py)
 
-Limited synthetic hypothesis selection, not general clinical reasoning.
+Limited synthetic hypothesis selection, not general clinical reasoning. The local LLM selects from this transparent catalog. Exact record text remains untrusted quoted evidence; these constraints do not clinically validate a cause, identify emergencies, or establish that a selected source supports causation.
 
 | Callable | Purpose/contract |
 | --- | --- |
@@ -297,9 +364,10 @@ Concise source-bound summaries; detailed provenance stays in the evidence packag
 | Callable | Purpose/contract |
 | --- | --- |
 | `digest(text: str)` | See linked implementation and subject contract. |
-| `inline_text(value)` | Render untrusted data as one literal Markdown line, never active markup. |
+| `inline_text(value)` | Render untrusted data as one literal Markdown line, never active markup. Original quotations remain untouched in source storage. Presentation folds whitespace so a record cannot add headings, lists or reference definitions. Ordinary filename underscores stay readable; intraword underscores cannot open CommonMark emphasis. HTML, links, images and code delimiters are escaped. |
 | `evidence_index(record, outputs, imaging=None)` | Keep every exact source excerpt and selected evidence link outside the short prose. |
-| `ct_summary(imaging)` | Aggregate accepted inspections; include reviewed calipers, never box-size diagnoses. |
+| `ct_summary(imaging)` | Short inspected result; exact source/model/coverage evidence stays bound separately. |
+| `endoscopy_summary(imaging)` | Keep the report focused on inspected regions rather than model metadata. |
 | `summary_parts(record, outputs, imaging=None, clinician_note=None)` | Plain-text report blocks shared by Markdown and portable HTML presentation. |
 | `compose(record: PatientRecord, source_file: str, outputs: dict[str, dict], evidence=None, imaging=None, clinician_note=None)` | One concise section; full exact excerpts/citations remain in report_evidence and originals. |
 
@@ -328,6 +396,17 @@ Authenticate report-note authorship without treating commentary as clinical fact
 | Callable | Purpose/contract |
 | --- | --- |
 | `verify_note(state, auth)` | See linked implementation and subject contract. |
+
+## [medical_assistant/research_examples.py](../../medical_assistant/research_examples.py)
+
+Read a local, bounded public-research upload kit; never downloads or approves.
+
+| Callable | Purpose/contract |
+| --- | --- |
+| `_manifest(root=None)` | See linked implementation and subject contract. |
+| `_read(root, name, expected, limit)` | See linked implementation and subject contract. |
+| `example_bundle(modality, patient, *, root=None, index=0)` | Load only the requested modality/case; full archive verification follows at import. |
+| `matching_endoscopy(raw, patient, *, root=None)` | Recognise the exact permitted demo source bytes without guessing dataset provenance. |
 
 ## [medical_assistant/runtime.py](../../medical_assistant/runtime.py)
 
@@ -459,6 +538,24 @@ Validate repository Markdown file links without contacting external websites.
 | --- | --- |
 | `main()` | See linked implementation and subject contract. |
 
+## [scripts/prepare_research_demo.py](../../scripts/prepare_research_demo.py)
+
+Build local upload examples from separately obtained, permitted research datasets. No downloads, training, clinical approval or linking of real patient histories. The real CT workspace must already have been produced by the CT companion.
+
+| Callable | Purpose/contract |
+| --- | --- |
+| `sha(path)` | See linked implementation and subject contract. |
+| `main()` | See linked implementation and subject contract. |
+| `main.run(root, *args)` | See linked implementation and subject contract. |
+
+## [scripts/smoke_endoscopy.py](../../scripts/smoke_endoscopy.py)
+
+Actual bounded synthetic producer/receiver smoke; no imaging or final approvals.
+
+| Callable | Purpose/contract |
+| --- | --- |
+| `main()` | See linked implementation and subject contract. |
+
 ## [scripts/smoke_imaging.py](../../scripts/smoke_imaging.py)
 
 Real local CT worker and receiver; no human or final approval is simulated.
@@ -469,7 +566,15 @@ Real local CT worker and receiver; no human or final approval is simulated.
 
 ## [scripts/smoke_local.py](../../scripts/smoke_local.py)
 
-Real local model smoke: verify an uncertainty hold and a separate fully synthetic
+Real local model smoke: verify an uncertainty hold and a separate fully synthetic ordinary-eligible fixture. Never approve a safety hold or final clinical report.
+
+| Callable | Purpose/contract |
+| --- | --- |
+| `main()` | See linked implementation and subject contract. |
+
+## [scripts/smoke_research_pair.py](../../scripts/smoke_research_pair.py)
+
+Actual local image-pair/report smoke with SCRIPTED reviews in a TEMPORARY DB. The approvals below test plumbing only. They are never clinical review and never modify the demo application's database. No image pixels are sent to the LLM.
 
 | Callable | Purpose/contract |
 | --- | --- |
@@ -484,6 +589,10 @@ Vendor/check ML-free CT contracts; no CT model, torch or database tools imported
 | `sync(ct_root, *, write=False)` | See linked implementation and subject contract. |
 | `main()` | See linked implementation and subject contract. |
 
-## Image-first endoscopy extension
+## [scripts/sync_endo_contracts.py](../../scripts/sync_endo_contracts.py)
 
-Endoscopy entry points: `endo_worker.LocalEndoscopyJob`, `endo_ui.endoscopy_ui`, `endo_support.checked_endo_review`, `endo_support.verify_endo_snapshot` and `report.endoscopy_summary`. [Module boundaries](../ENDOSCOPY.md).
+Check exact ML-free endoscopy contract/worker equality with the companion.
+
+| Callable | Purpose/contract |
+| --- | --- |
+| `main()` | See linked implementation and subject contract. |

@@ -3,9 +3,9 @@ import time
 from pathlib import Path
 
 import pytest
+from conftest import FakeInference, create_auth
 from streamlit.testing.v1 import AppTest
 
-from conftest import FakeInference, create_auth
 from medical_assistant.database import get_history, seed
 
 APP = Path(__file__).resolve().parents[1] / "app.py"
@@ -13,8 +13,8 @@ APP = Path(__file__).resolve().parents[1] / "app.py"
 
 @pytest.fixture
 def ui(monkeypatch, tmp_path):
-    import medical_assistant.runtime
     import medical_assistant.ollama_client
+    import medical_assistant.runtime
     import medical_assistant.storage
 
     path = tmp_path / "history.sqlite3"
@@ -97,7 +97,7 @@ def test_ui_hides_all_patient_examples_until_signin(ui):
     assert not any(b.key == "generate" for b in app.button)
     login(app)
     assert app.selectbox(key="patient").value == "fictional-001"
-    assert len(app.selectbox(key="patient").options) == 7
+    assert len(app.selectbox(key="patient").options) == 8
     assert not any(b.key == "generate" for b in app.button) and not inference.calls
     open_safety(app)
     assert app.button(key="generate").disabled
@@ -126,8 +126,9 @@ def test_ui_safety_review_rejection_approval_and_export(ui, tmp_path):
     wait_analysis(app.button(key="generate").click().run())
     assert len(inference.calls) == 1
     assert not app.get("download_button")
+    app.checkbox(key="attested").uncheck()
     app.button(key="submit_review").click().run()
-    assert app.error  # Empty notes/no attestation cannot approve.
+    assert app.error  # An explicit false confirmation cannot submit a review.
     app.text_area(key="review_notes").input(
         "Verified synthetic source excerpts and unresolved uncertainty."
     )
@@ -136,7 +137,7 @@ def test_ui_safety_review_rejection_approval_and_export(ui, tmp_path):
     assert not app.exception
     assert not app.get("download_button")
     app.button(key="preview_report_note").click().run()
-    assert not app.checkbox(key="attested").value
+    assert app.checkbox(key="attested").value
     app.checkbox(key="attested").check()
     app.radio(key="decision").set_value("Approve report")
     app.button(key="submit_review").click().run()

@@ -1,8 +1,8 @@
-# LOVISA tracked-file inventory
+# LOVISA maintained-file inventory
 
-[Overview](../README.md) · [Module guide](CODE_REFERENCE.md) · [Endoscopy](ENDOSCOPY.md)
+[Overview](../README.md) · [Module guide](CODE_REFERENCE.md) · [Real research images](RESEARCH_IMAGES.md)
 
-Maintained code, fictional fixtures, configuration and guides. Credentials, models, runtime image stores and generated clinical reports are ignored.
+Code, fictional fixtures, configuration and guides. Credentials, datasets, weights, runtime image stores and generated reports are ignored.
 
 - [.github/workflows/tests.yml](../.github/workflows/tests.yml)
 - [.gitignore](../.gitignore)
@@ -24,6 +24,7 @@ Maintained code, fictional fixtures, configuration and guides. Credentials, mode
 - [data/patients/demo_riley.json](../data/patients/demo_riley.json)
 - [data/patients/demo_sam.json](../data/patients/demo_sam.json)
 - [data/patients/fictional_patient.json](../data/patients/fictional_patient.json)
+- [data/patients/research_composite.json](../data/patients/research_composite.json)
 - [data/reports/.gitkeep](../data/reports/.gitkeep)
 - [docs/ACCEPTANCE.md](../docs/ACCEPTANCE.md)
 - [docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md)
@@ -41,6 +42,7 @@ Maintained code, fictional fixtures, configuration and guides. Credentials, mode
 - [docs/RECORDS.md](../docs/RECORDS.md)
 - [docs/RELEASE.md](../docs/RELEASE.md)
 - [docs/REPORTS.md](../docs/REPORTS.md)
+- [docs/RESEARCH_IMAGES.md](../docs/RESEARCH_IMAGES.md)
 - [docs/SETUP.md](../docs/SETUP.md)
 - [docs/VALIDATION.md](../docs/VALIDATION.md)
 - [docs/WORKFLOWS.md](../docs/WORKFLOWS.md)
@@ -93,6 +95,7 @@ Maintained code, fictional fixtures, configuration and guides. Credentials, mode
 - [medical_assistant/report_assets.py](../medical_assistant/report_assets.py)
 - [medical_assistant/report_binding.py](../medical_assistant/report_binding.py)
 - [medical_assistant/report_notes.py](../medical_assistant/report_notes.py)
+- [medical_assistant/research_examples.py](../medical_assistant/research_examples.py)
 - [medical_assistant/runtime.py](../medical_assistant/runtime.py)
 - [medical_assistant/safety.py](../medical_assistant/safety.py)
 - [medical_assistant/storage.py](../medical_assistant/storage.py)
@@ -107,9 +110,11 @@ Maintained code, fictional fixtures, configuration and guides. Credentials, mode
 - [requirements.lock.txt](../requirements.lock.txt)
 - [scripts/check_docs.py](../scripts/check_docs.py)
 - [scripts/check_ollama.py](../scripts/check_ollama.py)
+- [scripts/prepare_research_demo.py](../scripts/prepare_research_demo.py)
 - [scripts/smoke_endoscopy.py](../scripts/smoke_endoscopy.py)
 - [scripts/smoke_imaging.py](../scripts/smoke_imaging.py)
 - [scripts/smoke_local.py](../scripts/smoke_local.py)
+- [scripts/smoke_research_pair.py](../scripts/smoke_research_pair.py)
 - [scripts/sync_ct_contracts.py](../scripts/sync_ct_contracts.py)
 - [scripts/sync_endo_contracts.py](../scripts/sync_endo_contracts.py)
 - [tests/conftest.py](../tests/conftest.py)
@@ -133,10 +138,13 @@ Maintained code, fictional fixtures, configuration and guides. Credentials, mode
 - [tests/test_nodule_imaging.py](../tests/test_nodule_imaging.py)
 - [tests/test_nodule_ui.py](../tests/test_nodule_ui.py)
 - [tests/test_ollama_client.py](../tests/test_ollama_client.py)
+- [tests/test_public_research.py](../tests/test_public_research.py)
 - [tests/test_reasoning_constraints.py](../tests/test_reasoning_constraints.py)
 - [tests/test_reasoning_grounding.py](../tests/test_reasoning_grounding.py)
 - [tests/test_report_assets.py](../tests/test_report_assets.py)
 - [tests/test_report_presentation.py](../tests/test_report_presentation.py)
+- [tests/test_research_examples.py](../tests/test_research_examples.py)
+- [tests/test_review_defaults.py](../tests/test_review_defaults.py)
 - [tests/test_review_records.py](../tests/test_review_records.py)
 - [tests/test_review_safety.py](../tests/test_review_safety.py)
 - [tests/test_review_ui.py](../tests/test_review_ui.py)

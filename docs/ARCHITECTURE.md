@@ -145,3 +145,14 @@ text, substituting different images or source metadata invalidates the approval.
 ## Image-first endoscopy extension
 
 The endoscopy companion adds a local CV adapter, RGB-specific evidence validator and authenticated region review. It shares imaging persistence and final content binding; it does not send pixels to the LLM or change safety/hypothesis rules. [Full boundary](ENDOSCOPY.md).
+
+## Public-research evidence boundary
+
+Patient histories remain synthetic. CT research-v3 and endoscopy research-v2
+require explicit public provenance and a fictional composite case. Original
+research identities remain distinct; CT crop geometry/boxes map to its full-source
+metadata. `research_examples.py` verifies local example hashes and exact endoscopy
+image provenance. `endo_worker` runs permitted RGB inputs in the companion under
+the existing watchdog. No imaging pixels/notes enter the LLM, and no image result
+changes safety routing. Optional review notes and preselected confirmations do
+not replace authenticated, content-bound submission. [Exact formats](RESEARCH_IMAGES.md).

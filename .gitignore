@@ -59,3 +59,6 @@ Thumbs.db
 .vscode/
 *~
 *.swp
+
+!/data/patients/research_composite.json
+/data/research-demo/

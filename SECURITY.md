@@ -1,6 +1,7 @@
 # LOVISA security and data handling
 
-LOVISA accepts fictional histories and bounded generated-synthetic CT only. A
+LOVISA accepts fictional histories, generated-synthetic imaging and explicitly
+permitted public research imaging in labelled fictional composite cases. A
 fictional flag/hash marker does not prove that input is free of personal data;
 inspect sources manually. Clinical deployment and real-world record modification
 are unsupported. [CT boundary](docs/IMAGING.md).
@@ -57,3 +58,13 @@ no external assets or scripts. Existing source and safety checks remain mandator
 Approval also signs a content manifest covering the source records, model evidence,
 CT snapshots and clinician note. Even when two studies produce identical short
 text, substituting different images or source metadata invalidates the approval.
+
+## Public research exception
+
+Synthetic histories remain mandatory. Explicitly permitted deidentified public
+imaging may enter separate research schemas only in fictional composite cases,
+with dataset/license/subject provenance and no asserted real-patient linkage.
+Original data/weights/accounts remain outside Git. Hashes are consistency checks,
+not proof of permission or model execution. Review confirmations start selected,
+but no approval exists until an authenticated user explicitly submits the exact
+decision. Notes can be blank; the attestation and content binding remain mandatory.

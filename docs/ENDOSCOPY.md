@@ -2,7 +2,7 @@
 
 [Overview](../README.md) · [Architecture](ARCHITECTURE.md) · [Reports](REPORTS.md)
 
-LOVISA now accepts reviewed **artificial colonoscopy image candidates**, alongside
+LOVISA now accepts reviewed **artificial and permitted public research colonoscopy candidates**, alongside
 CT studies and medical-history evidence. This does not extend the clinical model
 into general gastrointestinal diagnosis, cancer classification or treatment advice.
 
@@ -16,13 +16,13 @@ Train/register a model explicitly before selecting installed-model mode.
 1. Sign in and select one artificial patient.
 2. Open **Endoscopy review** (also linked in the right-hand guide).
 3. Run the artificial example or installed model on the generated phantom, or
-   inspect a supported synthetic `.zip`. Progress and cancellation are immediate;
+   inspect a supported synthetic/research `.zip`. In the Jordan composite case, open the real example or upload one of the prepared research JPGs to run the model. [Files and sources](RESEARCH_IMAGES.md). Progress and cancellation are immediate;
    the worker is stopped after 110 seconds. This is a response budget, not a
    guarantee of a successful model result on every computer.
 4. Inspect source and overlay. Areas are mask pixels and image-area fractions,
    not physical lesion size. Scores are model outputs, not cancer probability.
-5. Set every region to accept/reject; uncertain blocks acceptance. Add a short
-   review note and explicitly attest image/patient/limitation inspection.
+5. Set every region to accept/reject; uncertain blocks acceptance. An optional
+   note may be blank. The green confirmation starts selected; only submission records the inspection.
 6. **Include reviewed endoscopy in report**, then complete the separate safety
    check and generate a draft. Final clinician approval remains mandatory.
 
@@ -39,7 +39,7 @@ clears its private widgets. Urgent policy decisions pause optional imaging.
 | Variable | Purpose |
 | --- | --- |
 | `LOVISA_ENDO_ROOT` | Companion root; defaults to sibling `AI-MedImg-Endo` |
-| `LOVISA_ENDO_MODEL_DIR` | Registered local model; defaults to `artifacts/kvasir-model` |
+| `LOVISA_ENDO_MODEL_DIR` | Registered local model; defaults to registered `artifacts/kvasir-research-v2` when available, otherwise `artifacts/kvasir-model` |
 | `LOVISA_ENDO_BACKEND` | `onnx-cpu` (default), `openvino-cpu`, or `openvino-npu` |
 
 No runtime model download, cloud fallback, model-selected executable or LLM image
@@ -54,12 +54,13 @@ side), float32 probability map, binary predicted mask, overlay, candidate region
 model provenance and unknown acquisition date. Every declared candidate is
 recomputed from the probability map, threshold and minimum area; source and
 annotation pixels are independently checked. Paths, duplicate JSON keys, ZIP
-member counts, byte sizes and hashes are validated before storage. The archive
-contains exactly five files, within 16 MiB. Coordinates are half-open `xyxy` in
+member counts, byte sizes and hashes are validated before storage. Synthetic-v1 contains exactly five files within 16 MiB. Research-v2 retains the same
+five-file structure with a 64-MiB total/expanded bound and 16-MiB-plus-header
+per-artifact bound, so real large source images can retain their source grid. Coordinates are half-open `xyxy` in
 source pixels; connected regions are not adjudicated distinct polyp identities.
 
 Standalone endoscopy supports explicitly permitted public research images up to
-2048 pixels per side, but **these cannot be exported into synthetic LOVISA cases**.
+2048 pixels per side, and can use the distinct `lovisa-endo-research-v2` bundle for a `research-composite-` fictional case. Public provenance and original-byte hashes are required; Kvasir patient identity remains unknown. This does not permit real clinical records.
 A synthetic flag/hash establishes internal consistency, not independent proof of
 origin, inference execution or clinical correctness. Local administrators remain
 trusted. No histology, anatomical segment or millimetre calibration is invented.
@@ -82,4 +83,4 @@ Smokes generate artificial pixels and validate actual worker output; they issue
 no imaging or clinical approvals. Tests use temporary accounts/databases and
 scripted reviewers. [Actual outcomes](../EVALUATION.md).
 
-Hosted cross-repository checks pin producer `bff92c23dd9e2679d38a7dcd4274b1cb5035a35f`. Later documentation-only commits do not change this tested contract.
+Hosted cross-repository checks pin producer `81ff9f53a0baa9b40ff396283ef1dd9f430bf170`. Later documentation-only commits do not change this tested contract.

@@ -10,21 +10,23 @@ import hashlib
 import io
 import json
 import math
-from pathlib import PurePosixPath
 import stat
-from typing import Literal
-from datetime import datetime
 import zipfile
+from datetime import datetime
+from pathlib import PurePosixPath
+from typing import Literal
 
 import numpy as np
 from PIL import Image
 from pydantic import Field, field_validator, model_validator
 
 from medical_assistant.nodule_models import (
-    Record,
-    Study,
-    Review,
+    Geometry,
     Identifier,
+    Record,
+    Review,
+    SourceSlice,
+    Study,
     research_report,
 )
 
@@ -63,9 +65,33 @@ class ExchangeArtifact(Record):
         return value
 
 
+class PublicResearchSource(Record):
+    """Operator-declared public provenance, never a real patient-history link."""
+
+    dataset: str = Field(min_length=1, max_length=200)
+    source_url: str = Field(min_length=10, max_length=500, pattern=r"^https://")
+    license: str = Field(min_length=1, max_length=300)
+    research_subject_id: str = Field(min_length=1, max_length=100)
+    original_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+    composite_case: Literal[True]
+
+    @field_validator("composite_case", mode="before")
+    @classmethod
+    def explicit_composite(cls, value):
+        if value is not True:
+            raise ValueError(
+                "Public images require an explicitly fictional composite case"
+            )
+        return value
+
+
 class NoduleBundle(Record):
-    schema_version: Literal["mhcra-lung-nodules-v2"]
-    synthetic: Literal[True]
+    schema_version: Literal["mhcra-lung-nodules-v2", "lovisa-ct-research-v3"]
+    synthetic: bool = Field(strict=True)
+    research: PublicResearchSource | None = None
+    original_study: Study | None = None
+    crop_origin_zyx: tuple[int, int, int] | None = None
+    inference_region_zyx: tuple[int, int, int, int, int, int] | None = None
     patient_id: Identifier
     study_id: Identifier
     job_id: str = Field(pattern=r"^[a-f0-9]{32}$")
@@ -76,20 +102,30 @@ class NoduleBundle(Record):
     producer_review: Review | None
     artifacts: list[ExchangeArtifact] = Field(min_length=6, max_length=130)
 
-    @field_validator("synthetic", mode="before")
-    @classmethod
-    def literal_synthetic(cls, value):
-        if value is not True:
-            raise ValueError("Synthetic input required")
-        return value
-
     @model_validator(mode="after")
     def consistent(self):
-        if (
-            self.study.input_kind != "generated-synthetic"
-            or self.study.protocol_attestation != "synthetic-phantom"
-        ):
-            raise ValueError("MHCRA rejects public research and clinical input")
+        if self.schema_version == "mhcra-lung-nodules-v2":
+            if self.synthetic is not True or any(
+                x is not None
+                for x in (
+                    self.research,
+                    self.original_study,
+                    self.crop_origin_zyx,
+                    self.inference_region_zyx,
+                )
+            ):
+                raise ValueError(
+                    "Synthetic input requires literal true without research metadata"
+                )
+            if (
+                self.study.input_kind != "generated-synthetic"
+                or self.study.protocol_attestation != "synthetic-phantom"
+            ):
+                raise ValueError(
+                    "Synthetic schema rejects public research and clinical input"
+                )
+        else:
+            self.verify_research_crop()
         if (
             self.patient_id != self.study.patient_alias
             or self.study_id != self.study.study_id
@@ -125,6 +161,80 @@ class NoduleBundle(Record):
             if not a.path.endswith(suffix):
                 raise ValueError("Wrong nodule artifact type")
         return self
+
+    def verify_research_crop(self):
+        """Bind a limited HU excerpt to exact original geometry and candidate coordinates.
+
+        Whole-source hashes record provenance; they do not authenticate a producer.
+        The consumer independently checks excerpt pixels/previews, not absent full scans.
+        """
+        original, crop = self.original_study, self.crop_origin_zyx
+        if (
+            self.synthetic is not False
+            or self.research is None
+            or original is None
+            or crop is None
+            or not self.patient_id.startswith("research-composite-")
+            or self.study.input_kind != "approved-public-research"
+            or original.input_kind != "approved-public-research"
+        ):
+            raise ValueError(
+                "Research CT requires original study, provenance and a fictional composite case"
+            )
+        if min(crop) < 0 or np.any(
+            np.array(crop) + self.study.geometry.shape_zyx
+            > np.array(original.geometry.shape_zyx)
+        ):
+            raise ValueError("CT excerpt outside original source")
+        region = self.inference_region_zyx
+        if region is None:
+            raise ValueError("Research CT must declare actual inference coverage")
+        start, shape = np.array(region[:3]), np.array(region[3:])
+        if (
+            np.any(start < 0)
+            or np.any(shape < [2, 1, 1])
+            or np.any(start + shape > np.array(original.geometry.shape_zyx))
+            or np.any(np.array(crop) < start)
+            or np.any(np.array(crop) + self.study.geometry.shape_zyx > start + shape)
+            or any(
+                np.any(np.array(c.box_zyx[:3]) < start)
+                or np.any(np.array(c.box_zyx[3:]) > start + shape - 1)
+                for c in original.candidates
+            )
+        ):
+            raise ValueError(
+                "CT excerpt/predictions exceed declared inference coverage"
+            )
+        geometry = original.geometry.model_dump()
+        geometry.update(
+            shape_zyx=self.study.geometry.shape_zyx,
+            origin_lps_mm=tuple(original.geometry.to_lps(crop)),
+        )
+        if self.study.geometry != Geometry.model_validate(geometry):
+            raise ValueError("CT excerpt physical geometry mismatch")
+        sources = [
+            SourceSlice.model_validate(dict(s.model_dump(), index=i))
+            for i, s in enumerate(
+                original.sources[crop[0] : crop[0] + self.study.geometry.shape_zyx[0]]
+            )
+        ]
+        if self.study.sources != sources or self.study.model != original.model:
+            raise ValueError("CT excerpt source or model mismatch")
+        expected = []
+        offset = np.array(crop)
+        limit = offset + self.study.geometry.shape_zyx - 1
+        for c in original.candidates:
+            lo, hi = np.array(c.box_zyx[:3]), np.array(c.box_zyx[3:])
+            if np.all(lo >= offset) and np.all(hi <= limit):
+                expected.append(
+                    c.model_copy(
+                        update={"box_zyx": tuple(np.r_[lo - offset, hi - offset])}
+                    )
+                )
+        if self.study.candidates != expected:
+            raise ValueError(
+                "CT excerpt candidates must be the exact enclosed original predictions"
+            )
 
 
 def wire_pixels(study, hu, index, *, calipers=()):

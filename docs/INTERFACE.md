@@ -29,7 +29,7 @@ top. Navigation never runs inference or supplies an approval.
 ## Safety before generation
 
 Open **Safety check** from its tab, Next action or step 4 in the guide. The form
-lists actual policy gaps. Add assessment notes, attest review, select the intended
+lists actual policy gaps. Optionally add notes, retain the selected confirmation, choose the intended
 decision and save it. Saving does not call the model. Only after the required
 checks does **Generate draft for clinician review**, at the bottom of this view,
 become available. Warning signs block generation. Pending CT/import changes have
@@ -39,7 +39,7 @@ an **Open pending changes** button so they can be reviewed or discarded first.
 
 The locked button demonstrates the gate; it is not a clinical safety conclusion.
 Final report approval remains a separate action in Clinical report. Previewing a
-clinician note updates the text and clears the review checkbox; it does not
+clinician note updates the text and restores the selected confirmation default; it does not
 approve the report. [Report format and downloads](REPORTS.md). This is a
 research safeguard, not regulatory certification.
 
@@ -80,3 +80,13 @@ SQLite, Ollama and the separate CT environment remain local. This version uses
 ## Image-first endoscopy extension
 
 The **Endoscopy review** workspace adds source/overlay images, pixel-area results and explicit candidate decisions. Its linked guide step opens that view. [Operation](ENDOSCOPY.md).
+
+## Research-image and review update
+
+Review confirmations start selected and green; notes are optional. Pause/corrections
+choices are yellow and allow/approve choices green, with larger decision labels.
+Colour indicates a selection, never a completed approval. Every image candidate
+needs an include/exclude choice before the separate submit action. Blank final
+notes need no preview; changed nonempty notes must be previewed before approval.
+The Jordan composite adds real-image buttons and permitted endoscopy JPG upload.
+Model scores and provenance hashes stay out of primary results. [Research guide](RESEARCH_IMAGES.md).

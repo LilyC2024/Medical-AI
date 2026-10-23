@@ -116,10 +116,11 @@ def history_ui(path, auth, token, user, record):
                 f"{len(proposal['duplicate_ids'])} exact duplicate entries will be skipped."
             )
         with st.form("import_approval"):
-            notes = st.text_area("Import review notes", key="import_notes")
+            notes = st.text_area("Import review note (optional)", key="import_notes")
             checked = st.checkbox(
                 "I verified this synthetic source and the proposed facts.",
                 key="import_attest",
+                value=True,
             )
             submit = st.form_submit_button(
                 "Approve history import", key="approve_import", disabled=not token

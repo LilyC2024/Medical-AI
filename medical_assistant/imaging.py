@@ -75,7 +75,8 @@ class ImagingStore:
             payload, snapshot["manifest"]["patient_id"]
         )
         if (
-            bundle.model_dump(mode="json") != snapshot["manifest"]
+            bundle.model_dump(mode="json")
+            != type(bundle).model_validate(snapshot["manifest"]).model_dump(mode="json")
             or file_digest(raw) != snapshot["manifest_sha256"]
         ):
             raise ValueError("Imaging manifest changed")

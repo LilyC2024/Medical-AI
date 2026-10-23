@@ -24,9 +24,16 @@ def pixels_for(manifest, path_for):
 def nodule_viewer(manifest, path_for, key, *, review=None):
     bundle = NoduleBundle.model_validate(manifest)
     study = bundle.study
+    public = not bundle.synthetic
     st.caption(
-        "Artificial CT · amber: candidate box · cyan: reviewed caliper. Scores are not cancer probabilities; box size is not a measured lesion diameter."
+        "Public research CT excerpt · amber: candidate · cyan: caliper"
+        if public
+        else "Artificial CT · amber: candidate · cyan: caliper"
     )
+    if public:
+        st.caption(
+            "Limited scan coverage · protocol unverified · fictional composite case"
+        )
     if study.model.synthetic_fixture:
         st.warning(
             "Generated demonstration with a non-ML finder; this is not a trained detector result."
@@ -51,7 +58,7 @@ def nodule_viewer(manifest, path_for, key, *, review=None):
     left, right = st.columns(2)
     left.image(
         str(path_for("source_preview", index)),
-        caption=f"Synthetic source slice {index}",
+        caption=f"Source slice {index}",
         width="stretch",
     )
     if review is None:
@@ -85,10 +92,15 @@ def candidate_controls(manifest, key):
         st.write(f"Candidate {c.candidate_id}")
         old = previous.get(c.candidate_id)
         options = ["uncertain", "accept", "reject"]
-        choice = st.selectbox(
+        choice = st.radio(
             f"Decision {c.candidate_id}",
             options,
             index=options.index(old.decision) if old else 0,
+            format_func=lambda x: {
+                "uncertain": "Pause · decide later",
+                "accept": "Include candidate",
+                "reject": "Exclude candidate",
+            }[x],
             key=key + "_decision_" + c.candidate_id,
         )
         caliper = None

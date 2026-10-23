@@ -2,9 +2,8 @@
 
 # Ruff sees imported pytest fixtures as redefinitions at test parameters.
 # ruff: noqa: F811
-from test_ui import ui, login, prepare_safety, wait_analysis, open_imaging  # noqa: F401
-from test_ui import open_safety
 from test_nodule_imaging import nodule_bytes
+from test_ui import login, open_imaging, open_safety, prepare_safety, ui, wait_analysis  # noqa: F401
 
 
 def test_completed_ct_automatically_shows_results_and_keeps_them_after_analysis(
@@ -35,7 +34,7 @@ def test_completed_ct_automatically_shows_results_and_keeps_them_after_analysis(
     open_imaging(app)
     assert app.metric[0].value == "1"
     key, proposal = app.session_state.imaging_proposal
-    app.selectbox(key=key + "_decision_N001").set_value("accept")
+    app.radio(key=key + "_decision_N001").set_value("accept")
     app.text_area(key="imaging_notes").input("Scripted fixture inspection only.")
     app.checkbox(key="imaging_attest").check()
     app.button(key="imaging_accept").click().run()
@@ -54,11 +53,15 @@ def test_patient_change_clears_unsubmitted_safety_decision(ui):
     login(app)
     open_safety(app)
     app.text_area(key="safety_notes").input("Unsubmitted notes for previous patient.")
-    app.checkbox(key="safety_attest").check()
+    app.checkbox(key="safety_attest").uncheck()
+    app.radio(key="safety_action").set_value(
+        "Allow draft generation after my safety assessment"
+    )
     app.selectbox(key="patient").set_value("demo-01").run()
     open_safety(app)
     assert app.text_area(key="safety_notes").value == ""
-    assert not app.checkbox(key="safety_attest").value
+    assert app.checkbox(key="safety_attest").value
+    assert app.radio(key="safety_action").value == "Keep analysis paused"
     assert app.button(key="generate").disabled
 
 

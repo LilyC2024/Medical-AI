@@ -31,9 +31,9 @@ clinical performance claims or guarantees. [Workspace](docs/INTERFACE.md) ·
 | --- | --- | --- |
 | **LOVISA** — this repository | Synthetic history + accepted imaging → concise clinical summary | Organize facts, identify gaps, propose constrained hypotheses and require clinician approval |
 | **[Lung CT Research Assistant](https://github.com/LilyC2024/ai-medimg-2.5D-CT)** | Supported CT → nodule candidates, annotations, calipers and research summary | Support source-image inspection and measurement in a separate local environment |
-| **[Endoscopy Image Research Assistant](https://github.com/LilyC2024/AI-MedImg-Endo)** | RGB research images → candidate regions, masks and pixel-area findings | Review polyp candidates locally; send artificial studies to LOVISA |
+| **[Endoscopy Image Research Assistant](https://github.com/LilyC2024/AI-MedImg-Endo)** | RGB research images → candidate regions, masks and pixel-area findings | Review candidates locally; send artificial or explicitly permitted research studies to LOVISA |
 
-The CT companion can send a validated **synthetic** study to LOVISA. A reviewer
+Both companions send source-verified artificial studies or explicitly labelled **public research evidence** to LOVISA. Public images are limited to a fictional composite case; their unrelated research subjects are kept separate. A reviewer
 checks its candidates and measurements before accepting the study. The report
 includes those inspection results and representative source/annotation images.
 A brief clinician note is previewed before final approval. Images and imaging
@@ -92,9 +92,36 @@ Ollama runs on loopback. Completion/export recheck safety, source integrity and
 approval. The detailed [picture guide](docs/ILLUSTRATIONS.md) explains the diagrams
 and the CT connection.
 
+## Real-image demo and concise reviews
+
+Select **Jordan — real-image research composite** after login. Its fictional
+history can include a real LIDC-IDRI CT excerpt and a real Kvasir-SEG endoscopy
+image. They come from **unrelated research subjects**, not one real patient.
+Use **Open real CT example** and **Open real endoscopy example**, or upload the
+prepared files. You can also re-run the polyp model on three supplied research
+JPGs. [Prepare files, data terms and exact commands](docs/RESEARCH_IMAGES.md).
+
+Imaging panels show source, annotations and inspected results. Model scores,
+checkpoint identifiers and verbose provenance stay out of the main presentation.
+The short report includes CT/endoscopy results, essential uncertainty and an
+optional clinician note; exact evidence remains bound separately.
+
+Confirmations start checked and green; they submit **nothing automatically**.
+Pause/corrections choices are yellow and allow/approve choices green. Notes may
+be blank. Every candidate still needs an explicit include/exclude decision, and
+safety, imaging and final approval each require their own submit action.
+
+Actual endoscopy CPU training used 24 epochs and the frozen grouped split;
+168 positive test images gave exploratory mean Dice **0.544**. There were no
+negative examinations and patient independence is unknown. Real CT was tested
+with the pretrained detector; **full CT training was not run** because this PC
+has no CUDA GPU. Full-scan CPU inference is offline preparation and can take
+several minutes; prepared evidence opens directly. Interactive workers retain
+the 110-second stop. [Evidence and limitations](EVALUATION.md).
+
 ## Endoscopy image companion
 
-LOVISA also supports the [image-first polyp research assistant](https://github.com/LilyC2024/AI-MedImg-Endo). Inspect artificial RGB images, review candidate regions and include accepted annotations and pixel-area measurements in the combined report. CT remains a separate modality. The initial endoscopy model is an exploratory baseline, not a validated screening or cancer detector. [Setup, workflow and evidence boundaries](docs/ENDOSCOPY.md).
+LOVISA also supports the [image-first polyp research assistant](https://github.com/LilyC2024/AI-MedImg-Endo). Inspect artificial or permitted public RGB images, review candidate regions and include the accepted result and images in the combined report. CT remains a separate modality. The initial endoscopy model is an exploratory baseline, not a validated screening or cancer detector. [Setup, workflow and evidence boundaries](docs/ENDOSCOPY.md).
 
 ## Run LOVISA
 
@@ -124,7 +151,7 @@ is displayed. Tests are separate from live model inference.
 
 Install CT separately with Python **3.12**. The integration supports nodule-v2 and
 legacy tissue-mask bundles within a synthetic limit of **64 slices ×256×256**.
-Full-size/public-research CT and training remain standalone companion features.
+Full-size CT processing and training remain standalone companion features. Public source-mapped CT excerpts use a separate research-v3 format; research endoscopy uses v2, while the old synthetic formats remain supported.
 Existing `mhcra-*` formats and `MHCRA_CT_*` settings are stable integration names.
 [Naming and compatibility](docs/NAMING.md) · [CT setup](docs/IMAGING.md).
 
@@ -136,6 +163,7 @@ Existing `mhcra-*` formats and `MHCRA_CT_*` settings are stable integration name
 | [Architecture](docs/ARCHITECTURE.md) | Specialists, storage, models and trust boundaries |
 | [Reports and example](docs/REPORTS.md) | Concise combined output, clinician-note preview and image downloads |
 | [Records](docs/RECORDS.md) | Synthetic JSON, sources and local references |
+| [Real research images](docs/RESEARCH_IMAGES.md) | Public datasets, local upload kit, composite case and actual experiments |
 | [Imaging](docs/IMAGING.md) | Connect, inspect, measure and accept CT results |
 | [Code reference](docs/CODE_REFERENCE.md) | Modules, functions and folders |
 | [Validation](docs/VALIDATION.md) / [Evaluation](EVALUATION.md) | Reproduce checks; distinguish tests from actual inference |

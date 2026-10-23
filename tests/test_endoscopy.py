@@ -168,7 +168,14 @@ def test_combined_history_ct_and_endo_report_is_approval_bound(
     list(events)
     flow.acknowledge_safety(case, review_for(flow.state(case), safety=True), token)
     state = flow.state(case)
-    assert "Endoscopy inspection" in state["draft"] and "100 pixels" in state["draft"]
+    assert (
+        "Endoscopy inspection" in state["draft"]
+        and "1 accepted on inspection" in state["draft"]
+    )
+    assert any(
+        s["manifest"].get("study", {}).get("candidates", [{}])[0].get("area_px") == 100
+        for s in state["imaging"]
+    )
     assert "5.00 mm" in state["draft"] and state["draft"].count("# ") == 1
     assert (
         len(state["report_evidence"]["ct_studies"]) == 1

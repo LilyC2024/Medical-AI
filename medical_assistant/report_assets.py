@@ -39,7 +39,7 @@ def inspection_figures(state, store):
             verify_endo_snapshot(snapshot)
             index = 0
             overlay_png = resolve("overlay_preview", 0).read_bytes()
-            caption = f"Study {number} · artificial endoscopy image. Amber: predicted candidate regions; decisions reviewed separately. Pixel area is not physical lesion size."
+            caption = f"Study {number} · {'public research' if not manifest['synthetic'] else 'artificial'} endoscopy. Amber: candidate regions; physical size unavailable."
         elif is_nodule(manifest):
             bundle = NoduleBundle.model_validate(manifest)
             review = verify_nodule_snapshot(snapshot)
@@ -71,12 +71,18 @@ def inspection_figures(state, store):
             buffer = io.BytesIO()
             Image.fromarray(overlay).save(buffer, format="PNG")
             overlay_png = buffer.getvalue()
-            mode = (
-                "non-ML demonstration"
-                if bundle.study.model.synthetic_fixture
-                else "installed detector"
+            caption = (
+                f"Study {number} · source slice {index}. Amber: candidates; cyan: reviewed calipers. "
+                + (
+                    "Public CT excerpt, limited coverage."
+                    if not manifest["synthetic"]
+                    else (
+                        "Artificial non-ML example."
+                        if bundle.study.model.synthetic_fixture
+                        else "Artificial CT example."
+                    )
+                )
             )
-            caption = f"Study {number} · {mode} · source slice {index}. Amber: candidate boxes; cyan: reviewed calipers. Representative view only."
         else:
             index = manifest["geometry"]["shape_zyx"][0] // 2
             overlay_png = resolve("overlay_preview", index).read_bytes()

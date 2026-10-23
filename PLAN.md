@@ -108,3 +108,25 @@ software gates.
 28. **Joint verification and publication** — full regressions, local Ollama and
     producer-consumer smokes, automated UI checks, concise linked documentation and
     accurate evaluation records; publish both projects after passing. Status: complete — 231 LOVISA/35 endoscopy local tests; actual model/CT/endoscopy smokes, Linux/Windows and both Python hosted suites plus all joint imaging jobs passed. Both repositories published; local demo restarted.
+
+## Real research images and clearer review controls
+
+29. **Research evidence boundary** — explicitly permit de-identified public research
+    imaging alongside fictional history, with dataset/license/source provenance,
+    distinct research-subject identities, composite-case labels and bounded
+    source mappings; preserve synthetic compatibility. Test before UI changes.
+    Status: passed — seven adversarial/backwards-compatibility tests and 24 existing CT/endoscopy checks.
+30. **Real-data experiments and upload examples** — obtain permitted CT and
+    endoscopy sources, freeze subject-aware splits where identifiers exist, execute
+    feasible local training/evaluation without inventing GPU results; implement
+    upload preparation and a labelled composite case. The actual prepared-pair
+    smoke belongs to phase 32. Status: passed — 82 CT / 36 endoscopy tests,
+    real Kvasir 24-epoch CPU training/export and 168-image evaluation; real CT
+    downloaded and offline inference running. Full CT GPU training unavailable.
+31. **Concise review interface** — short imaging results, optional notes, checked
+    confirmation defaults, larger yellow/green decision controls; explicit submit
+    and unresolved-candidate/safety gates remain. Status: passed — 14 review/UI tests, optional-note/authentication checks and 27 combined-report/existing workflow checks.
+32. **Combined report validation and delivery** — temporary scripted-review tests
+    for the actual research-image pair, full regressions/smokes and honest outcomes,
+    updated instructions/sample manifest and a refreshed local demo. Publish
+    compatible changes after passing. Status: local validation passed — 243 LOVISA / 83 CT / 37 endoscopy tests; actual 11.98s CT ROI, 3.16s endoscopy and 34.32s combined local-LLM smoke. Publishing/hosted checks in progress; full CT training remains hardware-blocked.

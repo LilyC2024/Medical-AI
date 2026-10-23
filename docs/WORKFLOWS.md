@@ -14,7 +14,7 @@
    and optional calipers. Inspect and accept it, or discard it. A pending study
    blocks the safety preparation so it cannot be silently omitted from the draft.
 4. Open **Safety check** using its tab, **Next action**, or guide step 4. For
-   missing current information, add assessment notes, tick the review checkbox,
+   missing current information, optionally add notes, keep the confirmation selected,
    choose **Allow draft generation after my safety assessment**, and **Save safety
    assessment**. This saves the decision and freezes the snapshot; **no model
    runs yet**. Choosing **Keep analysis paused** ends this case for human review.
@@ -28,7 +28,7 @@
    Source/annotation pictures appear beneath it. Detailed citations are in the
    collapsed evidence view and JSON package, not repeated through the prose.
 7. Enter a brief clinician note (up to 600 characters) and **Preview note in report**.
-   Read the changed draft, tick the review checkbox again, choose **Approve report**
+   Read the changed draft, retain the selected confirmation, choose **Approve report**
    and submit. The default requests corrections and keeps the draft pending.
    Approval saves ignored local JSON and enables HTML, Markdown and JSON downloads.
    HTML embeds CT pictures for offline use; Markdown contains the concise text.
@@ -63,11 +63,19 @@ claim of medical-device compliance. The model cannot lower escalation.
 ## Import a source
 
 Open **Source records**, then **Import a synthetic medical record / add observations**. Preview supported
-JSON or observation controls; inspect the proposal, add notes/attestation and
+JSON or observation controls; inspect the proposal, optionally add notes, retain the confirmation and
 approve the exact import. Dates/measurements are included only when explicitly
 supplied. Defaults are not observations. Originals and IDs are immutable.
 [Record format](RECORDS.md) · [Detailed CT review](IMAGING.md).
 
 ## Image-first endoscopy extension
 
-Before safety preparation, optionally inspect and accept an endoscopy study in **Endoscopy review**. Resolve every region, add a note and attest inspection; final report approval remains separate. [Image workflow](ENDOSCOPY.md).
+Before safety preparation, optionally inspect and accept an endoscopy study in **Endoscopy review**. Resolve every region, optionally add a note and explicitly submit the inspection; final report approval remains separate. [Image workflow](ENDOSCOPY.md).
+
+## Optional notes and visible decisions
+
+Confirmations now start checked; notes may be blank. Select the yellow pause or
+green allow/approve choice, then explicitly submit. Leaving the page or checking
+a box alone records no decision. Candidate choices start paused/uncertain; resolve
+every candidate before including imaging. The final report is a separate approval.
+[Public research image workflow](RESEARCH_IMAGES.md).

@@ -75,4 +75,15 @@ input,textarea{font-size:13px!important;}.stTextInput input,.stTextArea textarea
 .st-key-help_rail button{justify-content:flex-start;text-align:left;background:#fff;}
 .st-key-help_rail button:hover{background:#e9f5f1;}
 .st-key-next_action button{margin-bottom:8px;}
+/* Review selections: colour reflects a choice; submit records the decision. */
+.st-key-safety_attest,.st-key-attested,.st-key-imaging_attest,.st-key-endo_attest,.st-key-import_attest{border-radius:10px;padding:10px 12px;background:#f6f8f8;border:1px solid #dce5e2;}
+.st-key-safety_attest:has(input:checked),.st-key-attested:has(input:checked),.st-key-imaging_attest:has(input:checked),.st-key-endo_attest:has(input:checked),.st-key-import_attest:has(input:checked){background:#e4f5eb;border-color:#70b696;}
+.st-key-safety_action [data-testid="stWidgetLabel"] p,.st-key-decision [data-testid="stWidgetLabel"] p{font-size:20px!important;font-weight:750!important;}
+.st-key-safety_action label[data-baseweb="radio"],.st-key-decision label[data-baseweb="radio"],div[class*="_decision_"] label[data-baseweb="radio"]{border:1px solid #dce5e2;min-height:48px;}
+.st-key-safety_action label[data-baseweb="radio"]:nth-child(1),.st-key-decision label[data-baseweb="radio"]:nth-child(1),div[class*="_decision_"] label[data-baseweb="radio"]:nth-child(1){background:#fff5d5;}
+.st-key-safety_action label[data-baseweb="radio"]:nth-child(2),.st-key-decision label[data-baseweb="radio"]:nth-child(2),div[class*="_decision_"] label[data-baseweb="radio"]:nth-child(2){background:#e8f7ed;}
+.st-key-safety_action label:has(input:checked),.st-key-decision label:has(input:checked),div[class*="_decision_"] label:has(input:checked){border:2px solid #287c60;box-shadow:0 0 0 2px #287c6012;}
+.st-key-safety_action label:nth-child(1):has(input:checked),.st-key-decision label:nth-child(1):has(input:checked),div[class*="_decision_"] label:nth-child(1):has(input:checked){border-color:#be8b18;}
+.st-key-safety_action label p,.st-key-decision label p,div[class*="_decision_"] label p{font-size:15px!important;font-weight:600;}
+.lv-next strong{font-size:15px;}.lv-next p{font-size:15px;}.st-key-next_action button p{font-size:15px!important;font-weight:700;}
 </style>

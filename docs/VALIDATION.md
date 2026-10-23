@@ -89,3 +89,17 @@ checks are live inference or clinician verification.
 ## Image-first endoscopy extension
 
 Endoscopy adds `test_endoscopy.py`, `test_endoscopy_ui.py` and `test_endo_worker.py`. Run `scripts/sync_endo_contracts.py --endo-root ../AI-MedImg-Endo` and `scripts/smoke_endoscopy.py --endo-root ../AI-MedImg-Endo` for exact contract and actual synthetic producer/receiver checks. [Details](ENDOSCOPY.md).
+
+## Actual public-image pair
+
+Prepare permitted data using [the research guide](RESEARCH_IMAGES.md), then run:
+
+```bash
+.venv/bin/python scripts/smoke_research_pair.py --kit data/research-demo --model gemma4:e2b --output data/research-demo/new-isolated-test
+```
+
+This uses actual research predictions and the installed local LLM. It tests image,
+safety and final approval with clearly scripted submissions in a disposable DB,
+never the app database. Its exported example visibly says no clinician reviewed
+it. Standard `smoke_local.py` still issues no approvals. Reproduce public model
+training/evaluation separately; artificial unit checks are not real-data tests.

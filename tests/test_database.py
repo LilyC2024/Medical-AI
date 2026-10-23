@@ -4,9 +4,16 @@ import sqlite3
 import pytest
 from pydantic import ValidationError
 
-from medical_assistant.database import attach_original, get_history, initialize, list_patients, seed, write_synthetic
+from medical_assistant.database import (
+    attach_original,
+    get_history,
+    initialize,
+    list_patients,
+    seed,
+    write_synthetic,
+)
 from medical_assistant.models import PatientRecord
-from medical_assistant.storage import PATIENT_DIR, load_record
+from medical_assistant.storage import PATIENT_DIR
 
 
 def test_sqlite_retrieval_has_exact_encounters_and_no_duplicates(tmp_path):
@@ -14,14 +21,28 @@ def test_sqlite_retrieval_has_exact_encounters_and_no_duplicates(tmp_path):
     seed(path)
     seed(path)
     record = get_history("synthetic-checklist", path)
-    assert [e.id for e in record.entries] == ["dose-1", "visit-1", "dose-2", "visit-2", "symptom-undated"]
+    assert [e.id for e in record.entries] == [
+        "dose-1",
+        "visit-1",
+        "dose-2",
+        "visit-2",
+        "symptom-undated",
+    ]
     assert len(record.entries) == 5
-    assert [e.id for e in record.entries if e.kind == "encounter"] == ["visit-1", "visit-2"]
-    assert len(list_patients(path)) == 7
+    assert [e.id for e in record.entries if e.kind == "encounter"] == [
+        "visit-1",
+        "visit-2",
+    ]
+    assert len(list_patients(path)) == 8
     assert record.entries[-1].date is None
     with sqlite3.connect(path) as db:
-        assert db.execute("SELECT COUNT(*) FROM audit").fetchone()[0] == 7
-        assert db.execute("SELECT COUNT(*) FROM sources WHERE patient_id='synthetic-checklist'").fetchone()[0] == 1
+        assert db.execute("SELECT COUNT(*) FROM audit").fetchone()[0] == 8
+        assert (
+            db.execute(
+                "SELECT COUNT(*) FROM sources WHERE patient_id='synthetic-checklist'"
+            ).fetchone()[0]
+            == 1
+        )
     assert record.sources[0].filename == "checklist_patient.json"
 
 
@@ -47,14 +68,18 @@ def test_conflicting_dates_rollback_whole_transaction(tmp_path):
     changed = original.model_dump(mode="json")
     changed["entries"][0]["date"] = "2024-01-01"
     with pytest.raises(ValueError, match="unsupported"):
-        write_synthetic(PatientRecord.model_validate(changed), path, actor="test", action="test")
+        write_synthetic(
+            PatientRecord.model_validate(changed), path, actor="test", action="test"
+        )
     assert get_history("synthetic-checklist", path) == original
 
     # A new, internally consistent source still cannot overwrite a stored ID.
     data = json.loads((PATIENT_DIR / "checklist_patient.json").read_text())
     data["entries"][0]["date"] = "2024-01-01"
     raw = json.dumps(data)
-    changed_record = attach_original(PatientRecord.model_validate(data), "conflict.json", raw)
+    changed_record = attach_original(
+        PatientRecord.model_validate(data), "conflict.json", raw
+    )
     with pytest.raises(ValueError, match="Conflicting encounter"):
         write_synthetic(changed_record, path, actor="test", action="test")
     assert get_history("synthetic-checklist", path) == original

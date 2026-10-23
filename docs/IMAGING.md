@@ -16,7 +16,8 @@ sent to Ollama; imaging cannot change safety escalation or the hypothesis catalo
 | Non-ML fixture / installed pretrained detector | Both launchable locally; explicit CPU or available CUDA for pretrained |
 | `mhcra-imaging-v1` | Retained tissue-mask importer, viewer, worker and report summary |
 | Incomplete nodule-v1 ZIP | Rejected; re-export the original workspace with current CT |
-| Full-size/public-research CT, dataset preparation/training | Standalone CT only; LOVISA accepts bounded generated-synthetic studies |
+| Full-size CT, dataset preparation/training | Standalone preparation; no full scan is silently packed into the UI |
+| `lovisa-ct-research-v3` | Bounded public HU excerpt, original source geometry/candidate mapping and dataset/license/subject provenance in a fictional composite |
 
 Existing `mhcra-*`, `MHCRA_CT_*` and bridge/module names are stable interfaces.
 LOVISA is the current application name. [Naming map](NAMING.md).
@@ -75,7 +76,7 @@ or remote fallback occurs. Missing weights/unavailable CUDA fail explicitly.
    calipers use one source plane and endpoints inside the candidate box. Enable a
    caliper, submit **Preview nodule measurements** to expose its form inputs, then
    edit and preview again. Cyan lines are unapproved previews at this stage.
-6. Add imaging notes, attest association/geometry review and accept. The authenticated
+6. Optionally add notes, keep the inspection confirmation selected and explicitly include the study. The authenticated
    account and exact decisions/calipers are bound to the acceptance hash.
 7. Complete safety preparation after accepting CT. The short clinical summary
    includes the accepted inspection and reviewed calipers, with representative
@@ -84,8 +85,8 @@ or remote fallback occurs. Missing weights/unavailable CUDA fail explicitly.
    A report prepared before CT acceptance needs a new review to include the study.
    [Report rules](REPORTS.md).
 
-CT analysis results show counts, review state, source-slice ranges, scores and
-reviewed calipers. Pending and accepted results appear in CT review; accepted
+CT analysis results show candidate counts, review state, source-slice ranges and
+reviewed calipers; detector scores remain in structured evidence. Pending and accepted results appear in CT review; accepted
 studies remain inspectable in an active clinical snapshot. Empty states explain
 when no CT has been attached.
 
@@ -134,7 +135,7 @@ Wire previews use −1000 to 400 HU and a font-independent NumPy renderer.
 
 Shared ML-free contracts/report/renderer are vendored from CT with one import-path
 rewrite. [Sync/check commands](VALIDATION.md) detect drift. CI pins producer
-`5ba347cf6cd66b1931eaad3cd7d8cb27d4136606`; later documentation commits leave that
+`b73a72188efda899f9d0a0d321f905002bc7dac3`; later documentation commits leave that
 contract unchanged. [Workflow](../.github/workflows/tests.yml).
 
 Ignored `data/imaging/` holds originals/HU/previews/jobs. SQLite stores accepted
@@ -144,3 +145,11 @@ and export recheck artifacts and review bindings. Hashes prove internal consiste
 not independent synthetic origin/model execution or clinical truth. Local admins
 remain trusted. Interrupted jobs/proposals are not resumable; a completed bundle
 can be re-imported. Accepted files must remain available for verification.
+
+## Real CT example
+
+The signed-in Jordan composite has a prepared LIDC-IDRI source excerpt. Use its
+**Open real CT example** button or upload the research ZIP. Original public
+subject identity, license, whole-volume hash and crop mapping are retained; the
+report states limited coverage/protocol uncertainty. Full-scan CPU processing
+is offline setup, not an interactive two-minute operation. [Commands and terms](RESEARCH_IMAGES.md).

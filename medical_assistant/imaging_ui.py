@@ -8,8 +8,8 @@ from medical_assistant.ct_worker import (
     LocalCTJob,
     configured_ct_model,
 )
-from medical_assistant.imaging import ImagingStore
 from medical_assistant.endo_support import is_endoscopy
+from medical_assistant.imaging import ImagingStore
 from medical_assistant.imaging_results import summarize
 from medical_assistant.models import Review
 from medical_assistant.nodule_support import imaging_acceptance_digest, is_nodule
@@ -44,21 +44,7 @@ def _viewer(manifest, path_for, key, *, review=None):
         caption=f"Unvalidated candidate overlay · slice {index}",
         width="stretch",
     )
-    st.dataframe(
-        [
-            {
-                "Class": i,
-                "Heuristic meaning": manifest["classes"][str(i)],
-                "Source-grid voxels": manifest["voxel_counts"][i],
-                "Candidate volume (mm³)": manifest["candidate_volumes_mm3"][i],
-            }
-            for i in range(4)
-        ],
-        hide_index=True,
-    )
-    st.caption(
-        f"Bundle-reported entropy mean: {manifest['uncertainty_mean']:.3f} — model behavior, not clinical confidence. Raw predictions; producer declares ONNX parity passed."
-    )
+    st.caption("Legacy tissue-mask example; this does not detect nodules.")
 
 
 def result_summary(manifest, review=None):
@@ -75,14 +61,20 @@ def result_summary(manifest, review=None):
         if result["rows"]:
             st.dataframe(
                 [
-                    {k: v for k, v in row.items() if k != "Source SHA-256"}
+                    {
+                        k: v
+                        for k, v in row.items()
+                        if k not in ("Source SHA-256", "Detector score")
+                    }
                     for row in result["rows"]
                 ],
                 hide_index=True,
             )
     else:
-        st.write("Tissue-class voxel counts:", result["voxel_counts"])
-    st.info(result["conclusion"])
+        st.caption("Legacy tissue-mask result; no nodule measurements.")
+    st.caption(
+        "Candidate regions require inspection; counts do not establish a diagnosis."
+    )
     st.caption(
         "Inspect the source images and annotations below. Calipers require human review."
     )
@@ -106,8 +98,14 @@ def imaging_ui(path, auth, token, user, record, *, locked=False, case_imaging=No
     pending = st.session_state.get("imaging_proposal")
     if pending and is_endoscopy(pending[1]["manifest"]):
         from medical_assistant.ui.navigation import go_to
+
         st.info("Resolve the pending endoscopy study before adding CT.")
-        st.button("Open pending endoscopy", on_click=go_to, args=("endoscopy-review",), key="ct_open_endo")
+        st.button(
+            "Open pending endoscopy",
+            on_click=go_to,
+            args=("endoscopy-review",),
+            key="ct_open_endo",
+        )
         return
     job = st.session_state.get("ct_job")
     if job:
@@ -196,10 +194,13 @@ def imaging_ui(path, auth, token, user, record, *, locked=False, case_imaging=No
                         if is_nodule(manifest)
                         else None
                     )
-                    notes = st.text_area("Imaging review notes", key="imaging_notes")
+                    notes = st.text_area(
+                        "Image review note (optional)", key="imaging_notes"
+                    )
                     attested = st.checkbox(
-                        "I checked the synthetic patient/study association, overlays, geometry and research limitations.",
+                        "I inspected the images, candidate decisions and case association.",
                         key="imaging_attest",
+                        value=True,
                     )
                     submit = st.form_submit_button(
                         "Include reviewed CT in report",
@@ -248,6 +249,31 @@ def imaging_ui(path, auth, token, user, record, *, locked=False, case_imaging=No
     ):
         job = st.session_state.get("ct_job")
         running = job is not None and job.status() == "running"
+        other_job = st.session_state.get("endo_job")
+        cannot_add = (
+            locked
+            or not token
+            or "imaging_proposal" in st.session_state
+            or bool(other_job and other_job.status() in ("running", "complete"))
+        )
+        if record.patient_id == "research-composite-demo":
+            st.caption(
+                "Real research example · limited CT excerpt · unrelated to the endoscopy subject"
+            )
+            if st.button(
+                "Open real CT example",
+                key="ct_real_example",
+                disabled=cannot_add or running,
+            ):
+                try:
+                    from medical_assistant.research_examples import example_bundle
+
+                    prepare(example_bundle("ct", record.patient_id))
+                    st.rerun()
+                except (ValueError, OSError):
+                    st.error(
+                        "Prepare the local research-image kit first; see docs/RESEARCH_IMAGES.md."
+                    )
         mode = st.selectbox(
             "CT workflow",
             [
@@ -273,7 +299,7 @@ def imaging_ui(path, auth, token, user, record, *, locked=False, case_imaging=No
         if st.button(
             "Run CT analysis",
             key="ct_generate",
-            disabled=locked or running or not token or bool(st.session_state.get("endo_job") and st.session_state.endo_job.status() in ("running", "complete")),
+            disabled=cannot_add or running,
         ):
             try:
                 st.session_state.ct_job = LocalCTJob(
@@ -308,14 +334,14 @@ def imaging_ui(path, auth, token, user, record, *, locked=False, case_imaging=No
             if status != "running" and st.button("Dismiss CT job", key="ct_dismiss"):
                 del st.session_state.ct_job
                 st.rerun()
-        with st.expander("Or upload an existing synthetic CT bundle"):
+        with st.expander("Or upload an existing CT review bundle"):
             uploaded = st.file_uploader(
-                "Synthetic CT review bundle (.zip)", type=["zip"], key="ct_bundle"
+                "CT review bundle (.zip)", type=["zip"], key="ct_bundle"
             )
             if st.button(
                 "Inspect uploaded CT bundle",
                 key="ct_upload",
-                disabled=locked or uploaded is None,
+                disabled=cannot_add or running or uploaded is None,
             ):
                 try:
                     prepare(uploaded.getvalue())

@@ -18,7 +18,10 @@ from PIL import Image
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 VERSION = "lovisa-endo-image-v1"
-MAX_BYTES = 16 * 1024**2
+RESEARCH_VERSION = "lovisa-endo-research-v2"
+VERSIONS = (VERSION, RESEARCH_VERSION)
+SYNTHETIC_MAX_BYTES = 16 * 1024**2
+MAX_BYTES = 64 * 1024**2
 MAX_PIXELS = 2048 * 2048
 LIMITATION = "Research candidates only; no cancer diagnosis, normal-examination conclusion or calibrated millimetre measurement."
 Id = Annotated[str, Field(pattern=r"^[A-Za-z0-9_-]{1,64}$")]
@@ -140,7 +143,7 @@ class Artifact(Record):
     path: str = Field(min_length=1, max_length=100)
     role: Literal["source_preview", "probability", "mask", "overlay_preview"]
     sha256: Hash
-    size_bytes: int = Field(gt=0, le=4 * 1024**2, strict=True)
+    size_bytes: int = Field(gt=0, le=16 * 1024**2 + 1024, strict=True)
     slice_index: Literal[0] = 0
 
     @field_validator("path")
@@ -158,9 +161,30 @@ class Artifact(Record):
         return path
 
 
+class PublicResearchSource(Record):
+    """Operator-declared public provenance, never a real patient-history link."""
+
+    dataset: str = Field(min_length=1, max_length=200)
+    source_url: str = Field(min_length=10, max_length=500, pattern=r"^https://")
+    license: str = Field(min_length=1, max_length=300)
+    research_subject_id: str = Field(min_length=1, max_length=100)
+    original_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+    composite_case: Literal[True]
+
+    @field_validator("composite_case", mode="before")
+    @classmethod
+    def explicit_composite(cls, value):
+        if value is not True:
+            raise ValueError(
+                "Public images require an explicitly fictional composite case"
+            )
+        return value
+
+
 class Bundle(Record):
-    schema_version: Literal["lovisa-endo-image-v1"] = VERSION
-    synthetic: Literal[True]
+    schema_version: Literal["lovisa-endo-image-v1", "lovisa-endo-research-v2"] = VERSION
+    synthetic: bool = Field(strict=True)
+    research: PublicResearchSource | None = None
     patient_id: Id
     study_id: Id
     job_id: str = Field(pattern=r"^[a-f0-9]{32}$")
@@ -169,23 +193,36 @@ class Bundle(Record):
     study: Study
     artifacts: list[Artifact] = Field(min_length=4, max_length=4)
 
-    @field_validator("synthetic", mode="before")
-    @classmethod
-    def synthetic_only(cls, value):
-        """Require an explicit synthetic flag rather than truthy coercion."""
-        if value is not True:
-            raise ValueError("LOVISA requires literal synthetic input")
-        return value
-
     @model_validator(mode="after")
     def consistent(self):
-        """Check study identity, modality bounds and exact artifact membership."""
-        if self.study.width > 512 or self.study.height > 512:
-            raise ValueError(
-                "LOVISA synthetic images are limited to 512 pixels per side"
-            )
-        if self.study.input_kind != "generated-synthetic":
-            raise ValueError("LOVISA rejects public research images")
+        """Require distinct schemas for artificial and deidentified public pixels."""
+        if self.schema_version == VERSION:
+            if (
+                self.synthetic is not True
+                or self.research is not None
+                or any(a.size_bytes > 4 * 1024**2 for a in self.artifacts)
+            ):
+                raise ValueError(
+                    "Synthetic input requires literal true and no research metadata"
+                )
+            if self.study.width > 512 or self.study.height > 512:
+                raise ValueError(
+                    "LOVISA synthetic images are limited to 512 pixels per side"
+                )
+            if self.study.input_kind != "generated-synthetic":
+                raise ValueError("Synthetic schema rejects public research images")
+        else:
+            if (
+                self.synthetic is not False
+                or self.research is None
+                or self.study.input_kind != "approved-public-research"
+                or self.study.model.evaluation_scope
+                not in ("positive-images-only", "includes-negative-images")
+                or not self.patient_id.startswith("research-composite-")
+            ):
+                raise ValueError(
+                    "Research images require provenance, a trained model and a fictional composite case"
+                )
         if (self.patient_id, self.study_id) != (
             self.study.patient_alias,
             self.study.study_id,
@@ -345,6 +382,11 @@ def read_exchange(payload, patient_id):
                 raise ValueError("Manifest too large")
             raw = archive.read("bundle.json")
             bundle = Bundle.model_validate(json.loads(raw, object_pairs_hook=unique))
+            if bundle.schema_version == VERSION and (
+                len(payload) > SYNTHETIC_MAX_BYTES
+                or sum(e.file_size for e in entries) > SYNTHETIC_MAX_BYTES
+            ):
+                raise ValueError("Synthetic archive exceeds original 16 MiB limit")
             if bundle.patient_id != patient_id:
                 raise ValueError("Endoscopy patient mismatch")
             if set(archive.namelist()) != {
