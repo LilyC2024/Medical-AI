@@ -6,6 +6,9 @@ Source, fictional fixtures, local configuration and documentation are listed bel
 Runtime databases, images, weights, accounts and generated reviews are ignored.
 The callable inventory is generated separately from AST; this is the publication map.
 
+- [.github/dependabot.yml](../.github/dependabot.yml)
+- [.github/workflows/codeql.yml](../.github/workflows/codeql.yml)
+- [.github/workflows/security.yml](../.github/workflows/security.yml)
 - [.github/workflows/tests.yml](../.github/workflows/tests.yml)
 - [.gitignore](../.gitignore)
 - [.streamlit/config.toml](../.streamlit/config.toml)

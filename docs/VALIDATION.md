@@ -9,7 +9,17 @@
 .venv/bin/python -m compileall -q medical_assistant app.py scripts tests
 .venv/bin/python -m pytest -q
 .venv/bin/python scripts/check_docs.py
+# Quality/security gates also enforced in CI (tools are not in the runtime lockfile):
+.venv/bin/python -m pip install ruff==0.17.2 mypy==2.4.0 pytest-cov==7.1.0 pip-audit==2.10.1
+.venv/bin/python -m ruff check .                       # syntax/undefined-name gate
+.venv/bin/python -m mypy                               # schemas, safety, orchestration
+.venv/bin/python -m pytest -q --cov --cov-report=term  # fails below 85% line coverage
+.venv/bin/python -m pip_audit -r requirements.lock.txt --strict
 ```
+
+Hosted CI also runs gitleaks over full history, CodeQL (`security-and-quality`)
+and publishes a CycloneDX SBOM of the lockfile; Dependabot proposes weekly pip and
+Actions updates. Coverage measures executed lines, not clinical correctness.
 
 See [response-budget checks](PERFORMANCE.md) and [workspace behavior](INTERFACE.md).
 Timeout/cancellation/late-output, compact-ID grounding and responsive scripted UI

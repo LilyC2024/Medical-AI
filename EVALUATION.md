@@ -1,5 +1,22 @@
 # LOVISA evaluation record
 
+## CI quality and security gates — 24 October 2026
+
+Tooling change stacked on the Pillow security update. Two typing-only edits; no
+clinical logic, policy, catalog or model change.
+
+| Executed check (local, Python 3.13.17) | Actual outcome |
+| --- | --- |
+| `ruff check .` with new `E9,F63,F7,F82` gate | All checks passed (default rule set still reports the 95-finding style backlog) |
+| `mypy` (2.4.0) on models, safety, workflow, grounding, reasoning constraints | Success: no issues in 5 files (4 narrowing false positives fixed) |
+| `pytest -q --cov` | **279 passed**; coverage **89.10%** ≥ 85% floor |
+| `pip_audit -r requirements.lock.txt --strict` | No known vulnerabilities found |
+| `cyclonedx-py requirements requirements.lock.txt` | CycloneDX 1.6 SBOM, 72 components |
+| Workflow/Dependabot YAML parse | All four files parse |
+
+Not run: gitleaks (running the downloaded binary was not permitted in this
+session; it runs in hosted CI), CodeQL (hosted only), hosted CI itself.
+
 ## Pillow security update — 24 October 2026
 
 Dependency-only change: Pillow 12.3.0 → 13.0.0 and Streamlit 1.65.0 → 1.66.1 in

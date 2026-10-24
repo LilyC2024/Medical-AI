@@ -45,6 +45,10 @@ credentials, exports, local approvals, logs, weights and real images. Inspect th
 staged diff and Git history; `.gitignore` does not remove previously tracked data.
 Reference excerpts require redistribution rights. The evidence manifest starts empty.
 
+CI audits locked dependencies (pip-audit), scans full history for secrets
+(gitleaks), runs CodeQL and publishes an SBOM; Dependabot proposes updates. These
+are automated checks, not an independent security review.
+
 Report suspected vulnerabilities privately when a maintainer channel is available.
 Use a minimal synthetic reproduction; never post real records or credentials in
 public issues. No certification or response-time commitment is claimed.

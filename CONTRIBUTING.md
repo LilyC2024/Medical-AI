@@ -22,9 +22,15 @@ before updating the pinned integration commit. [Stable identifiers](docs/NAMING.
 ```bash
 .venv/bin/python -m pip check
 .venv/bin/python -m compileall -q medical_assistant app.py scripts tests
-.venv/bin/python -m pytest -q
+.venv/bin/python -m pytest -q --cov --cov-report=term
 .venv/bin/python scripts/check_docs.py
+.venv/bin/python -m ruff check . && .venv/bin/python -m mypy
+.venv/bin/python -m pip_audit -r requirements.lock.txt --strict
 ```
+
+Install the pinned tools from [Validation](docs/VALIDATION.md). CI fails on new
+syntax/undefined-name errors, mypy errors in the typed modules, coverage below 85%,
+known-vulnerable locked packages and committed secrets.
 
 Use temporary databases and scripted models/reviewers. Run real local inference
 separately when affected: `.venv/bin/python scripts/smoke_local.py --model gemma4:e2b`.

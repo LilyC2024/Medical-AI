@@ -29,3 +29,27 @@ pythonpath = ["."]
 
 [tool.setuptools.package-data]
 medical_assistant = ["ui/*.css"]
+
+[tool.ruff.lint]
+# CI gate: syntax errors and undefined names. Ruff's broader default rules still
+# report a style backlog (see EVALUATION.md); it is tracked, not gated.
+select = ["E9", "F63", "F7", "F82"]
+
+[tool.mypy]
+# Typed gate on schemas, safety policy and orchestration; widen deliberately.
+files = [
+  "medical_assistant/models.py",
+  "medical_assistant/safety.py",
+  "medical_assistant/workflow.py",
+  "medical_assistant/grounding.py",
+  "medical_assistant/reasoning_constraints.py",
+]
+ignore_missing_imports = true
+follow_imports = "silent"
+warn_unused_ignores = true
+
+[tool.coverage.run]
+source = ["medical_assistant"]
+
+[tool.coverage.report]
+fail_under = 85

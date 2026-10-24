@@ -21,7 +21,8 @@ def validate_record_grounding(record: PatientRecord):
             raise ValueError("Duplicate entry IDs in original source")
         originals[source.id] = {entry.id: entry for entry in entries}
     for entry in record.entries:
-        original = originals.get(entry.source_id, {}).get(entry.id)
+        # A missing source_id finds no original and fails closed just below.
+        original = originals.get(entry.source_id, {}).get(entry.id)  # type: ignore[arg-type]
         if original is None:
             raise ValueError("Extracted fact is missing from its original source")
         fields = ("date", "source_type", "kind", "text", "medication", "blood_pressure", "warning_screen")
