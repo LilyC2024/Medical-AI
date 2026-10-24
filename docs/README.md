@@ -18,6 +18,7 @@ is its function. [Root overview](../README.md).
 | Find folders/functions/subfunctions | [Code reference](CODE_REFERENCE.md) / [File inventory](FILE_INVENTORY.md) |
 | Reproduce checks or inspect bugs | [Validation](VALIDATION.md) / [Expert review](REVIEW.md) |
 | Inspect executed outcomes or the original checklist | [Evaluation](../EVALUATION.md) / [Acceptance](ACCEPTANCE.md) |
+| See what reporting guidelines require and plan reviewer testing | [Checklists](REPORTING_CHECKLISTS.md) / [Human factors](HUMAN_FACTORS.md) |
 | Understand retained diagrams and names | [Illustrations](ILLUSTRATIONS.md) / [Naming](NAMING.md) |
 | Develop and publish changes | [Development](DEVELOPMENT.md) / [Contributing](../CONTRIBUTING.md) |
 

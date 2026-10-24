@@ -1,5 +1,37 @@
 # LOVISA evaluation record
 
+## Current status (24 October 2026)
+
+This table summarises what is established on `main`. The dated log below is the
+evidence; older entries are historical measurements, not current claims. Changes
+proposed in open pull requests are not counted here.
+
+| Area | Status | Basis |
+| --- | --- | --- |
+| Software regression | 279 offline tests pass (Python 3.10/3.12 CI); CT 105, endoscopy 72 | Scripted inference, temporary databases |
+| Local LLM step (`gemma4:e2b`) | **Runs; value unmeasured.** No precision/recall, faithfulness, repeat-run variance or rule-only baseline | Smoke runs only |
+| Safety routing | Deterministic Python policy, model cannot lower it; structured fields only, no free-text emergency detection | Policy tests |
+| CT detector | **Runs; accuracy unmeasured.** One excerpt chosen from a reader contour; whole-scan CPU run stopped after ~28 min; LUNA16/LIDC overlap possible | Single actual run |
+| Endoscopy model | Exploratory: Dice 0.544, IoU 0.413, region precision proxy 0.215 on 168 positive-only, previously inspected images; no negatives, patient independence unknown | Single actual evaluation |
+| Combined demo | Plumbing only: fictional history plus unrelated lung CT and colonoscopy subjects | 66.5 s actual run |
+| Timings | Single runs, not a controlled benchmark | — |
+| Review gates and trust | Explicit authenticated submit; content-bound approval; producer archives hash-checked (consistency, not origin) | Tests |
+| Independent review | None. Development reviews were AI-agent self-audits; no clinician or human security review | — |
+| Reporting guidelines | Mostly not met; see [checklists](docs/REPORTING_CHECKLISTS.md) and the unexecuted [human-factors protocol](docs/HUMAN_FACTORS.md) | — |
+
+## Status table, reporting checklists and human-factors protocol — 24 October 2026
+
+Documentation only: added the current-status table above, a CLAIM / TRIPOD+AI /
+DECIDE-AI mapping and a seeded-error reviewer protocol (not executed). No source,
+policy, catalog, model or test changed.
+
+| Executed check | Actual outcome |
+| --- | --- |
+| `python -m pytest -q` (Python 3.13.17) | **279 passed in 81.52s** |
+| `scripts/check_docs.py` / `generate_api_docs.py --check` | Passed: 37 documents; API reference matches |
+
+Not run: the human-factors protocol itself, hosted CI.
+
 ## Expert review and joint release — 24 October 2026
 
 Three independent coding reviewers audited LOVISA, CT and endoscopy. Repairs
