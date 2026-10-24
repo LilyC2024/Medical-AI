@@ -62,3 +62,6 @@ Thumbs.db
 
 !/data/patients/research_composite.json
 /data/research-demo/
+
+.venv-release/
+/data/trust/

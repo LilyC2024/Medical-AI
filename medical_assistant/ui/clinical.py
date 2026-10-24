@@ -8,6 +8,7 @@ from medical_assistant import ollama_client, storage
 from medical_assistant.jobs import BudgetInference, WorkStopped, WorkTask
 from medical_assistant.imaging_actions import job_pending
 from medical_assistant.models import Review
+from medical_assistant.persistence import resumable_cases, workflow_checkpointer
 from medical_assistant.report import digest
 from medical_assistant.report_assets import inspection_figures, portable_html
 from medical_assistant.ui.components import empty
@@ -150,6 +151,27 @@ def generate_task(workflow, case, token):
     return WorkTask(run, title="Rechecking safety before clinical reasoning")
 
 
+def resume_saved_review(auth, record, model, token):
+    """Offer the newest pending review saved before a restart (durable key only)."""
+    if not auth.durable_receipts:
+        return
+    cases = resumable_cases(workflow_checkpointer(auth.path, True), record.patient_id)
+    if not cases:
+        return
+    latest = cases[0]
+    st.info(
+        f"A saved review for this patient is waiting ({latest['status'].replace('_', ' ')}, "
+        f"saved {latest['saved_at'][:16].replace('T', ' ')} UTC). Resume it, or continue below "
+        "to start a new one. Your earlier decisions and receipts are rechecked."
+    )
+    if st.button("Resume saved review", key="resume_saved", disabled=not token):
+        st.session_state.workflow = MedicalHistoryOrchestrator(
+            ollama_client.OllamaClient(model), auth=auth
+        )
+        st.session_state.case_id = latest["case_id"]
+        st.rerun()
+
+
 def bottom_actions(path, auth, record, model, token, user, decision):
     """Safety first, then one explicit bottom-of-page generation action."""
     st.subheader("Safety check")
@@ -171,6 +193,8 @@ def bottom_actions(path, auth, record, model, token, user, decision):
         or job_pending(endo)
     )
     status = state.get("status")
+    if not state and task is None:
+        resume_saved_review(auth, record, model, token)
     stale = bool(
         state
         and state["safety_decision"]["decision_sha256"] != decision["decision_sha256"]

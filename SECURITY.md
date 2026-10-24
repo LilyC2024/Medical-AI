@@ -36,8 +36,11 @@ structured safety policy is not comprehensive free-text emergency recognition.
 
 ## Persistence and publication
 
-Pending graphs, proposals, sessions and receipt keys live in memory. Restarting
-loses pending work. Local databases, accepted images and exports are not encrypted
+By default pending graphs and receipt keys are process-local. An explicitly
+configured durable master key enables database-scoped SQLite checkpoints for
+human-review interrupts. Sessions, workers and image proposals remain in memory.
+Moving the database or rotating the key invalidates old receipts; sign-in is
+required after restart. [Configuration](docs/REPRODUCIBILITY.md). Local databases, accepted images and exports are not encrypted
 by the app. Audit records are not a tamper-proof legal audit system.
 
 Publish deliberately fictional fixtures only. Exclude databases, account hashes,
@@ -77,3 +80,13 @@ uploaded image/link expression cannot become a browser resource through an error
 message. Actual source content remains in its source view. Worker saturation is
 recoverable without clearing or fabricating an assessment. Cancelled work cannot
 publish a late draft after patient/input changes. [Audit](docs/REVIEW.md).
+
+Optional pinned Ed25519 producer keys identify exact imaging exports. Unknown
+signed keys, malformed signatures and tampered evidence are rejected. Unsigned
+legacy examples require human review unless local settings require signatures.
+Signatures do not establish accuracy; producer metrics are declarations only.
+
+Local traces are opt-in, contain no exception text or automatic resource metadata
+and have no network exporter. Audit replay verifies displayed decisions against
+receipts but is not a tamper-proof log. Python 3.10/Pillow 12.3 is no longer a
+supported release environment; use Python 3.11+ and the fixed locked dependencies.

@@ -2,7 +2,7 @@
 
 [Overview](../README.md) · [Checks](VALIDATION.md) · [Evidence](../EVALUATION.md)
 
-Three independent reviewers inspected LOVISA, CT and endoscopy source, tests and
+Three AI coding review agents inspected LOVISA, CT and endoscopy source, tests and
 runtime boundaries. The primary agent checked integrations, documentation and
 publication. Each material defect received a regression or rejected-input test.
 This is a software audit, not clinician review or exhaustive security assurance.
@@ -44,3 +44,7 @@ Unsigned hashes establish consistency, not authenticity. Histories remain fictio
 public imaging subjects are separate. GPU training, NPU execution and independent
 clinical validity are not established. Browser visual QA is separate from Streamlit
 AppTest; the current review does not claim new manual browser verification.
+
+These were AI-assisted source reviews, not independent human clinical or security
+audits. Runtime specialist roles are separate from development review agents.
+See [branch integration decisions](BRANCH_REVIEW.md).

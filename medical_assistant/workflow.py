@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import TypedDict
 from uuid import uuid4
 
-from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.graph import END, START, StateGraph
 from langgraph.types import Command, interrupt
 
@@ -17,18 +16,23 @@ from medical_assistant.grounding import validate_record_grounding
 from medical_assistant.history import MedicalHistoryAgent, MedicationAgent
 from medical_assistant.imaging import ImagingStore
 from medical_assistant.models import PatientRecord, ReportNote, Review
+from medical_assistant.persistence import resumable_cases, workflow_checkpointer
+from medical_assistant.provenance import inference_provenance
 from medical_assistant.report import compose, digest, evidence_index
 from medical_assistant.report_binding import content_digest, verify_content_binding
 from medical_assistant.report_notes import verify_note
 from medical_assistant.safety import SafetyAgent
 from medical_assistant.storage import ROOT
+from medical_assistant.tracing import traced
 
 
 class CaseState(TypedDict, total=False):
     case_id: str
+    database_identity: str
     record: dict
     source_file: str
     model: str
+    model_provenance: dict
     assessments: dict
     evidence: list[dict]
     safety_decision: dict
@@ -53,7 +57,13 @@ class CaseState(TypedDict, total=False):
 
 class MedicalHistoryOrchestrator:
     def __init__(
-        self, inference: Inference, evidence_collection=None, *, auth=None, safety=None
+        self,
+        inference: Inference,
+        evidence_collection=None,
+        *,
+        auth=None,
+        safety=None,
+        checkpointer=None,
     ):
         self.inference = inference
         self.auth = auth or LocalAuth()
@@ -63,8 +73,12 @@ class MedicalHistoryOrchestrator:
             ROOT / "data" / "evidence"
         )
         builder = StateGraph(CaseState)
-        builder.add_node("safety", self._initial_safety)
-        builder.add_node("safety_human_review", self._safety_review)
+
+        def add_node(name, node):
+            builder.add_node(name, traced(name, node))  # no-op unless tracing enabled
+
+        add_node("safety", self._initial_safety)
+        add_node("safety_human_review", self._safety_review)
         for role, extractor in (
             ("history", MedicalHistoryAgent()),
             ("medications", MedicationAgent()),
@@ -79,13 +93,13 @@ class MedicalHistoryOrchestrator:
                     }
                 }
 
-            builder.add_node(role, extract)
-        builder.add_node("evidence_retrieval", self._retrieve_evidence)
-        builder.add_node("reasoning", self._reasoning)
-        builder.add_node("safety_review", self._final_safety)
-        builder.add_node("orchestrator", self._compose)
-        builder.add_node("clinician_review", self._review)
-        builder.add_node("complete_report", self._complete)
+            add_node(role, extract)
+        add_node("evidence_retrieval", self._retrieve_evidence)
+        add_node("reasoning", self._reasoning)
+        add_node("safety_review", self._final_safety)
+        add_node("orchestrator", self._compose)
+        add_node("clinician_review", self._review)
+        add_node("complete_report", self._complete)
         builder.add_edge(START, "safety")
         builder.add_conditional_edges(
             "safety",
@@ -118,7 +132,14 @@ class MedicalHistoryOrchestrator:
             {"complete": "complete_report", "review": "clinician_review"},
         )
         builder.add_edge("complete_report", END)
-        self.graph = builder.compile(checkpointer=InMemorySaver())
+        self.graph = builder.compile(
+            checkpointer=checkpointer
+            or workflow_checkpointer(self.auth.path, self.auth.durable_receipts)
+        )
+
+    def resumable_cases(self, patient_id):
+        """Pending saved reviews for this patient (durable receipt key only)."""
+        return resumable_cases(self.graph.checkpointer, patient_id)
 
     def _initial_safety(self, state):
         decision = self.safety.evaluate(PatientRecord.model_validate(state["record"]))
@@ -182,7 +203,12 @@ class MedicalHistoryOrchestrator:
             state["assessments"],
             state["evidence"],
         )
-        return {"assessments": {**state["assessments"], "reasoning": result}}
+        return {
+            "assessments": {**state["assessments"], "reasoning": result},
+            "model_provenance": inference_provenance(
+                self.inference, state["safety_decision"]
+            ),
+        }
 
     def _verify_safety_ack(self, state):
         current = self.safety.evaluate(PatientRecord.model_validate(state["record"]))
@@ -334,6 +360,7 @@ class MedicalHistoryOrchestrator:
         return case_id, self.graph.stream(
             {
                 "case_id": case_id,
+                "database_identity": str(self.auth.path.resolve()),
                 "record": record.model_dump(mode="json"),
                 "source_file": source_file,
                 "model": self.inference.model,
@@ -366,7 +393,11 @@ class MedicalHistoryOrchestrator:
         )
 
     def state(self, case_id):
-        return self.graph.get_state(self.config(case_id)).values
+        state = self.graph.get_state(self.config(case_id)).values
+        identity = state.get("database_identity")
+        if state and identity != str(self.auth.path.resolve()):
+            raise PermissionError("Saved workflow belongs to a different database")
+        return state
 
     def _response(self, case_id, review, token, action):
         review = Review.model_validate(review.model_dump())

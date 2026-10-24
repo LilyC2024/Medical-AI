@@ -22,13 +22,14 @@ composite cases with provenance; unrelated source subjects stay separate.
 
 ## Run locally
 
-Use Python 3.10+ and local Ollama with **`gemma4:e2b`**. Reuse an existing `.venv`;
-for a fresh Linux checkout:
+Use Python 3.11+ and local Ollama with **`gemma4:e2b`**. Reuse an existing `.venv`;
+recreate older Python 3.10 environments for the fixed Pillow release.
+For a fresh Linux checkout:
 
 ```bash
 git clone https://github.com/LilyC2024/Medical-AI.git
 cd Medical-AI
-python3 -m venv .venv
+python3.12 -m venv .venv
 .venv/bin/python -m pip install -r requirements.lock.txt
 .venv/bin/python -m medical_assistant.auth
 .venv/bin/python -m streamlit run app.py
@@ -61,6 +62,14 @@ CV models and bounded Python adapters. Images and image notes never enter Ollama
 Development review agents are separate from the application's runtime.
 [Implementation and data structures](docs/ARCHITECTURE.md).
 
+## Reproducibility and review
+
+Optional signed imaging exchange pins trusted exporters. Reports bind the observed
+Ollama model digest, prompt and policy versions to approval. A configured durable
+key enables restart-safe pending human reviews; local traces are opt-in and
+redacted. [Configuration and limitations](docs/REPRODUCIBILITY.md).
+[Reviewed branch decisions](docs/BRANCH_REVIEW.md).
+
 ## Documentation and evidence
 
 | Read next | Purpose |
@@ -69,11 +78,11 @@ Development review agents are separate from the application's runtime.
 | [Real-image demo](docs/RESEARCH_IMAGES.md) | Permitted sources, upload kit and composite-case limitations |
 | [Code reference](docs/CODE_REFERENCE.md) | Folders, APIs, functions and subfunctions |
 | [Validation](docs/VALIDATION.md) / [Evaluation](EVALUATION.md) | Reproduce checks; distinguish scripted tests from actual local inference |
-| [Expert review](docs/REVIEW.md) | Reproduced defects, repairs and remaining assumptions |
+| [AI-assisted source review](docs/REVIEW.md) | Reproduced defects, repairs and remaining assumptions |
 
 **Educational and experimental, not a diagnostic device.** Clinical records,
 automatic medical decisions, paid APIs, cloud inference and remote tracing are
 unsupported. Missing information never proves safety. Local login does not verify
 clinical qualifications. [Security](SECURITY.md) · [Contributing](CONTRIBUTING.md).
-No project-wide redistribution license has been selected; preserve
-[third-party notices](third_party/README.md).
+Source: [MIT](LICENSE). Data, weights and [third-party notices](third_party/README.md)
+have separate [terms](DATA_TERMS.md).

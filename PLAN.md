@@ -171,3 +171,15 @@ software gates.
     smoke passed. All three repos published. Hosted 40099153159, 40099064726 and
     40099084727 passed; local demo health/sign-in verified. No clinical approval
     issued in the app; CUDA/NPU/full CT training remains unexecuted.
+
+## Reviewed branch integration — 24 October 2026
+
+39. **Branch assessment** — inspect every local and remote branch in all three
+    repositories, identify obsolete branches and trust-boundary defects, select
+    compatible improvements. Status: passed — all 19 remote proposal/legacy branches and two local legacy branches inventoried; concrete trust-boundary defects identified.
+40. **Coordinated implementation** — integrate reviewed provenance, durable review
+    state, local observability, signed imaging and quality gates; repair discovered
+    defects and pass focused regressions before final validation. Status: passed — focused adversarial tests and cross-project signed transfer passed.
+41. **Validation and delivery** — full suites, documentation/contract checks, live
+    local inference and producer/receiver smokes; record results and push to main.
+    Status: in progress.

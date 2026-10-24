@@ -19,3 +19,5 @@ selects a project-wide redistribution license for this new code. No model weight
 research images or third-party training code are vendored with it.
 [Endoscopy synchronization](../docs/ENDOSCOPY.md) and the CI producer pin identify
 the tested source. Dependency and dataset rights remain separate.
+
+Project source is [MIT](../LICENSE); [data/model terms](../DATA_TERMS.md) are separate.

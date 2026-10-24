@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.10', '3.12']
+        python-version: ['3.11', '3.12']
     env:
       LANGCHAIN_TRACING_V2: 'false'
       LANGCHAIN_TRACING: 'false'
@@ -41,8 +41,14 @@ jobs:
         run: |
           python scripts/check_docs.py
           python scripts/generate_api_docs.py --check
-      - name: Run offline regression tests
-        run: python -m pytest -q
+      - name: Install pinned quality tools
+        run: python -m pip install ruff==0.17.2 mypy==2.4.0 pytest-cov==7.1.0
+      - name: Lint (syntax errors and undefined names)
+        run: python -m ruff check .
+      - name: Type-check schemas, safety and orchestration
+        run: python -m mypy
+      - name: Run offline regression tests with coverage floor
+        run: python -m pytest -q --cov --cov-report=term
       # Deliberately no Ollama download, hosted model call, record upload,
       # live-model smoke test, report artifact upload, or deployment in CI.
 
@@ -62,7 +68,7 @@ jobs:
         uses: actions/checkout@v7
         with:
           repository: LilyC2024/ai-medimg-2.5D-CT
-          ref: 9a3cdfeb0dc71cb5a7e479e54d5a8430ddbe967c
+          ref: 6b2c7434bef256cd01a2322fb785d49eb4b80ad2
           path: companion-ct
       - name: Set up Python
         uses: actions/setup-python@v7
@@ -105,7 +111,7 @@ jobs:
         uses: actions/checkout@v7
         with:
           repository: LilyC2024/AI-MedImg-Endo
-          ref: 9391192d2f68cc7e50ba21a1085b21d1b3af2664
+          ref: e7ec238da9059530ede15f38399c782bdbcd262b
           path: companion-endo
       - uses: actions/setup-python@v7
         with:

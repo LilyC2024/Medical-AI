@@ -29,3 +29,10 @@ schemas. [CT docs](https://github.com/LilyC2024/ai-medimg-2.5D-CT/blob/main/docs
 [Security](../SECURITY.md) · [Phase gates](../PLAN.md) · [Release record](RELEASE.md).
 Earlier pictures and experiments remain explicitly historical; use the current
 workflow/API guides for operation. A scripted demonstration is not clinician review.
+
+## Reviewed integration
+
+- [Branch decisions](BRANCH_REVIEW.md)
+- [Provenance, trust and restart recovery](REPRODUCIBILITY.md)
+- [Reporting-checklist mapping](REPORTING_CHECKLISTS.md)
+- [Proposed human-factors study](HUMAN_FACTORS.md)

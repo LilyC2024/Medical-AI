@@ -4,13 +4,13 @@
 
 ## 1. Install the history application
 
-Use Python 3.10 or newer; regression CI targets 3.10 and 3.12. Reuse `.venv` in an
+Use Python 3.11 or newer; regression CI targets 3.11 and 3.12. Reuse `.venv` in an
 existing checkout. For a new Linux/macOS checkout:
 
 ```bash
 git clone https://github.com/LilyC2024/Medical-AI.git
 cd Medical-AI
-python3 -m venv .venv
+python3.12 -m venv .venv
 .venv/bin/python -m pip install -r requirements.lock.txt
 .venv/bin/python -m pip check
 ```
@@ -96,3 +96,9 @@ Inspect the displayed reason, service availability and `pip check` first. Worker
 capacity exhaustion is retryable; wait for a slot rather than bypass safety.
 Restart clears pending sessions, so sign in and repeat unfinished assessments.
 [Full checks](VALIDATION.md) · [Three-project sketch](ILLUSTRATIONS.md).
+
+## Reproducibility and migration
+
+[Durable reviews, model pins, producer trust and private local traces](REPRODUCIBILITY.md)
+are optional. Python 3.10 environments must be recreated with Python 3.11+ to use
+the fixed Pillow 13 dependency; the old environment should not process uploads.

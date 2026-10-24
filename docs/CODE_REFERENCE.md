@@ -78,3 +78,13 @@ exact signatures, nested helpers, direct calls, explicit raises and code-line li
 Regenerate with `scripts/generate_api_docs.py --write`; `--check` detects drift.
 The inventory imports no model or application. Subject contracts remain the source
 for operational guarantees, not static call lists.
+
+## Reviewed reproducibility modules
+
+`persistence.py` provides explicitly configured durable checkpoint/key handling;
+`provenance.py` records model/prompt/policy identity; `tracing.py` emits redacted
+local spans; `audit.py` verifies replayed decisions. `producer_signature.py` and
+`producer_trust.py` verify bounded signed evidence and pinned keys. The same
+attestation source is synchronized with both producers; the endoscopy shared
+package includes its own byte-identical copy. See [configuration](REPRODUCIBILITY.md)
+and the generated [callable reference](reference/CALLABLES.md).

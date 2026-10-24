@@ -9,6 +9,7 @@ from medical_assistant.imaging_ui import imaging_ui
 from medical_assistant.runtime import get_services
 from medical_assistant.safety import SafetyAgent
 from medical_assistant.ui import components as ui
+from medical_assistant.ui.audit import audit_trail
 from medical_assistant.ui.clinical import (
     background_progress,
     bottom_actions,
@@ -247,6 +248,7 @@ def main():
                 else:
                     anchor("clinical-report")
                     report_panel(auth, token, user, record, urgent=urgent)
+                    audit_trail(auth, record)
                 if view != "Safety check" and "analysis_task" in st.session_state:
                     background_progress()
             with guide:

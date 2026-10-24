@@ -21,11 +21,15 @@ def content_digest(state):
         "safety_ack",
         "final_safety_decision",
     )
+    bound = {key: state.get(key) for key in fields}
+    if state.get("model_provenance") is not None:
+        # Absent on drafts made before provenance existed; their binding is unchanged.
+        bound["model_provenance"] = state["model_provenance"]
     return digest(
         json.dumps(
             {
                 "format": "lovisa-combined-summary-v1",
-                **{key: state.get(key) for key in fields},
+                **bound,
             },
             sort_keys=True,
             ensure_ascii=False,

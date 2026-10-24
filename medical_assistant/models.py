@@ -177,9 +177,9 @@ class Assessment(StrictModel):
         for medication in self.medications:
             check(medication.evidence_ids, medication.source_type)
             orders = [
-                sources[i].medication
+                order
                 for i in medication.evidence_ids
-                if sources[i].medication
+                if (order := sources[i].medication)
             ]
             if not any(
                 (order.name.casefold(), order.dose, order.frequency)

@@ -38,7 +38,7 @@ Explain the problem, resulting behavior, validation and remaining limits. Inspec
 records, account data, tokens, logs, reports, images and weights out of commits/issues.
 New fictional fixtures need deliberate review and an explicit `.gitignore` exception.
 
-Hosted CI runs Python 3.10/3.12 regression and pinned CT smokes. It downloads setup
+Hosted CI runs Python 3.11/3.12 regression and pinned CT smokes. It downloads setup
 packages/weights explicitly and executes models on runner CPU; the app uses no
 cloud inference service. It uploads no clinical reports or patient records.
 LOVISA has no selected project-wide redistribution license; preserve notices for
@@ -55,3 +55,7 @@ file/anchor checker. Update every affected guide in both producer and receiver.
 Three independent expert coding reviewers audited LOVISA, CT and endoscopy in the
 current pass. Their regressions are software evidence and are separate from
 clinician review and actual model inference. [Findings](docs/REVIEW.md).
+
+Source contributions use [MIT](LICENSE); see [data/model terms](DATA_TERMS.md).
+Review [branch decisions](docs/BRANCH_REVIEW.md) and reproduce lint/type/coverage
+and dependency audits before changing shared contracts.

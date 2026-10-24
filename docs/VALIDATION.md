@@ -139,3 +139,18 @@ After intentional source/signature changes, regenerate with `--write`. The local
 Markdown checker now validates heading anchors as well as file paths, including
 encoded names and fenced examples. It is not a general Markdown parser and does
 not contact external URLs. [Review findings](REVIEW.md).
+
+## Reviewed integration checks
+
+Install the pinned `quality` extra in a supported Python 3.11+ environment, then run
+`python -m ruff check .`, `python -m mypy`, `python -m pytest -q --cov`, and
+`python -m pip_audit -r requirements.lock.txt --strict`. Coverage is a software
+regression gate (85%), not clinical validity. CycloneDX SBOMs list dependencies only.
+
+Run `python scripts/smoke_signed_exchange.py --ct-root /path/to/ct --endo-root /path/to/endo`
+for real subprocess signing and pinned receiving in disposable storage; no image
+or report approval is issued. This script uses generated synthetic evidence, not
+training or a clinical test. Both companions need their own installed environments.
+See [reproducibility](REPRODUCIBILITY.md) for optional durable-state, tracing and key
+configuration; adversarial regressions cover privacy, database isolation, audit
+decision binding and hostile signed archives.

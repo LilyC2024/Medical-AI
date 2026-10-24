@@ -59,11 +59,10 @@ blood pressure or screening. The model cannot change the Python route.
 | `CaseState` | Frozen record, assessments, safety decisions, evidence, accepted imaging and review receipts |
 | SQLite | Parameterized transactional originals, extracted facts, accounts, accepted imaging and audit records |
 | Local image directories | Original ZIP/artifacts and immutable accepted snapshots |
-| In-memory graph/session | Pending checkpoints, proposals, worker handles, session tokens and receipt key |
+| Graph/session | Optional database-scoped durable checkpoints; proposals, workers and session tokens remain in memory |
 
 Original sources are separate from extraction. Unsupported fields/excerpts fail
-closed. SQLite is local and unencrypted; restarting loses pending graph/session
-state. Historical exports are not silently revised or reapproved.
+closed. SQLite is local and unencrypted; restarting loses sessions and image proposals; optional durable human-review checkpoints survive. See [reproducibility](REPRODUCIBILITY.md). Historical exports are not silently revised or reapproved.
 
 ## LLM protocol and grounding
 

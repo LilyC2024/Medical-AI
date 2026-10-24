@@ -73,3 +73,21 @@ def test_backslashes_reference_definitions_and_newlines_cannot_escape_literal_sc
     assert r'\`\`\`' in rendered
     assert inline_text('normal_file.json') == 'normal_file.json'
     assert inline_text('_emphasis_') == r'\_emphasis\_'
+
+
+def test_html_provenance_footer_is_escaped_and_optional():
+    from medical_assistant.report_assets import provenance_note
+
+    assert provenance_note(None) == ""
+    note = provenance_note(
+        {
+            "model": "gemma4:e2b<script>",
+            "model_digest": None,
+            "prompt_version": "reasoning-prompt-v1",
+            "prompt_sha256": "a" * 64,
+            "policy_version": "synthetic-workflow-v1",
+            "policy_sha256": "b" * 64,
+        }
+    )
+    assert "<script>" not in note and "&lt;script&gt;" in note
+    assert "digest not reported" in note and "synthetic-workflow-v1" in note

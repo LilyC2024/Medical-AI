@@ -1,8 +1,55 @@
 # LOVISA evaluation record
 
+## Reviewed branch integration — current release, 24 October 2026
+
+[Every branch decision](docs/BRANCH_REVIEW.md) ·
+[Configuration and migration](docs/REPRODUCIBILITY.md). All 19 remote proposal/legacy
+branches and two local historical branches across the projects were inspected.
+Useful changes were selectively integrated; original branches remain available.
+Proposal test claims were not treated as current validation.
+
+| Actually executed | Outcome |
+| --- | --- |
+| Supported Python 3.12 LOVISA regression | **312 passed in 361.61s** |
+| LOVISA coverage | **87.55%**, configured 85% floor passed |
+| CT regression | **121 passed in 85.12s**, 73.53% coverage |
+| Endoscopy regression | **90 passed**, 78.88% coverage run; final 10.30s suite |
+| Focused final trust/privacy/persistence checks | **25 passed in 32.14s** |
+| Lint, scoped function-body types, dependency consistency | Passed in all three environments |
+| Dependency audits | No known vulnerabilities in release lock / installed companion environments |
+| Documentation/API | 94 maintained documents pass file/heading checks; AST references regenerated |
+| SBOM | CycloneDX lockfile/environment documents generated privately under /tmp |
+| Actual gemma4:e2b | Ordinary synthetic case reaches clinician review; missing-data case pauses before reasoning; no approval issued |
+| Actual pretrained CT on generated phantom | **30.25s**, one candidate; unreviewed report blocked |
+| Actual installed endoscopy model transfer | **0.97s**, one candidate, four artifacts; no approval issued |
+| Actual signed producer CLI → pinned receiver | CT **3.76s/66 artifacts**, endoscopy **2.11s/four artifacts**; no approvals issued |
+| Actual research upload UI/service smoke | CT ZIP **0.65s**, endoscopy ZIP **0.50s**, raw JPG inference **2.24s**; all pending review |
+
+The local Python 3.10 environment was preserved, but is no longer supported for
+release: its Pillow 12.3 audit found 37 known vulnerabilities, and fixed Pillow 13
+requires Python >=3.11. A separate `.venv-release` Python 3.12 environment was
+created and validated; CI now targets 3.11/3.12. Targeted companion packaging/tool
+fixes also removed audit findings; no ML dependencies or trained weights were
+replaced. Model/prompt/policy identity is bound into approval; optional durable
+state uses database-scoped keys and checkpoint files. Redacted spans exclude
+exception payloads/resource detectors, and audit replay checks displayed decisions.
+
+A paired public-image/local-LLM smoke timed out at the existing 90s model budget
+while full suites were consuming CPU. It failed closed without a final report;
+this is not a passing paired-report run. Response limits were not relaxed.
+The previous successful paired run below remains historical until a fresh retry
+is recorded. Local CT Docker rebuild was blocked by socket permissions; container
+validation is delegated to the configured hosted workflow. The proposed LOVISA
+Compose stack and human-factors protocol are not executed/shipped. No clinical
+validation, independent human audit, GPU training or NPU execution is claimed.
+
+Hosted runs for this new release will be recorded after publication.
+
+## Previous release evidence
+
 ## Expert review and joint release — 24 October 2026
 
-Three independent coding reviewers audited LOVISA, CT and endoscopy. Repairs
+Three AI coding review agents audited LOVISA, CT and endoscopy. Repairs
 were tested before the documentation phase. Root READMEs are now concise; linked
 subject guides and generated source/class/function references carry the detail.
 [Reproduced findings](docs/REVIEW.md) · [Development agents](docs/DEVELOPMENT.md).

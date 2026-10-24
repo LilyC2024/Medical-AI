@@ -14,7 +14,7 @@ from medical_assistant.nodule_ui import (
     nodule_viewer,
     preview_calipers,
 )
-
+from medical_assistant.producer_ui import false_positive_text, signature_notice
 from medical_assistant.ui.errors import error_message
 from medical_assistant.ui.imaging_actions import image_actions
 
@@ -154,6 +154,7 @@ def imaging_ui(path, auth, token, user, record, *, locked=False, case_imaging=No
             directory = store.root / "pending" / key
             try:
                 store._verify_directory(directory, proposal)
+                signature_notice(proposal)
                 result_summary(manifest)
 
                 def preview(role, index):
@@ -167,7 +168,9 @@ def imaging_ui(path, auth, token, user, record, *, locked=False, case_imaging=No
                 _viewer(manifest, preview, "pending_ct_slice_" + key)
                 with st.form("imaging_acceptance"):
                     decisions = (
-                        candidate_controls(manifest, key)
+                        candidate_controls(
+                            manifest, key, false_positive=false_positive_text(proposal)
+                        )
                         if is_nodule(manifest)
                         else None
                     )

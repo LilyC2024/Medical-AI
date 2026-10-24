@@ -1,24 +1,31 @@
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=84.1"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "local-medical-history-assistant"
 version = "0.7.0"
 description = "LOVISA: Medical History & Clinical Reasoning Assistant with local inference and human review"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE", "DATA_TERMS.md"]
 dependencies = [
   "langgraph>=1.0,<2",
+  "langgraph-checkpoint-sqlite>=3.1,<4",
+  "opentelemetry-sdk>=1.40,<2",
+  "cryptography>=44,<51",
   "langchain-core>=1.4,<2",
   "pydantic>=2.10,<3",
   "httpx>=0.27,<1",
-  "streamlit>=1.65,<2",
+  "streamlit>=1.66.1,<2",
   "numpy>=2,<3",
-  "pillow>=10,<14",
+  "pillow>=13,<14",
 ]
 
 [project.optional-dependencies]
 test = ["pytest>=8,<10"]
+keyring = ["keyring>=25,<26"]
+quality = ["ruff==0.17.2", "mypy==2.4.0", "pytest-cov==7.1.0", "pip-audit==2.10.1", "cyclonedx-bom==7.5.0"]
 
 [tool.setuptools.packages.find]
 include = ["medical_assistant*"]
@@ -29,3 +36,28 @@ pythonpath = ["."]
 
 [tool.setuptools.package-data]
 medical_assistant = ["ui/*.css"]
+
+[tool.ruff.lint]
+# CI gate: syntax errors and undefined names. Ruff's broader default rules still
+# report a style backlog (see EVALUATION.md); it is tracked, not gated.
+select = ["E9", "F63", "F7", "F82"]
+
+[tool.mypy]
+# Typed gate on schemas, safety policy and orchestration; widen deliberately.
+files = [
+  "medical_assistant/models.py",
+  "medical_assistant/safety.py",
+  "medical_assistant/workflow.py",
+  "medical_assistant/grounding.py",
+  "medical_assistant/reasoning_constraints.py",
+]
+ignore_missing_imports = true
+follow_imports = "silent"
+check_untyped_defs = true
+warn_unused_ignores = true
+
+[tool.coverage.run]
+source = ["medical_assistant"]
+
+[tool.coverage.report]
+fail_under = 85

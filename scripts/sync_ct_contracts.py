@@ -11,12 +11,17 @@ def sync(ct_root, *, write=False):
     pairs = (
         ("contracts.py", "nodule_models.py"),
         ("exchange_contract.py", "nodule_exchange.py"),
+        ("producer_signature.py", "producer_signature.py"),
     )
     for source, destination in pairs:
         text = (Path(ct_root) / "src/lung_nodule" / source).read_text(encoding="utf-8")
         text = text.replace(
             "from lung_nodule.contracts import",
             "from medical_assistant.nodule_models import",
+        )
+        text = text.replace(
+            "from lung_nodule.producer_signature import",
+            "from medical_assistant.producer_signature import",
         )
         target = ROOT / "medical_assistant" / destination
         if write:

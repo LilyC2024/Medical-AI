@@ -1,6 +1,7 @@
 """Ollama HTTP adapter: fixed loopback, no proxies, redirects, or cloud models."""
 
 import json
+import os
 import re
 import time
 
@@ -9,10 +10,13 @@ import httpx
 from medical_assistant.models import Assessment
 
 BASE_URL = "http://127.0.0.1:11434"
+DIGEST_ENV = "LOVISA_OLLAMA_MODEL_DIGEST"
 
 
 class OllamaClient:
-    def __init__(self, model: str = "gemma4:e2b", *, transport=None):
+    def __init__(
+        self, model: str = "gemma4:e2b", *, transport=None, expected_digest=None
+    ):
         if (
             not re.fullmatch(
                 r"[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)*(?::[A-Za-z0-9_.-]+)?", model
@@ -23,6 +27,9 @@ class OllamaClient:
                 "Choose an installed local Ollama model, not a cloud model"
             )
         self.model = model
+        # Optional pin: the installed model must have exactly this digest.
+        self.expected_digest = expected_digest or os.environ.get(DIGEST_ENV) or None
+        self.model_digest = None
         self._deadline = None
         self.http = httpx.Client(
             base_url=BASE_URL,
@@ -34,6 +41,16 @@ class OllamaClient:
 
     def close(self):
         self.http.close()
+
+    def _installed_digest(self):
+        response = self.http.get(
+            "/api/tags", timeout=httpx.Timeout(5, connect=3)
+        )
+        response.raise_for_status()
+        for item in response.json().get("models", []):
+            if self.model in (item.get("name"), item.get("model")):
+                return item.get("digest")
+        return None
 
     def _post(self, path: str, body: dict) -> dict:
         remaining = (
@@ -65,6 +82,12 @@ class OllamaClient:
             raise ValueError(
                 "Ollama did not confirm a locally installed parameter model"
             )
+        digest = self._installed_digest()
+        if self.expected_digest and digest != self.expected_digest:
+            raise ValueError(
+                "Installed Ollama model digest does not match the pinned digest"
+            )
+        self.model_digest = digest
 
     def assess(
         self, system: str, user: str, *, schema: dict | None = None

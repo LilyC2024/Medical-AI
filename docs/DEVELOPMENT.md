@@ -5,7 +5,7 @@
 ## Runtime implementation
 
 `MedicalHistoryOrchestrator` builds one LangGraph state machine with fixed stages
-and in-memory checkpoints. History and medication extraction and the safety policy
+and optional durable human-review checkpoints (in-memory by default). History and medication extraction and the safety policy
 are Python. Clinical reasoning uses one local Ollama model with constrained JSON/
 ID output. LangChain runnables wrap local extraction/retrieval. No specialist has
 arbitrary tools, a database connection or authority to approve output.

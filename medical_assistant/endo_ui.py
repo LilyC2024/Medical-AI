@@ -9,10 +9,11 @@ from medical_assistant.endo_contracts import digest
 from medical_assistant.endo_support import is_endoscopy, summarize_endo
 from medical_assistant.imaging import ImagingStore
 from medical_assistant.imaging_actions import collect
-from medical_assistant.ui.imaging_actions import image_actions
 from medical_assistant.models import Review
 from medical_assistant.nodule_support import imaging_acceptance_digest
+from medical_assistant.producer_ui import false_positive_text, signature_notice
 from medical_assistant.ui.errors import error_message
+from medical_assistant.ui.imaging_actions import image_actions
 from medical_assistant.ui.navigation import go_to
 
 
@@ -142,24 +143,28 @@ def endoscopy_ui(path, auth, token, user, record, *, locked=False, case_imaging=
                 )
 
             st.caption("Awaiting image review · not yet in the report")
+            signature_notice(item)
             image_results(manifest, preview)
             with st.form("endo_acceptance"):
-                choices = [
-                    {
-                        "candidate_id": c["candidate_id"],
-                        "decision": st.radio(
-                            "Review " + c["candidate_id"],
-                            ["uncertain", "accept", "reject"],
-                            format_func=lambda x: {
-                                "uncertain": "Pause · decide later",
-                                "accept": "Include candidate",
-                                "reject": "Exclude candidate",
-                            }[x],
-                            key="endo_decision_" + key + c["candidate_id"],
-                        ),
-                    }
-                    for c in manifest["study"]["candidates"]
-                ]
+                false_positive = false_positive_text(item)
+                choices = []
+                for c in manifest["study"]["candidates"]:
+                    st.caption(false_positive)
+                    choices.append(
+                        {
+                            "candidate_id": c["candidate_id"],
+                            "decision": st.radio(
+                                "Review " + c["candidate_id"],
+                                ["uncertain", "accept", "reject"],
+                                format_func=lambda x: {
+                                    "uncertain": "Pause · decide later",
+                                    "accept": "Include candidate",
+                                    "reject": "Exclude candidate",
+                                }[x],
+                                key="endo_decision_" + key + c["candidate_id"],
+                            ),
+                        }
+                    )
                 notes = st.text_area(
                     "Image review note (optional)", key="endo_notes", max_chars=600
                 )
