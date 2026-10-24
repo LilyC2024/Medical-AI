@@ -59,6 +59,14 @@ commentary. Verified source/annotation pictures appear below. Exact excerpts and
 IDs remain in the evidence package and optional readable view, not throughout
 the short prose. [Format](REPORTS.md).
 
+## Audit replay
+
+**Clinical report** ends with an **Audit trail** expander: each import, safety
+decision, note preview, imaging acceptance and final decision for the selected
+patient, with who did it and whether its receipt verifies under the current key.
+It is read-only. Set `LOVISA_TRACE_FILE=/path/traces.jsonl` before launch for
+redacted local step timings.
+
 ## 5. Review, approve and export
 
 An initially blank, unchanged final note needs no preview. Preview every changed

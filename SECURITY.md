@@ -38,7 +38,15 @@ structured safety policy is not comprehensive free-text emergency recognition.
 
 Pending graphs, proposals, sessions and receipt keys live in memory. Restarting
 loses pending work. Local databases, accepted images and exports are not encrypted
-by the app. Audit records are not a tamper-proof legal audit system.
+by the app. Audit records are not a tamper-proof legal audit system. The **Audit trail**
+expander replays a patient's rows and re-verifies receipts with the current key;
+rows from an earlier ephemeral key show as not verifiable rather than tampered.
+
+Optional workflow traces (`LOVISA_TRACE_FILE`) are OpenTelemetry spans appended to
+a local JSON-lines file; nothing is exported over the network. Spans contain only
+step names, a hashed case reference, outcome, timing and exception type, never
+record text, identifiers, prompts, model output or notes. Remote tracing remains
+unsupported.
 
 Publish deliberately fictional fixtures only. Exclude databases, account hashes,
 credentials, exports, local approvals, logs, weights and real images. Inspect the

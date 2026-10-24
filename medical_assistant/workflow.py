@@ -22,6 +22,7 @@ from medical_assistant.report_binding import content_digest, verify_content_bind
 from medical_assistant.report_notes import verify_note
 from medical_assistant.safety import SafetyAgent
 from medical_assistant.storage import ROOT
+from medical_assistant.tracing import traced
 
 
 class CaseState(TypedDict, total=False):
@@ -63,8 +64,12 @@ class MedicalHistoryOrchestrator:
             ROOT / "data" / "evidence"
         )
         builder = StateGraph(CaseState)
-        builder.add_node("safety", self._initial_safety)
-        builder.add_node("safety_human_review", self._safety_review)
+
+        def add_node(name, node):
+            builder.add_node(name, traced(name, node))  # no-op unless tracing enabled
+
+        add_node("safety", self._initial_safety)
+        add_node("safety_human_review", self._safety_review)
         for role, extractor in (
             ("history", MedicalHistoryAgent()),
             ("medications", MedicationAgent()),
@@ -79,13 +84,13 @@ class MedicalHistoryOrchestrator:
                     }
                 }
 
-            builder.add_node(role, extract)
-        builder.add_node("evidence_retrieval", self._retrieve_evidence)
-        builder.add_node("reasoning", self._reasoning)
-        builder.add_node("safety_review", self._final_safety)
-        builder.add_node("orchestrator", self._compose)
-        builder.add_node("clinician_review", self._review)
-        builder.add_node("complete_report", self._complete)
+            add_node(role, extract)
+        add_node("evidence_retrieval", self._retrieve_evidence)
+        add_node("reasoning", self._reasoning)
+        add_node("safety_review", self._final_safety)
+        add_node("orchestrator", self._compose)
+        add_node("clinician_review", self._review)
+        add_node("complete_report", self._complete)
         builder.add_edge(START, "safety")
         builder.add_conditional_edges(
             "safety",

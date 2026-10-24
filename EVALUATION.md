@@ -1,5 +1,20 @@
 # LOVISA evaluation record
 
+## Local traces and audit replay — 24 October 2026
+
+Observability only; no clinical logic, policy, catalog, model or approval change.
+
+| Executed check | Actual outcome |
+| --- | --- |
+| `python -m pytest -q` (Python 3.13.17) | **283 passed in 88.90s** (279 before + 4 new in `test_tracing_audit.py`) |
+| Trace redaction test | Spans for safety/history/medications/reasoning/orchestrator written locally; patient ID, display name, raw case ID and every entry text absent from the file |
+| Audit replay test | Final approval listed as verified; after a new ephemeral key the same row reads "not verifiable with the current receipt key" |
+| `scripts/check_docs.py` / `generate_api_docs.py --check` / `pip check` / `compileall` | Passed / matches / no broken requirements / compiled |
+| `ruff check .` (default rules) | Identical set to baseline |
+
+Not run: browser session with real Ollama, hosted CI. The audit log is still not
+tamper-evident (no hash chain); flagged as follow-up.
+
 ## Expert review and joint release — 24 October 2026
 
 Three independent coding reviewers audited LOVISA, CT and endoscopy. Repairs
