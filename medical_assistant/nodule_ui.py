@@ -80,7 +80,12 @@ def nodule_viewer(manifest, path_for, key, *, review=None):
 
 
 def candidate_controls(manifest, key):
-    """Return typed local choices; nothing is persisted or approved by these controls."""
+    """Return typed local choices; nothing is persisted or approved by these controls.
+
+    Every candidate starts without a decision, even when the producer's own review
+    chose one, so LOVISA acceptance always needs an active per-candidate choice.
+    Candidates left undecided are omitted; acceptance then fails verification.
+    """
     bundle = NoduleBundle.model_validate(manifest)
     previous = (
         {d.candidate_id: d for d in bundle.producer_review.decisions}
@@ -92,10 +97,14 @@ def candidate_controls(manifest, key):
         st.write(f"Candidate {c.candidate_id}")
         old = previous.get(c.candidate_id)
         options = ["uncertain", "accept", "reject"]
+        if old:
+            st.caption(
+                f"Producer review chose '{old.decision}'; make your own choice below."
+            )
         choice = st.radio(
             f"Decision {c.candidate_id}",
             options,
-            index=options.index(old.decision) if old else 0,
+            index=None,
             format_func=lambda x: {
                 "uncertain": "Pause · decide later",
                 "accept": "Include candidate",
@@ -163,14 +172,17 @@ def candidate_controls(manifest, key):
             caliper = Caliper(
                 start_zyx=(z, values[0], values[1]), end_zyx=(z, values[2], values[3])
             )
-        decisions.append(
-            Decision(candidate_id=c.candidate_id, decision=choice, caliper=caliper)
-        )
+        if choice is not None:
+            decisions.append(
+                Decision(candidate_id=c.candidate_id, decision=choice, caliper=caliper)
+            )
     return decisions
 
 
 def build_nodule_review(manifest, decisions, reviewer, attested):
     bundle = NoduleBundle.model_validate(manifest)
+    if len(decisions) != len(bundle.study.candidates):
+        raise ValueError("Choose a decision for every candidate")
     value = NoduleReview(
         study_digest=digest(bundle.study),
         reviewer=reviewer,

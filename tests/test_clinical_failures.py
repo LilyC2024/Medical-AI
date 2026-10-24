@@ -27,6 +27,7 @@ def test_busy_safety_submission_keeps_controls_available_and_can_retry(ui, monke
     app, _, _, inference = ui
     login(app)
     open_safety(app)
+    app.checkbox(key="safety_attest").check()
     app.radio(key="safety_action").set_value(
         "Allow draft generation after my safety assessment"
     )

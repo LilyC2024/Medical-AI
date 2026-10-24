@@ -61,10 +61,11 @@ the short prose. [Format](REPORTS.md).
 
 ## 5. Review, approve and export
 
-An initially blank, unchanged final note needs no preview. Preview every changed
-note, including clearing a previously previewed comment: select **Preview note
-in report** and read the revised content first. Retain attestation,
-choose **Approve report** and explicitly submit. The default requests corrections.
+Every report must be previewed before approval, even with a blank note. Preview
+again after any note change, including clearing a previously previewed comment:
+select **Preview report with this note** and read the revised content first. Then
+select the (initially unselected) attestation, choose **Approve report** and
+explicitly submit. The default requests corrections.
 No viewed image, checked box, navigation action or LLM response counts as approval.
 
 Approval enables HTML, Markdown and JSON downloads. HTML embeds verified pictures

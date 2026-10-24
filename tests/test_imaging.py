@@ -339,6 +339,7 @@ def test_appendix_is_review_bound_and_excluded_from_llm(
     assert "UNetSmall" not in json.dumps(inference.calls[0][1])
     with pytest.raises(ValueError):
         workflow.export(case)
+    workflow.prepare_report_note(case, "", token)  # preview is required
     workflow.review(
         case,
         Review(

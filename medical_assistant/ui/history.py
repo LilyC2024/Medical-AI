@@ -121,7 +121,7 @@ def history_ui(path, auth, token, user, record):
             checked = st.checkbox(
                 "I verified this synthetic source and the proposed facts.",
                 key="import_attest",
-                value=True,
+                value=False,
             )
             submit = st.form_submit_button(
                 "Approve history import", key="approve_import", disabled=not token

@@ -131,6 +131,7 @@ def test_legacy_mask_stays_distinct_in_the_portable_report(nodule_store, inferen
     list(events)
     flow.acknowledge_safety(case, review_for(flow.state(case), safety=True), token)
     state = flow.state(case)
+    flow.prepare_report_note(case, "", token)  # preview is required
     flow.review(case, review_for(state), token)
     page = portable_html(flow.export(case), auth=flow.auth, safety=flow.safety)
     assert "legacy tissue-mask" in page and "not nodule detections" in page
@@ -150,6 +151,7 @@ def test_same_text_cannot_substitute_another_accepted_ct_after_approval(
 
     store, token = nodule_store
     flow, case = report_with_ct(store, token, inference)
+    flow.prepare_report_note(case, "", token)  # preview is required
     flow.review(case, review_for(flow.state(case)), token)
     original = flow.export(case)
     key, proposal = store.prepare(

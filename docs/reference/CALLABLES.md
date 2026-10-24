@@ -713,6 +713,8 @@ Static calls (including nested helper bodies): `summarize_endo`, `st.selectbox`,
 
 Static calls (including nested helper bodies): `st.subheader`, `st.caption`, `collect`, `image_actions`, `st.session_state.get`, `ImagingStore`, `st.info`, `st.button`, `is_endoscopy`, `store.snapshots`, `store.verify`, `st.selectbox`, `next`, `image_results` (additional calls in source).
 
+Explicit raised conditions: `ValueError`. See source for triggers; called validators may raise additional exceptions.
+
 #### [endoscopy_ui.preview](../../medical_assistant/endo_ui.py#L137)
 
 `preview(role, index)`
@@ -1875,15 +1877,21 @@ Static calls (including nested helper bodies): `NoduleBundle.model_validate`, `s
 
 Return typed local choices; nothing is persisted or approved by these controls.
 
-Static calls (including nested helper bodies): `NoduleBundle.model_validate`, `st.write`, `previous.get`, `st.radio`, `st.checkbox`, `decisions.append`, `st.columns`, `columns[0].number_input`, `zip`, `Caliper`, `Decision`, `bool`, `values.append`, `options.index` (additional calls in source).
+Every candidate starts without a decision, even when the producer's own review
+chose one, so LOVISA acceptance always needs an active per-candidate choice.
+Candidates left undecided are omitted; acceptance then fails verification.
 
-#### [build_nodule_review](../../medical_assistant/nodule_ui.py#L172)
+Static calls (including nested helper bodies): `NoduleBundle.model_validate`, `st.write`, `previous.get`, `st.radio`, `st.checkbox`, `st.caption`, `st.columns`, `columns[0].number_input`, `zip`, `Caliper`, `decisions.append`, `bool`, `values.append`, `Decision` (additional calls in source).
+
+#### [build_nodule_review](../../medical_assistant/nodule_ui.py#L182)
 
 `build_nodule_review(manifest, decisions, reviewer, attested)`
 
-Static calls (including nested helper bodies): `NoduleBundle.model_validate`, `NoduleReview`, `value.verify`, `digest`.
+Static calls (including nested helper bodies): `NoduleBundle.model_validate`, `NoduleReview`, `value.verify`, `len`, `ValueError`, `digest`.
 
-#### [preview_calipers](../../medical_assistant/nodule_ui.py#L185)
+Explicit raised conditions: `ValueError`. See source for triggers; called validators may raise additional exceptions.
+
+#### [preview_calipers](../../medical_assistant/nodule_ui.py#L197)
 
 `preview_calipers(manifest, path_for, decisions)`
 
@@ -2720,7 +2728,7 @@ Static calls (including nested helper bodies): `self.state`, `self._verify_repor
 
 Explicit raised conditions: `ValueError`. See source for triggers; called validators may raise additional exceptions.
 
-#### [MedicalHistoryOrchestrator.export](../../medical_assistant/workflow.py#L508)
+#### [MedicalHistoryOrchestrator.export](../../medical_assistant/workflow.py#L512)
 
 `export(self, case_id)`
 

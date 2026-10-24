@@ -185,6 +185,7 @@ def test_combined_history_ct_and_endo_report_is_approval_bound(
     assert len(inspection_figures(state, store)) == 2
     with pytest.raises(ValueError):
         flow.export(case)
+    flow.prepare_report_note(case, "", token)  # preview is required
     flow.review(case, review_for(state), token)
     payload = flow.export(case)
     html = portable_html(payload, auth=store.auth, safety=flow.safety)
@@ -205,6 +206,7 @@ def test_source_image_changes_block_report_export(endo_store, inference):
     case, events = flow.start_patient("synthetic-checklist", store.path)
     list(events)
     flow.acknowledge_safety(case, review_for(flow.state(case), safety=True), token)
+    flow.prepare_report_note(case, "", token)  # preview is required
     flow.review(case, review_for(flow.state(case)), token)
     path = store.preview_path(accepted, "source_preview", 0)
     path.write_bytes(b"changed")

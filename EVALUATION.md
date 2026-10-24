@@ -1,5 +1,25 @@
 # LOVISA evaluation record
 
+## Active-choice review gates — 24 October 2026
+
+Human-gate change, no clinical-logic, policy, catalog or model change. Confirmations
+start unselected, candidate decisions start empty, and `MedicalHistoryOrchestrator.review`
+rejects approval of a report that was never previewed (blank notes allowed).
+Seventeen existing tests that assumed preselected confirmations or approval without
+preview were updated; `test_review_defaults.py` was rewritten for the new rules and
+one workflow regression was added.
+
+| Executed check | Actual outcome |
+| --- | --- |
+| `python -m pytest -q` (Python 3.13.17, local container) | **280 passed in 82.20s** (279 before + 1 new) |
+| New/rewritten gate tests | 5 passed: unselected safety/final confirmations, preview-before-approval, CT and endoscopy candidates without decisions |
+| `scripts/check_docs.py` / `generate_api_docs.py --check` | Passed (API reference regenerated for the `candidate_controls` docstring) |
+| `pip check` / `compileall` | No broken requirements / compiled |
+| `ruff check .` (ruff 0.17.2, default rules) | 95 findings, identical set to baseline; none introduced |
+
+Not run: live Ollama smoke, joint CT/endoscopy smokes, a browser session by a human
+reviewer, hosted CI. Effect on real reviewer behaviour is unmeasured.
+
 ## Expert review and joint release — 24 October 2026
 
 Three independent coding reviewers audited LOVISA, CT and endoscopy. Repairs

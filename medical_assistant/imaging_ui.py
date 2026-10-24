@@ -177,7 +177,7 @@ def imaging_ui(path, auth, token, user, record, *, locked=False, case_imaging=No
                     attested = st.checkbox(
                         "I inspected the images, candidate decisions and case association.",
                         key="imaging_attest",
-                        value=True,
+                        value=False,
                     )
                     submit = st.form_submit_button(
                         "Include reviewed CT in report",

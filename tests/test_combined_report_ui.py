@@ -31,7 +31,8 @@ def test_ct_report_shows_inspection_images_and_requires_previewed_note(ui):
     app.button(key="submit_review").click().run()
     assert app.error and not app.get("download_button")
     app.button(key="preview_report_note").click().run()
-    assert not app.exception and app.checkbox(key="attested").value
+    # A previewed note changes the draft, so the confirmation resets to unselected.
+    assert not app.exception and not app.checkbox(key="attested").value
     updated = app.session_state.workflow.state(app.session_state.case_id)
     assert "Scripted inspection" in updated["draft"] and not updated["reviewed"]
     app.checkbox(key="attested").check()

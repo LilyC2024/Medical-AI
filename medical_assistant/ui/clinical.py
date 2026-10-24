@@ -231,7 +231,7 @@ def bottom_actions(path, auth, record, model, token, user, decision):
             checked = st.checkbox(
                 "I reviewed these gaps and take responsibility for the decision below.",
                 key="safety_attest",
-                value=True,
+                value=False,
             )
             action = st.radio(
                 "Next step",
@@ -271,7 +271,7 @@ def bottom_actions(path, auth, record, model, token, user, decision):
                 st.error(error_message(error))
             except (ValueError, PermissionError):
                 st.error(
-                    "Keep the confirmation selected and choose the next step before saving. Notes are optional. If the record changed, start a new review."
+                    "Select the confirmation and choose the next step before saving. Notes are optional. If the record changed, start a new review."
                 )
     else:
         st.info(
@@ -433,15 +433,17 @@ def report_panel(auth, token, user, record, *, urgent=False):
                 max_chars=600,
             )
             st.caption(
-                "Preview this note to include it in the report. New clinical facts need an approved record import."
+                "Preview the report before approving, even with a blank note. New clinical facts need an approved record import."
             )
             preview_note = st.form_submit_button(
-                "Preview note in report", key="preview_report_note", disabled=not token
+                "Preview report with this note",
+                key="preview_report_note",
+                disabled=not token,
             )
             checked = st.checkbox(
                 "I reviewed the clinical summary, imaging inspections, source evidence and remaining limitations.",
                 key="attested",
-                value=True,
+                value=False,
             )
             action = st.radio(
                 "Review decision",
@@ -465,11 +467,11 @@ def report_panel(auth, token, user, record, *, urgent=False):
                 )
         if submit:
             try:
-                if (
-                    action == "Approve report"
-                    and state.get("clinician_note", {}).get("text", "") != notes.strip()
+                previewed = state.get("clinician_note")
+                if action == "Approve report" and (
+                    previewed is None or previewed["text"] != notes.strip()
                 ):
-                    raise ValueError("Preview the changed note before approval")
+                    raise ValueError("Preview the report and note before approval")
                 workflow.review(
                     case,
                     make_review(

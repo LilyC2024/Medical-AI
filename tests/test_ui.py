@@ -137,7 +137,7 @@ def test_ui_safety_review_rejection_approval_and_export(ui, tmp_path):
     assert not app.exception
     assert not app.get("download_button")
     app.button(key="preview_report_note").click().run()
-    assert app.checkbox(key="attested").value
+    assert not app.checkbox(key="attested").value  # reset after preview
     app.checkbox(key="attested").check()
     app.radio(key="decision").set_value("Approve report")
     app.button(key="submit_review").click().run()

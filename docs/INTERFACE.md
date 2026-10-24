@@ -37,11 +37,12 @@ invalid input preserves the previous case. [Image guide](IMAGING.md).
 
 ## Decisions and reports
 
-Confirmations start checked and green but submit nothing. Pause/corrections choices
-are yellow; allow/approve choices are green. Colour describes the selection,
-never completed approval. Candidate choices start uncertain and must be resolved.
-Notes can be blank. An initially blank unchanged final note needs no preview;
-every changed note, including clearing a previewed comment, must be previewed.
+Confirmations start unselected; selecting one submits nothing. Pause/corrections
+choices are yellow; allow/approve choices are green. Colour describes the
+selection, never completed approval. Candidate choices start empty (a producer's
+earlier choice is shown only as a caption) and each must be actively set to
+include or exclude. Notes can be blank, but every final report must be previewed
+before approval, and every changed note, including clearing one, previewed again.
 
 Safety preparation and generation are separate. The Generate button sits below
 the safety controls and remains gated. Final review is another explicit form.

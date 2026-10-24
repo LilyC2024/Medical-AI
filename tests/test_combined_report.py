@@ -96,5 +96,6 @@ def test_ct_inspection_measurements_and_evidence_are_in_combined_report(
     )
     assert len(state["draft"].split()) < 450 and state["draft"].count("# ") == 1
     assert "imaging" not in inference.calls[0][1]
+    flow.prepare_report_note(case, "", token)  # preview is required
     flow.review(case, review_for(state), token)
     assert "5.00 mm" in flow.export(case)["final_report"]

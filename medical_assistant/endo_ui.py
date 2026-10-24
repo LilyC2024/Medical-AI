@@ -150,6 +150,7 @@ def endoscopy_ui(path, auth, token, user, record, *, locked=False, case_imaging=
                         "decision": st.radio(
                             "Review " + c["candidate_id"],
                             ["uncertain", "accept", "reject"],
+                            index=None,
                             format_func=lambda x: {
                                 "uncertain": "Pause · decide later",
                                 "accept": "Include candidate",
@@ -166,7 +167,7 @@ def endoscopy_ui(path, auth, token, user, record, *, locked=False, case_imaging=
                 attested = st.checkbox(
                     "I inspected the image, candidate decisions and case association.",
                     key="endo_attest",
-                    value=True,
+                    value=False,
                 )
                 submit = st.form_submit_button(
                     "Include reviewed endoscopy in report",
@@ -174,6 +175,8 @@ def endoscopy_ui(path, auth, token, user, record, *, locked=False, case_imaging=
                     disabled=locked or not token,
                 )
             if submit:
+                if any(c["decision"] is None for c in choices):
+                    raise ValueError("Choose a decision for every candidate")
                 review = EndoReview(
                     study_digest=digest(manifest["study"]),
                     reviewer=user,
@@ -194,7 +197,7 @@ def endoscopy_ui(path, auth, token, user, record, *, locked=False, case_imaging=
         except (ValueError, OSError, PermissionError) as error:
             st.error(
                 "Image review could not be saved: " + error_message(error)
-                + ". Choose include or exclude for every candidate and keep the confirmation selected; notes are optional."
+                + ". Choose include or exclude for every candidate and select the confirmation; notes are optional."
             )
         if st.button("Discard endoscopy proposal", key="endo_discard"):
             store.discard(key)

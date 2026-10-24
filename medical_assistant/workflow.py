@@ -500,6 +500,10 @@ class MedicalHistoryOrchestrator:
         if state.get("status") != "awaiting_clinician_review":
             raise ValueError("No report is awaiting clinician review")
         self._verify_report(state)
+        if review.approved and state.get("clinician_note") is None:
+            raise ValueError(
+                "Preview the report, with or without a note, before approving it"
+            )
         response = self._response(case_id, review, token, "clinical-review")
         if review.draft_sha256 != digest(state["draft"]):
             raise ValueError("Stale review: inspect the current draft before approving")

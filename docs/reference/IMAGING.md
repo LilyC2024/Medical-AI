@@ -56,7 +56,8 @@ source-plane distances inside a candidate box, not confirmed lesion diameters.
   JPG bytes. Source images and predictions remain separate.
 - `image_results` can highlight a selected Endoscopy region in cyan for inspection;
   it does not alter the original source or stored canonical annotation.
-- Review notes may be blank; preselected confirmations require explicit submit.
+- Review notes may be blank; confirmations start unselected and every candidate
+  decision starts empty, so acceptance needs active choices and explicit submit.
 
 [Commands, sources and limits](../RESEARCH_IMAGES.md).
 

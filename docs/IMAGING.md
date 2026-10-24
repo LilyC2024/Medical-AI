@@ -75,7 +75,7 @@ or remote fallback occurs. Missing weights/unavailable CUDA fail explicitly.
    32×64×64 phantom; legacy mode trains a tiny tissue model and checks ONNX parity.
 4. Scroll source/overlay slices and jump to candidates. Amber boxes are candidate
    locations. Scores are not malignancy probabilities; box spans are not diameters.
-5. Explicitly accept/reject every candidate. Uncertain blocks acceptance. Optional
+5. Explicitly accept/reject every candidate; none is preselected. Uncertain blocks acceptance. Optional
    calipers use one source plane and endpoints inside the candidate box. Enable a
    caliper, submit **Preview nodule measurements** to expose its form inputs, then
    edit and preview again. Cyan lines are unapproved previews at this stage.

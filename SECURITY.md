@@ -65,9 +65,12 @@ Synthetic histories remain mandatory. Explicitly permitted deidentified public
 imaging may enter separate research schemas only in fictional composite cases,
 with dataset/license/subject provenance and no asserted real-patient linkage.
 Original data/weights/accounts remain outside Git. Hashes are consistency checks,
-not proof of permission or model execution. Review confirmations start selected,
-but no approval exists until an authenticated user explicitly submits the exact
-decision. Notes can be blank; the attestation and content binding remain mandatory.
+not proof of permission or model execution. Review confirmations start
+unselected and candidate decisions start empty, so every gate needs an active
+choice; no approval exists until an authenticated user explicitly submits the exact
+decision. The final report must be previewed before approval, even with a blank
+note. Notes can be blank; the attestation and content binding remain mandatory.
+These defaults reduce, but cannot remove, automation-bias risk.
 
 ## Error and task lifecycle hardening
 

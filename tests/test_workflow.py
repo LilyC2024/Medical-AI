@@ -22,7 +22,8 @@ def review_for(state, approved=True, *, safety=False):
     )
 
 
-def pending_draft(record, inference, auth_session):
+def pending_draft(record, inference, auth_session, *, preview=True):
+    """Pending draft; approval requires the reviewer to preview it first (blank note ok)."""
     auth, token = auth_session
     orchestrator = MedicalHistoryOrchestrator(inference, auth=auth)
     case_id, events = orchestrator.start(record, "fictional_patient.json")
@@ -30,6 +31,8 @@ def pending_draft(record, inference, auth_session):
     orchestrator.acknowledge_safety(
         case_id, review_for(orchestrator.state(case_id), safety=True), token
     )
+    if preview:
+        orchestrator.prepare_report_note(case_id, "", token)
     return orchestrator, case_id, token
 
 
@@ -83,7 +86,8 @@ def test_authenticated_approval_required_before_reviewed_and_audited(
         rows = db.execute(
             "SELECT action,actor,payload FROM audit ORDER BY id"
         ).fetchall()
-    assert [row[1] for row in rows] == ["dr.example", "dr.example"]
+    assert [row[1] for row in rows] == ["dr.example"] * 3
+    assert "report-note:" in rows[1][0]
     assert json.loads(rows[-1][2])["decision"]["approved"] is True
     assert "clinical-review:" in rows[-1][0]
     with pytest.raises(ValueError):
@@ -211,3 +215,22 @@ def test_cases_and_authenticated_receipts_are_isolated(record, inference, auth_s
         auth_session[0].verify_receipt(
             receipt, "clinical-review:" + second, receipt["content_sha256"]
         )
+
+
+def test_approval_requires_a_previewed_report_even_with_blank_note(
+    record, inference, auth_session
+):
+    orchestrator, case_id, token = pending_draft(
+        record, inference, auth_session, preview=False
+    )
+    with pytest.raises(ValueError, match="Preview the report"):
+        orchestrator.review(case_id, review_for(orchestrator.state(case_id)), token)
+    assert not orchestrator.state(case_id)["reviewed"]
+    rejected = orchestrator.review(
+        case_id, review_for(orchestrator.state(case_id), approved=False), token
+    )
+    assert rejected["status"] == "awaiting_clinician_review"
+    state = orchestrator.prepare_report_note(case_id, "", token)
+    assert "Not added." in state["draft"]
+    orchestrator.review(case_id, review_for(state), token)
+    assert orchestrator.export(case_id)["reviewed"] is True

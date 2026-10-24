@@ -45,8 +45,8 @@ explicit local-demo account creation. No account/password is bundled in source.
    results; permitted research-kit endoscopy JPG/PNG files run the installed model.
 3. Inspect candidates and explicitly include or discard each pending study.
 4. Complete **Safety check**, then **Generate draft for clinician review**.
-5. Read the short summary/images, optionally preview a clinician note, and
-   explicitly approve before a reviewed report can be exported.
+5. Read the short summary/images, preview the report (an optional clinician note
+   can be added), then explicitly approve before a reviewed report can be exported.
 
 The right-hand guide links directly to actions. Errors are visible and retryable.
 Adding images after report preparation starts a fresh unreviewed context and

@@ -31,8 +31,9 @@ and full decisions remain available in the local store/evidence package.
 
 ## Note and final approval
 
-Enter a brief note and choose **Preview note in report**. The draft updates and the
-confirmation returns to its selected default; no LLM call or approval occurs. Read the new text/images,
+Optionally enter a brief note and choose **Preview report with this note**; this
+step is required before approval even when the note is blank. The draft updates and
+the confirmation returns to its unselected default; no LLM call or approval occurs. Read the new text/images,
 confirm review and explicitly approve. Notes have signed, case-bound authorship;
 new source facts require an approved import, not a note. An old approval cannot
 approve changed content.
@@ -66,8 +67,8 @@ The CT line gives proposed/accepted counts, any accepted reviewed calipers and
 limited public-excerpt coverage. Endoscopy gives proposed/accepted regions, with
 no invented physical size or histology. Model metadata and raw source identifiers
 remain in bound evidence. A composite notice prevents cross-subject interpretation.
-Notes may be blank. An initially blank unchanged final note needs no preview.
-Every change, including clearing a previously previewed note, requires preview
+Notes may be blank, but every report needs a preview before approval. Every
+change, including clearing a previously previewed note, requires a fresh preview
 before explicit approval. [Real-image case](RESEARCH_IMAGES.md).
 
 ## Frozen content and retries

@@ -61,7 +61,7 @@ def test_patient_change_clears_unsubmitted_safety_decision(ui):
     app.selectbox(key="patient").set_value("demo-01").run()
     open_safety(app)
     assert app.text_area(key="safety_notes").value == ""
-    assert app.checkbox(key="safety_attest").value
+    assert not app.checkbox(key="safety_attest").value
     assert app.radio(key="safety_action").value == "Keep analysis paused"
     assert app.button(key="generate").disabled
 

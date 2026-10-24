@@ -318,6 +318,7 @@ def test_nodule_appendix_is_grounded_separate_from_llm_and_final_review(
     assert "Scripted synthetic unit fixture" not in json.dumps(inference.calls)
     with pytest.raises(ValueError):
         workflow.export(case)
+    workflow.prepare_report_note(case, "", token)  # preview is required
     workflow.review(
         case,
         Review(
