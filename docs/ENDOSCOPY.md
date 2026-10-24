@@ -99,3 +99,16 @@ missing model, invalid output and worker timeout. A malformed file does not reti
 an existing report. A failed or already-collected job does not lock the other
 panel. A pending candidate review must be included or discarded first; the page
 links directly to the corresponding view. No upload or analysis supplies approval.
+
+## Verified producer and failure handling
+
+The companion now checks research sidecars and exported ZIPs against the same
+original bytes, typed study and predictions. Its manifest loader rechecks decoded
+related-image content and actual masks, while registration rejects ambiguous or
+nonfinite parity/configuration metadata. Historical workspace compatibility is
+verified; the public-v2/synthetic-v1 wire contracts are unchanged.
+[Producer review](https://github.com/LilyC2024/AI-MedImg-Endo/blob/main/docs/REVIEW.md).
+
+Changing standalone model/backend/permission clears stale work. LOVISA preserves
+its own patient-scoped cancellation and immutable accepted snapshots. Bounded
+literal errors explain failure without interpreting source text as markup.

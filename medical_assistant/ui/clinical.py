@@ -5,12 +5,13 @@ import json
 import streamlit as st
 
 from medical_assistant import ollama_client, storage
-from medical_assistant.jobs import BudgetInference, WorkTask
+from medical_assistant.jobs import BudgetInference, WorkStopped, WorkTask
 from medical_assistant.imaging_actions import job_pending
 from medical_assistant.models import Review
 from medical_assistant.report import digest
 from medical_assistant.report_assets import inspection_figures, portable_html
 from medical_assistant.ui.components import empty
+from medical_assistant.ui.errors import error_message
 from medical_assistant.ui.navigation import clear_patient, go_to
 from medical_assistant.workflow import MedicalHistoryOrchestrator
 
@@ -266,6 +267,8 @@ def bottom_actions(path, auth, record, model, token, user, decision):
                     )
                 )
                 st.rerun()
+            except WorkStopped as error:
+                st.error(error_message(error))
             except (ValueError, PermissionError):
                 st.error(
                     "Keep the confirmation selected and choose the next step before saving. Notes are optional. If the record changed, start a new review."
@@ -277,10 +280,14 @@ def bottom_actions(path, auth, record, model, token, user, decision):
         if st.button(
             "Confirm required safety checks", key="preflight", disabled=not token
         ):
-            st.session_state.analysis_task = start_task(
-                path, auth, record.patient_id, model, token=token
-            )
-            st.rerun()
+            try:
+                auth.require(token)
+                st.session_state.analysis_task = start_task(
+                    path, auth, record.patient_id, model, token=token
+                )
+                st.rerun()
+            except (WorkStopped, ValueError, PermissionError) as error:
+                st.error(error_message(error))
     if st.button(
         "Generate draft for clinician review",
         key="generate",
@@ -294,8 +301,8 @@ def bottom_actions(path, auth, record, model, token, user, decision):
                 st.session_state.workflow, st.session_state.case_id, token
             )
             st.rerun()
-        except (ValueError, PermissionError) as error:
-            st.error(str(error))
+        except (WorkStopped, ValueError, PermissionError) as error:
+            st.error(error_message(error))
     st.caption(
         "Final clinician approval is a separate step after the draft. Research use only; this safety gate is not regulatory certification."
     )
@@ -305,6 +312,9 @@ def failure():
     st.error(
         "This run stopped before producing a reviewed report. Start a new case or retry the draft."
     )
+    detail = st.session_state.get("run_error")
+    if detail:
+        st.caption("Reason: " + error_message(detail))
     st.caption(
         "Check the local service and source records, then start a new review. No report has been approved."
     )

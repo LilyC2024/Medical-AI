@@ -38,7 +38,7 @@ legacy transfers, local Ollama smoke and hosted checks. Exact commits/runs are i
 | tissue-mask `mhcra-imaging-v1` | Retained as a distinct legacy path |
 | incomplete `mhcra-lung-nodules-v1` | Re-export original workspace with current CT; do not relabel |
 | Existing package/environment/bridge names | Continue using them; the LOVISA rename is presentation-level |
-| Public research/full-size CT | Keep in standalone CT; LOVISA accepts bounded synthetic studies only |
+| Public research/full-size CT | Prepare full scans standalone; current research-v3 accepts only bounded, provenance-bound excerpts in fictional composites |
 
 Standalone CT export requires its local review by default. Its dedicated LOVISA
 bridge exports pending review and never forges approval. LOVISA always requires
@@ -137,3 +137,13 @@ validation errors are displayed beside Analyze, with retry available.
 Reused environments/models and unchanged producer contracts. Source validation,
 urgent routing, explicit image/safety/final approvals and immutable accepted
 studies remain enforced. [Operation](INTERFACE.md) · [Actual checks](../EVALUATION.md).
+
+## Expert review and documentation consolidation — 24 October 2026
+
+Three code reviewers repaired recoverable clinical worker errors, unsafe validation
+rendering, CT archive/numeric validation and endoscopy evidence/data/registration/
+UI-state checks. Existing formats and model/dependency versions remain unchanged.
+Root READMEs now act as concise entry points; detailed guides and generated API
+references explain commands, data structures, individual functions and limitations.
+A current editable three-project sketch complements retained historical pictures.
+[Findings](REVIEW.md) · [Executed evidence](../EVALUATION.md).

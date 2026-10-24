@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="760" viewBox="0 0 1280 760" role="img" aria-labelledby="title description"><title id="title">LOVISA — three local projects, one human-reviewed report</title><desc id="description">Fictional JSON history passes Python safety checks, human assessment when required, deterministic history and medication extraction and local Ollama reasoning. Separately, CT and endoscopy models produce candidate evidence for explicit human image acceptance. Python combines the verified evidence into a concise draft. A clinician must approve before final export. No image pixels or notes enter the language model.</desc><defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#8097a5"/></marker></defs><g font-family="DejaVu Sans,sans-serif"><rect width="1280" height="760" fill="#f5f8fa"/>
+<text x="40" y="53" font-size="30" font-weight="700" fill="#183245">LOVISA · three projects, one reviewed workflow</text>
+<text x="40" y="88" font-size="18" font-weight="400" fill="#516775">Fictional medical history and separately permitted research imaging · local processing</text>
+<text x="40" y="138" font-size="13" font-weight="700" fill="#147d73">SOURCE</text>
+<text x="335" y="138" font-size="13" font-weight="700" fill="#147d73">LOCAL PROCESSING</text>
+<text x="670" y="138" font-size="13" font-weight="700" fill="#147d73">REVIEWABLE EVIDENCE</text>
+<rect x="40" y="165" width="250" height="120" rx="16" fill="#ffffff" stroke="#d6e2e8"/>
+<text x="58" y="195" font-size="18" font-weight="700" fill="#183245">Fictional history</text>
+<text x="58" y="222" font-size="15" font-weight="400" fill="#516775">Original JSON + SQLite</text>
+<text x="58" y="243" font-size="15" font-weight="400" fill="#516775">Known and missing dates</text>
+<text x="58" y="264" font-size="15" font-weight="400" fill="#516775">Documented vs reported</text>
+<rect x="335" y="165" width="290" height="120" rx="16" fill="#eaf2fb" stroke="#d6e2e8"/>
+<text x="353" y="195" font-size="18" font-weight="700" fill="#183245">History orchestrator</text>
+<text x="353" y="222" font-size="15" font-weight="400" fill="#516775">Safety: stop / human review</text>
+<text x="353" y="243" font-size="15" font-weight="400" fill="#516775">History + medication extraction</text>
+<text x="353" y="264" font-size="15" font-weight="400" fill="#516775">Local Ollama: hypotheses only</text>
+<rect x="670" y="165" width="250" height="120" rx="16" fill="#ffffff" stroke="#d6e2e8"/>
+<text x="688" y="195" font-size="18" font-weight="700" fill="#183245">Evidence checks</text>
+<text x="688" y="222" font-size="15" font-weight="400" fill="#516775">Exact source verification</text>
+<text x="688" y="243" font-size="15" font-weight="400" fill="#516775">Approved local references</text>
+<text x="688" y="264" font-size="15" font-weight="400" fill="#516775">Uncertainty stays explicit</text>
+<rect x="40" y="330" width="250" height="120" rx="16" fill="#ffffff" stroke="#d6e2e8"/>
+<text x="58" y="360" font-size="18" font-weight="700" fill="#183245">CT volume</text>
+<text x="58" y="387" font-size="15" font-weight="400" fill="#516775">Artificial or public research</text>
+<text x="58" y="408" font-size="15" font-weight="400" fill="#516775">HU + physical source grid</text>
+<text x="58" y="429" font-size="15" font-weight="400" fill="#516775">Full-scan preparation offline</text>
+<rect x="335" y="330" width="290" height="120" rx="16" fill="#e6f3ef" stroke="#d6e2e8"/>
+<text x="353" y="360" font-size="18" font-weight="700" fill="#183245">CT companion</text>
+<text x="353" y="387" font-size="15" font-weight="400" fill="#516775">MONAI 3D RetinaNet</text>
+<text x="353" y="408" font-size="15" font-weight="400" fill="#516775">Map boxes to source voxels</text>
+<text x="353" y="429" font-size="15" font-weight="400" fill="#516775">Explicit local CPU / CUDA</text>
+<rect x="670" y="330" width="250" height="120" rx="16" fill="#ffffff" stroke="#d6e2e8"/>
+<text x="688" y="360" font-size="18" font-weight="700" fill="#183245">CT image acceptance</text>
+<text x="688" y="387" font-size="15" font-weight="400" fill="#516775">Source + candidate overlay</text>
+<text x="688" y="408" font-size="15" font-weight="400" fill="#516775">Optional manual calipers</text>
+<text x="688" y="429" font-size="15" font-weight="400" fill="#516775">Explicit candidate decisions</text>
+<rect x="40" y="495" width="250" height="120" rx="16" fill="#ffffff" stroke="#d6e2e8"/>
+<text x="58" y="525" font-size="18" font-weight="700" fill="#183245">Endoscopy image</text>
+<text x="58" y="552" font-size="15" font-weight="400" fill="#516775">Artificial or public research</text>
+<text x="58" y="573" font-size="15" font-weight="400" fill="#516775">Original image + RGB pixels</text>
+<text x="58" y="594" font-size="15" font-weight="400" fill="#516775">Declared dataset and subject</text>
+<rect x="335" y="495" width="290" height="120" rx="16" fill="#fff3dc" stroke="#d6e2e8"/>
+<text x="353" y="525" font-size="18" font-weight="700" fill="#183245">Endoscopy companion</text>
+<text x="353" y="552" font-size="15" font-weight="400" fill="#516775">Compact U-Net</text>
+<text x="353" y="573" font-size="15" font-weight="400" fill="#516775">Probability → mask → regions</text>
+<text x="353" y="594" font-size="15" font-weight="400" fill="#516775">ONNX / explicit OpenVINO</text>
+<rect x="670" y="495" width="250" height="120" rx="16" fill="#ffffff" stroke="#d6e2e8"/>
+<text x="688" y="525" font-size="18" font-weight="700" fill="#183245">Image acceptance</text>
+<text x="688" y="552" font-size="15" font-weight="400" fill="#516775">Source + candidate outline</text>
+<text x="688" y="573" font-size="15" font-weight="400" fill="#516775">Pixel area, no invented size</text>
+<text x="688" y="594" font-size="15" font-weight="400" fill="#516775">Explicit region decisions</text>
+<polyline points="290,225 327,225" fill="none" stroke="#8097a5" stroke-width="2" marker-end="url(#arrow)"/>
+<polyline points="625,225 662,225" fill="none" stroke="#8097a5" stroke-width="2" marker-end="url(#arrow)"/>
+<polyline points="290,390 327,390" fill="none" stroke="#8097a5" stroke-width="2" marker-end="url(#arrow)"/>
+<polyline points="625,390 662,390" fill="none" stroke="#8097a5" stroke-width="2" marker-end="url(#arrow)"/>
+<polyline points="290,555 327,555" fill="none" stroke="#8097a5" stroke-width="2" marker-end="url(#arrow)"/>
+<polyline points="625,555 662,555" fill="none" stroke="#8097a5" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="970" y="280" width="270" height="260" rx="16" fill="#ffffff" stroke="#d6e2e8"/>
+<text x="988" y="310" font-size="18" font-weight="700" fill="#183245">Python composition</text>
+<text x="988" y="337" font-size="15" font-weight="400" fill="#516775">One concise clinical summary</text>
+<text x="988" y="358" font-size="15" font-weight="400" fill="#516775">Reviewed image observations</text>
+<text x="988" y="379" font-size="15" font-weight="400" fill="#516775">Source / annotation pictures</text>
+<text x="988" y="400" font-size="15" font-weight="400" fill="#516775">Brief clinician commentary</text>
+<text x="988" y="421" font-size="15" font-weight="400" fill="#516775"></text>
+<text x="988" y="442" font-size="15" font-weight="400" fill="#516775">Safety and integrity rechecked</text>
+<text x="988" y="463" font-size="15" font-weight="400" fill="#516775">No autonomous diagnosis</text>
+<polyline points="920,225 946,225 946,330 962,330" fill="none" stroke="#8097a5" stroke-width="2" marker-end="url(#arrow)"/>
+<polyline points="920,390 962,390" fill="none" stroke="#8097a5" stroke-width="2" marker-end="url(#arrow)"/>
+<polyline points="920,555 946,555 946,465 962,465" fill="none" stroke="#8097a5" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="970" y="600" width="270" height="100" rx="16" fill="#e6f3ef" stroke="#d6e2e8"/>
+<text x="988" y="630" font-size="18" font-weight="700" fill="#183245">Clinician approval</text>
+<text x="988" y="657" font-size="15" font-weight="400" fill="#516775">Required before reviewed status</text>
+<text x="988" y="678" font-size="15" font-weight="400" fill="#516775">and HTML / text / JSON export</text>
+<polyline points="1105,540 1105,592" fill="none" stroke="#8097a5" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="40" y="658" width="880" height="56" rx="14" fill="#eaf0f5"/>
+<text x="58" y="682" font-size="16" font-weight="600" fill="#183245">No image pixels or imaging notes enter the LLM. Separate local environments.</text>
+<text x="58" y="703" font-size="14" font-weight="400" fill="#516775">Research prototype · no cloud inference · review gates cannot be supplied by a model</text>
+</g></svg>

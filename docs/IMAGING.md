@@ -160,3 +160,16 @@ or **Upload** the research ZIP and **Analyze**. Original public
 subject identity, license, whole-volume hash and crop mapping are retained; the
 report states limited coverage/protocol uncertainty. Full-scan CPU processing
 is offline setup, not an interactive two-minute operation. [Commands and terms](RESEARCH_IMAGES.md).
+
+## Reviewed producer behavior
+
+The current CT producer validates finite real HU and float32-representable source
+snapshots before workspace creation. Training targets must be valid integer class
+IDs before casting; archive cleanup owns its full temporary root and rejects
+ambiguous/encrypted members. These repairs do not change nodule-v2, research-v3
+or legacy-v1 wire formats. The receiver still independently checks all artifacts.
+[Producer expert review](https://github.com/LilyC2024/ai-medimg-2.5D-CT/blob/main/docs/review.md).
+
+Consumer startup, validation and integrity errors use bounded literal messages.
+Full source/model evidence is retained locally; no model dump is needed in the
+normal image panel. [Usability/security review](REVIEW.md).

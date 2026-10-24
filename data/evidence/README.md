@@ -10,3 +10,7 @@ require renewed approval. Retrieval checks approved entries only, scores word
 overlap and returns at most three results. No web search or automatic downloads.
 
 [Reference rules](../../docs/RECORDS.md) · [Implementation](../../medical_assistant/evidence.py).
+
+Only approved excerpts are retrieval input, not instructions to alter policy or
+invoke tools. A missing collection remains explicitly unsupported reference
+coverage; do not manufacture a guideline citation. [Source and retrieval contract](../../docs/RECORDS.md).

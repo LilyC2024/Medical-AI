@@ -1,84 +1,68 @@
-# The two projects in pictures
+# LOVISA and its imaging companions in pictures
 
-[Overview](../README.md) · [Architecture](ARCHITECTURE.md) · [CT integration](IMAGING.md)
+[Overview](../README.md) · [Architecture](ARCHITECTURE.md) · [CT](IMAGING.md) · [Endoscopy](ENDOSCOPY.md)
 
-## 1. LOVISA: from history to reviewed report
+## Current three-project sketch
 
-![LOVISA workflow, shown with the former MHCRA AI name](images/mhcra-ai-workflow-v1.png)
+![Current sources, local engines, evidence review and clinician approval](images/lovisa-system.svg)
 
-Read left to right. Original synthetic records enter the orchestrator. Python
-checks safety before any reasoning: an urgent warning stops; missing safety data
-requires human assessment. History and medication specialists organize facts.
-Local Ollama proposes constrained hypotheses. A safety recheck and explicit
-clinician approval precede the reviewed report. The lower strip shows separate
-human approval for history imports.
+Read each row from source to local processing and reviewable evidence. Fictional
+JSON history passes Python safety and extraction, then constrained local Ollama
+reasoning. CT uses MONAI RetinaNet with source-grid candidates/calipers. Endoscopy
+uses U-Net with probability-derived regions. Human image inclusion is independent
+of safety assessment and final clinician approval. Python composes accepted
+observations and pictures after reasoning; image pixels/notes never enter the LLM.
 
-The retained image uses **MHCRA AI**, LOVISA's former name. “Eligible to continue”
-means workflow eligibility, not confirmation of medical safety.
+The SVG is an editable source diagram copied consistently into all three repos.
+It contains no patient images, inference results or accuracy claims. Its rendered
+layout was inspected locally. Separate environments and research/composite-source
+boundaries are deliberate architecture, not a unified general-disease classifier.
 
-## 2. LOVISA: the software components
+## Original history workflow
 
-![LOVISA technical flow, shown with the former MHCRA AI name](images/mhcra-ai-technical-flow-v1.png)
+![Original history workflow under the former MHCRA AI name](images/mhcra-ai-workflow-v1.png)
 
-Streamlit is the UI. SQLite stores original JSON separately from facts. LangGraph
-runs sequential role components and pauses for review. Only the reasoning node
-calls local Ollama (`gemma4:e2b`, `127.0.0.1:11434`). Python checks returned JSON,
-source IDs and exact excerpts. Authentication binds approvals to the exact draft;
-completion/export verify safety and integrity again. Pending state is in memory.
+This retained AI-generated illustration explains records, specialist roles and
+human approval, using the old MHCRA AI name and an earlier longer report layout.
+The current report has one Clinical summary section. “Eligible” is workflow
+permission, never a finding of medical safety.
 
-[Editable Mermaid](images/mhcra-ai-technical-flow-v1.mmd) describes the clinical
-graph. The original [workflow prompt](images/mhcra-ai-workflow-v1.prompt.txt) and
-[technical prompt](images/mhcra-ai-technical-flow-v1.prompt.txt) preserve how the
-pictures were produced. Image generation was documentation work, not app inference.
+## Original technical illustration
 
-## 3. CT companion: from pixels to reviewable annotations
+![Earlier Streamlit, SQLite, LangGraph and Ollama architecture](images/mhcra-ai-technical-flow-v1.png)
 
-![Generated CT source, amber candidate and cyan caliper](images/lung-research-workflow.png)
+Streamlit supplies UI; SQLite separates originals/facts; LangGraph coordinates
+Python roles and human interrupts; local Ollama selects bounded hypotheses.
+The old picture does not depict the later endoscopy or Upload/Analyze extensions.
+[Editable historical Mermaid](images/mhcra-ai-technical-flow-v1.mmd),
+[workflow prompt](images/mhcra-ai-workflow-v1.prompt.txt) and
+[technical prompt](images/mhcra-ai-technical-flow-v1.prompt.txt) preserve provenance.
+Image generation was documentation work, not runtime clinical inference.
 
-Left: generated CT-like source pixels. Middle: a candidate box. Right: an in-plane
-8 mm example caliper. Amber denotes a candidate; cyan denotes a manual measurement.
-This figure uses a non-ML fixture finder, not the pretrained detector. It shows
-annotation/measurement behavior, not cancer diagnosis or clinical accuracy.
+## Candidate and measurement example
 
-## 4. Connect image evidence to history
+![Artificial CT source, candidate and manual measurement](images/lung-research-workflow.png)
 
-```mermaid
-flowchart LR
-    CT[CT companion: synthetic pixels and local detector] --> ZIP[Validated nodule-v2 bundle]
-    ZIP --> VIEW[LOVISA: source, candidates and caliper review]
-    VIEW --> ACCEPT[Authenticated imaging acceptance]
-    ACCEPT --> APPENDIX[CT inspection and images in a new summary]
-    HISTORY[Synthetic history and safety-gated reasoning] --> DRAFT[Combined draft]
-    APPENDIX --> DRAFT
-    DRAFT --> FINAL[Separate final clinician approval]
-```
+Left is manufactured CT-like source; amber is a candidate box; cyan is a manually
+placed 8 mm fixture caliper. This uses the non-ML finder, not pretrained detection
+or clinical ground truth. It illustrates geometry and review interaction only.
+Actual pretrained model smokes and public ROI limits are recorded separately in
+[Evaluation](../EVALUATION.md).
 
-The transfer is a bounded local file bundle. LOVISA verifies original bytes and
-annotations; it sends no images to the LLM. Accepting imaging cannot lower safety
-escalation or approve the final report. [Limits and exact contract](IMAGING.md).
+## Historical interface and legacy path
 
-## Historical tissue-mask figure
+![Earlier selected-patient workspace and operating guide](images/lovisa-workspace-overview.jpg)
 
-![Retained legacy synthetic tissue-mask workbench](images/mhcra-synthetic-workbench.png)
+The light UI/right-hand guide persist, while button labels and view count have
+changed. Current operation uses [six views and Upload/Analyze](INTERFACE.md).
+Do not use this screenshot as a precise map of current buttons.
 
-This earlier picture shows heuristic tissue classes, counts and overlays from the
-retained legacy bridge. Its segmentation metrics are not nodule-detection results.
+![Legacy manufactured tissue-mask workbench](images/mhcra-synthetic-workbench.png)
 
-## Current workspace
+The retained four-class 2.5D teacher/mask pipeline is separate from nodule detection.
+Its counts, segmentation metrics and historical NPU timing cannot establish lung
+or endoscopy performance. [Current CT integration](IMAGING.md).
 
-![Readable LOVISA workspace and right-side guide](images/lovisa-workspace-overview.jpg)
-
-The current light interface shows exact fictional source text and policy status.
-[Operating guide](INTERFACE.md) · [Responsiveness and timings](PERFORMANCE.md).
-
-The [interface guide](INTERFACE.md) also shows the dedicated Safety check view and an actual
-installed-pretrained result on a generated phantom. These are separate from the
-non-ML fixture figures above.
-
-The current report is one concise Clinical summary section with CT inspection and
-a brief reviewer note. Earlier illustrations show the prior layout; the
-[report guide](REPORTS.md) and its scripted example show the current output.
-
-## Image-first endoscopy extension
-
-Earlier figures illustrate the history/CT workflow. The image-first endoscopy branch follows the same source → candidate inspection → acceptance → combined draft → final approval pattern. [Current endoscopy workflow](ENDOSCOPY.md).
+[Report layout example](REPORTS.md) contains fictional/scripted content and is
+labelled accordingly. No illustration is clinician verification or an actual
+review of the app's current patient data.

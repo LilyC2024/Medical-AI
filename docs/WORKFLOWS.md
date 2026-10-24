@@ -1,86 +1,86 @@
-# Use LOVISA: review first, generate second
+# Operate LOVISA: one case, explicit review
 
-[Overview](../README.md) · [Setup](SETUP.md) · [Five complex cases](DEMO_CASES.md)
+[Overview](../README.md) · [Setup](SETUP.md) · [Interface](INTERFACE.md)
 
-## First synthetic case
+## 1. Sign in and select a fictional case
 
-1. **Sign in.** All patient examples, CT and report controls stay hidden until
-   authenticated. Select Taylor or one of the five complex fictional cases.
-2. Read **Patient overview**. Check dates, attribution, medicines and original
-   sources in **Source records**. Import/approve any synthetic corrections there
-   before preparing the case.
-3. Optionally open **CT review** or **Endoscopy review**. **Upload** the supported
-   file and **Analyze**, or select a local example and Analyze without an upload.
-   ZIPs open existing results; permitted endoscopy JPG/PNG files run the local
-   polyp model. The completed result opens automatically: candidate count, review status, source slices, annotations
-   and optional calipers. Inspect and accept it, or discard it. A pending study
-   blocks the safety preparation so it cannot be silently omitted from the draft.
-4. Open **Safety check** using its tab, **Next action**, or its labelled guide step. For
-   missing current information, optionally add notes, keep the confirmation selected,
-   choose **Allow draft generation after my safety assessment**, and **Save safety
-   assessment**. This saves the decision and freezes the snapshot; **no model
-   runs yet**. Choosing **Keep analysis paused** ends this case for human review.
-   When the required current structured observations are supplied, use **Confirm
-   required safety checks** instead. An urgent warning blocks generation outright.
-5. Only after these checks does **Generate draft for clinician review**, at the
-   bottom of Safety check, become enabled. Click it to run local reasoning.
-   Progress/cancel stays in that view; completion opens **Clinical report**.
-6. Read the single **Clinical summary** section. It combines the local model's
-   history hypotheses, accepted CT inspection, essential gaps and clinician note.
-   Source/annotation pictures appear beneath it. Detailed citations are in the
-   collapsed evidence view and JSON package, not repeated through the prose.
-7. Enter a brief clinician note (up to 600 characters) and **Preview note in report**.
-   Read the changed draft, retain the selected confirmation, choose **Approve report**
-   and submit. The default requests corrections and keeps the draft pending.
-   Approval saves ignored local JSON and enables HTML, Markdown and JSON downloads.
-   HTML embeds CT pictures for offline use; Markdown contains the concise text.
+No case opens automatically. Sign in, choose one patient and read **Patient
+overview**: dated/undated entries, documented versus reported statements and
+historical medication orders. **Source records** shows original wording and input
+downloads. Correct facts through an explicitly approved synthetic import, never
+by editing a generated note. [Fixtures and intended behavior](DEMO_CASES.md).
 
-If the report has no CT, **Start a new report with CT** opens CT review for the
-same patient. Accept the study before safety preparation; a study added later
-requires a new report snapshot. Upload/Analyze now starts that fresh context
-automatically after valid input; repeat safety and final review. Saved reports
-are preserved. Invalid input shows an error beside Analyze and leaves the old
-report unchanged.
+## 2. Add optional image evidence
 
-Use **Start a new review** to reassess the same patient after a source change.
-You can choose another patient at any time: unfinished work is cancelled and all
-notes/proposals/report controls are cleared. Stored accepted records remain
-patient-specific. Sign-out or session expiry hides all patient content.
+Open **CT review** or **Endoscopy review**, then **Upload → Analyze**.
 
-Every button in **Your review steps** opens and scrolls to the relevant section.
-If safety is blocked by pending CT/history, use **Open pending changes**, then
-accept or discard that proposal. Navigation never approves anything.
-
-## Safety is a workflow boundary
-
-| Situation | What the page does |
+| Input | What Analyze does |
 | --- | --- |
-| Any supplied structured warning is present | Blocks generation and optional CT work; requires human assessment |
-| Current screening/BP missing or uncertain | Lists the gaps; requires an authenticated, attested assessment before generation |
-| Required current structured observations supplied | Allows snapshot confirmation; this is not a clinical safety finding |
-| Source/policy/date changes after preparation | Blocks the old case; start a new one |
-| Safety saved but Generate not clicked | No clinical model call |
-| Draft generated but final review incomplete | No reviewed export |
+| CT companion review ZIP | Validate and open existing source/candidate results; no full-volume model rerun |
+| Endoscopy review ZIP | Validate and open included source/probability/region evidence |
+| Exact permitted research-kit endoscopy JPG/PNG | Run the installed local polyp model on those bytes |
+| Model/example choice without an upload | Generate the explicit artificial example or open Jordan's prepared research result |
 
-These rules are local prototype safeguards, not regulatory certification or a
-claim of medical-device compliance. The model cannot lower escalation.
+An upload takes precedence over example selection. Remove it to use an example.
+Full DICOM inference and arbitrary research-image preparation remain companion
+work. For public files select **Jordan — real-image research composite**; its
+CT and endoscopy subjects are unrelated to each other and the fictional history.
+[Research files and permissions](RESEARCH_IMAGES.md).
 
-## Import a source
+Inspect source and annotations, resolve every candidate, optionally add a note,
+and explicitly include the study. Uncertain blocks inclusion. A checked default
+confirmation submits nothing. Alternatively discard the pending proposal.
+Only one pending image review is shown at a time; the page links to it directly.
+[CT/calipers](IMAGING.md) · [Endoscopy](ENDOSCOPY.md).
 
-Open **Source records**, then **Import a synthetic medical record / add observations**. Preview supported
-JSON or observation controls; inspect the proposal, optionally add notes, retain the confirmation and
-approve the exact import. Dates/measurements are included only when explicitly
-supplied. Defaults are not observations. Originals and IDs are immutable.
-[Record format](RECORDS.md) · [Detailed CT review](IMAGING.md).
+## 3. Complete the safety assessment
 
-## Image-first endoscopy extension
+Use **Safety check**, **Next action**, or its right-hand guide link. Pending record
+or image proposals must be resolved first; **Open pending changes** goes to the
+correct view. Urgent structured warnings block reasoning and optional imaging.
 
-Before safety preparation, optionally inspect and accept an endoscopy study in **Endoscopy review**. Resolve every region, optionally add a note and explicitly submit the inspection; final report approval remains separate. [Image workflow](ENDOSCOPY.md).
+For missing current information, review the actual listed gaps, optionally add
+notes, keep the attestation selected, choose **Allow draft generation after my
+safety assessment**, and **Save safety assessment**. Choosing **Keep analysis
+paused** stops the case for human assessment. With required observations supplied,
+use **Confirm required safety checks** instead. Neither path establishes medical
+safety or calls the LLM yet; it freezes a workflow snapshot.
 
-## Optional notes and visible decisions
+## 4. Generate and inspect the draft
 
-Confirmations now start checked; notes may be blank. Select the yellow pause or
-green allow/approve choice, then explicitly submit. Leaving the page or checking
-a box alone records no decision. Candidate choices start paused/uncertain; resolve
-every candidate before including imaging. The final report is a separate approval.
-[Public research image workflow](RESEARCH_IMAGES.md).
+Only then does **Generate draft for clinician review**, at the bottom of Safety
+check, become eligible. Progress/cancellation is immediate; completion opens
+**Clinical report**. A missing model, capacity limit, timeout or validation failure
+shows an escaped bounded reason; no fallback invents findings or approves output.
+
+The report has one **Clinical summary** section: constrained history hypotheses,
+accepted CT/endoscopy observations, essential uncertainty and optional clinician
+commentary. Verified source/annotation pictures appear below. Exact excerpts and
+IDs remain in the evidence package and optional readable view, not throughout
+the short prose. [Format](REPORTS.md).
+
+## 5. Review, approve and export
+
+An initially blank, unchanged final note needs no preview. Preview every changed
+note, including clearing a previously previewed comment: select **Preview note
+in report** and read the revised content first. Retain attestation,
+choose **Approve report** and explicitly submit. The default requests corrections.
+No viewed image, checked box, navigation action or LLM response counts as approval.
+
+Approval enables HTML, Markdown and JSON downloads. HTML embeds verified pictures
+for offline use; Markdown is the concise prose; JSON retains exact source/model/
+image/review evidence. Saving/export recheck content, safety and artifacts.
+
+## Change, retry or leave a case
+
+- Valid Upload/Analyze after preparation starts a fresh unreviewed context and
+  requires image inclusion/safety again; saved reports and the old snapshot stay intact.
+- Invalid input leaves the old context intact and displays a retryable error.
+- Worker saturation preserves safety state; retry after a slot is free. A failed
+  analysis cannot publish a late draft or enable export.
+- Changing patient cancels unfinished work and clears its notes/proposals.
+- Sign-out/session expiry hides all case controls; restart loses pending sessions.
+- New source/policy/date requires a new review; an old approval cannot authorize it.
+
+These gates are prototype safeguards, not regulatory certification or a comprehensive
+clinical triage protocol. [Security](../SECURITY.md) · [Troubleshooting](VALIDATION.md).

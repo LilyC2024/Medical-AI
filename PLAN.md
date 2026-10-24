@@ -149,3 +149,23 @@ software gates.
     polyp inference and live Ollama passed. Guides updated; tested source published
     as aa06c9e; localhost restarted and demo login verified. Hosted workflow
     40019579036 is running independently; its result is not claimed as passed.
+
+## Three-repository expert review — 24 October 2026
+
+36. **Expert source review and repairs** — independent reviewers inspect LOVISA,
+    CT and endoscopy, reproduce material defects and test repairs. Audit contracts,
+    trust boundaries, job lifecycle, source/model identity and CLI workflows before
+    changing documentation. Status: passed — LOVISA 279 tests/163.05s, CT 101
+    runtime tests/34.96s plus four documentation tests, endoscopy 72 tests/9.39s;
+    focused regressions reproduced original failures.
+37. **Documentation and architecture** — audit every maintained Markdown document,
+    keep root READMEs concise, expand linked setup/workflow/API/research/security
+    guides and provide current three-project sketches. Status: passed — concise 503/452/455-word root READMEs; 82
+    maintained documents pass local file/heading checks; exact API references and
+    source diagram reviewed, specialist doc audits corrected stale claims.
+38. **Joint validation and publication** — full regressions in existing environments,
+    actual local model/interoperability smokes, reproducible documentation checks,
+    evidence records, compatible producer pins and publication of all three repos.
+    Status: local validation passed — 279 LOVISA / 105 CT / 72 endoscopy tests,
+    actual gemma4:e2b, registered CV and all imaging transfers passed; real paired
+    report 66.48s with scripted reviews in temporary SQLite. Publication pending.

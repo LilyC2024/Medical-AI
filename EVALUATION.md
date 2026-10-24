@@ -1,5 +1,44 @@
 # LOVISA evaluation record
 
+## Expert review and joint release — 24 October 2026
+
+Three independent coding reviewers audited LOVISA, CT and endoscopy. Repairs
+were tested before the documentation phase. Root READMEs are now concise; linked
+subject guides and generated source/class/function references carry the detail.
+[Reproduced findings](docs/REVIEW.md) · [Development agents](docs/DEVELOPMENT.md).
+
+| Executed check | Actual outcome |
+| --- | --- |
+| Final LOVISA regression | **279 passed in 149.79s**; scripted inference/review and temporary databases |
+| Final CT regression | **105 passed in 29.40s**, 11 existing dependency/legacy warnings |
+| Final endoscopy regression | **72 passed in 5.76s**, two existing ONNX exporter warnings |
+| Actual registered MONAI model, generated phantom | **8.39s**, one candidate; unreviewed report remains blocked |
+| Actual CT producer → receiver | Fixture/pretrained nodule-v2 each 66 verified artifacts; legacy-v1 41 artifacts; no approvals |
+| Actual installed endoscopy producer → receiver | **0.91s**, one generated-input region, four verified artifacts; pending review |
+| Actual local Upload/Analyze | CT ZIP **0.69s**, endoscopy ZIP **0.51s**, actual raw-JPG model **2.74s**; no image/safety/final approval |
+| Actual local gemma4:e2b smoke | Passed uncertainty hold and eligible fictional reasoning; stopped before final approval |
+| Actual real CT + endoscopy + local LLM paired report | **66.48s**, 170 words and four embedded pictures; approvals scripted only in disposable SQLite |
+| Documentation | **82 maintained Markdown documents** across repos pass local file/heading checks; source references match AST, also checked across Python 3.10/3.12 |
+| Supporting checks | All three pip consistency/compilation checks and applicable Ruff checks passed; shared CT and endoscopy sources match exactly |
+
+Eight LOVISA regressions cover capacity exhaustion/retry, source-supplied Markdown
+in validation errors, actual failure reason, active-task cancellation by CT upload,
+late draft rejection and deferred cross-modality result collection. Source,
+safety/auth/content-binding and immutable accepted-image checks were preserved.
+The current static source diagram was rendered and inspected locally; this is
+not new manual browser visual verification. The retained scroll component emits
+an existing Streamlit deprecation log and was not replaced without browser-focus QA.
+
+CT/endoscopy models, dependencies, wire schemas and the clinical hypothesis catalog
+were unchanged. Actual research image/model checks are not clinical validation;
+no new training, negative-examination evaluation, CUDA or NPU execution is claimed.
+Actual-app patient data, image acceptance and clinical approvals were not modified.
+Earlier sections below are dated historical evidence, not current capability promises.
+
+The previous Upload/Analyze hosted run [40019579036](https://github.com/LilyC2024/Medical-AI/actions/runs/40019579036)
+was confirmed successful before this review. New source publication, joint paired-
+report results and hosted outcomes are recorded after execution below.
+
 ## Upload/Analyze repair — 23 October 2026
 
 The original failure was a frozen clinical-context lock on all image actions,
@@ -37,7 +76,7 @@ CT input here remains a prepared source-mapped review ZIP; full DICOM inference
 is offline companion work. Arbitrary unprovenanced research JPGs are rejected.
 
 [Reproduce upload smoke](docs/VALIDATION.md#uploadanalyze-regressions) ·
-[Operation](docs/INTERFACE.md#upload-and-analyze). Publication and local restart
+[Operation](docs/INTERFACE.md#consistent-image-actions). Publication and local restart
 outcomes are recorded below after completion.
 
 ## Real-image composite and clearer review — 23 October 2026
@@ -79,7 +118,7 @@ establish patient independence. No cancer/clinical performance claim follows.
 [Commands, data terms and reproducibility](docs/RESEARCH_IMAGES.md).
 
 The report is shorter and hides model scores/hashes from primary panels while
-retaining content-bound evidence. Blank final notes no longer demand a note
+retaining content-bound evidence. Initially blank unchanged final notes no longer demand a note
 preview; changed nonempty notes still do. Preselected confirmations record no
 approval until explicit authenticated submission. Urgent routing and model
 grounding remain enforced in Python. Browser styling is covered by automated
@@ -449,3 +488,11 @@ The existing localhost process was restarted on `127.0.0.1:8501`; health returne
 HTTP 200 and the existing `demo` account login was verified. Sign in again after
 refreshing. The smoke made no changes to the app's patient/imaging/report data.
 The prepared-kit README and maintained guides now describe Upload/Analyze.
+
+## Reviewed producer source pins
+
+The reviewed CT source [9a3cdfe](https://github.com/LilyC2024/ai-medimg-2.5D-CT/commit/9a3cdfeb0dc71cb5a7e479e54d5a8430ddbe967c)
+and endoscopy source [9391192](https://github.com/LilyC2024/AI-MedImg-Endo/commit/9391192d2f68cc7e50ba21a1085b21d1b3af2664)
+are published. LOVISA's integration CI now pins those exact producer commits.
+Shared contracts are unchanged and exact sync plus all local producer/consumer
+smokes passed. No hosted outcome is inferred from a local result.

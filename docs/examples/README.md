@@ -18,3 +18,8 @@ Build the current local HTML with `scripts/smoke_research_pair.py` after prepari
 its research kit. The report includes four verified source/annotation pictures
 and a visible automated-test note. Temporary accounts, passwords, databases and
 approval receipts are never distributed. [Actual evidence](../../EVALUATION.md).
+
+The current source-linked [system sketch](../images/lovisa-system.svg) explains
+how accepted CT and endoscopy join the summary. This saved example remains a
+historical scripted fixture; it is not silently regenerated as a new clinical
+review when source code changes. [Current report rules](../REPORTS.md).

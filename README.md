@@ -2,137 +2,28 @@
 
 **Medical History & Clinical Reasoning Assistant**
 
-LOVISA is a local research prototype that turns **synthetic patient records** into
-a chronological, source-linked report for clinician review. It combines SQLite,
-LangGraph, Streamlit and local Ollama inference. The former project name was
-**MHCRA AI**. LOVISA is the project name; its medical-history and clinical-reasoning
-function remains the same.
+A locally deployed research application that organizes **fictional patient
+histories**, proposes source-grounded hypotheses and combines accepted CT and
+endoscopy observations into a short report for clinician review.
 
-## A clearer local workspace
+![Three local projects and the separate human-review gates](docs/images/lovisa-system.svg)
 
-The illustration below shows the earlier history/CT layout; this release adds an Endoscopy review view and its linked guide step.
+## Three projects, clear responsibilities
 
-![LOVISA patient workspace and operating guide](docs/images/lovisa-workspace-overview.jpg)
+| Project | Input → output |
+| --- | --- |
+| **LOVISA** — this repository | Synthetic JSON + accepted imaging → safety-gated, concise clinical summary |
+| [Lung CT assistant](https://github.com/LilyC2024/ai-medimg-2.5D-CT) | Supported CT volume → candidates, source annotations and optional manual calipers |
+| [Endoscopy assistant](https://github.com/LilyC2024/AI-MedImg-Endo) | Permitted research JPG/PNG → candidate regions, mask and pixel-area observations |
 
-Sign in and choose one patient. Read the history, optionally inspect CT or endoscopy, then open
-**Safety check** to record your assessment and generate a concise draft. The
-right-hand **Your review steps** buttons open and scroll to each action; the
-**Next action** button points to pending work. **Source records** keeps readable
-evidence separate from the main workflow. Changing patients clears unfinished
-notes and cancels old work. Background processing stops at 110 seconds if needed.
-Actual local synthetic smokes took **1.65s** (fixture CT), **12.43s** (pretrained CT)
-and **23.40s** (Ollama clinical workflow). These are individual CPU runs, not
-clinical performance claims or guarantees. [Workspace](docs/INTERFACE.md) ·
-[Performance and limits](docs/PERFORMANCE.md).
+Each project has its own local environment. Image evidence never becomes a
+confirmed diagnosis. Public images are allowed only in labelled fictional
+composite cases with provenance; unrelated source subjects stay separate.
 
-## Three projects, one reviewed workflow
+## Run locally
 
-| Project | Input → output | Responsibility |
-| --- | --- | --- |
-| **LOVISA** — this repository | Synthetic history + accepted imaging → concise clinical summary | Organize facts, identify gaps, propose constrained hypotheses and require clinician approval |
-| **[Lung CT Research Assistant](https://github.com/LilyC2024/ai-medimg-2.5D-CT)** | Supported CT → nodule candidates, annotations, calipers and research summary | Support source-image inspection and measurement in a separate local environment |
-| **[Endoscopy Image Research Assistant](https://github.com/LilyC2024/AI-MedImg-Endo)** | RGB research images → candidate regions, masks and pixel-area findings | Review candidates locally; send artificial or explicitly permitted research studies to LOVISA |
-
-Both companions send source-verified artificial studies or explicitly labelled **public research evidence** to LOVISA. Public images are limited to a fictional composite case; their unrelated research subjects are kept separate. A reviewer
-checks its candidates and measurements before accepting the study. The report
-includes those inspection results and representative source/annotation images.
-A brief clinician note is previewed before final approval. Images and imaging
-notes stay outside the language model. [Integration guide](docs/IMAGING.md).
-
-**Research and education only.** These projects do not diagnose cancer, exclude
-disease, prescribe treatment or make automatic medical decisions. LOVISA accepts
-fictional records only. Local login does not verify clinical qualifications.
-
-## Understand the workflow
-
-![LOVISA clinical workflow, illustrated under its former MHCRA AI name](docs/images/mhcra-ai-workflow-v1.png)
-
-Read left to right: local records → safety check → history and medication
-extraction → source-grounded hypotheses → safety recheck → clinician review.
-The report now has **one Clinical summary section**: model-selected hypotheses,
-CT/endoscopy inspection, essential gaps and a brief clinician note. Detailed citations stay
-in the evidence package and an optional evidence view. A portable HTML download
-includes verified imaging pictures. [Report example and rules](docs/REPORTS.md).
-
-An urgent warning stops reasoning. Missing safety information pauses for human
-assessment. A draft becomes reviewed only after explicit approval of its exact
-contents. The retained picture uses the previous **MHCRA AI** name and an earlier
-report layout; the current summary replaces its longer report presentation.
-
-![Synthetic CT source, candidate box and demonstration caliper](docs/images/lung-research-workflow.png)
-
-The companion adds image evidence: source slice → candidate annotation → physical
-caliper. This picture uses generated pixels and a **non-ML fixture finder**. Its
-8 mm caliper illustrates software behavior; it is not a clinical finding or a
-pretrained-detector accuracy result.
-
-## Agents and models
-
-One `MedicalHistoryOrchestrator` runs four sequential specialist roles:
-
-| Specialist | Implementation | Purpose |
-| --- | --- | --- |
-| History | Python `MedicalHistoryAgent` | Preserve dates, attribution and missing chronology |
-| Medication | Python `MedicationAgent` | Extract supplied orders and documented dose changes |
-| Clinical reasoning | `SpecialistAgent("reasoning", inference)` + local Ollama | Select eligible hypothesis/evidence IDs; Python restores exact excerpts |
-| Safety | Python `SafetyAgent` + versioned policy | Enforce urgent stops and uncertainty-review holds |
-
-Only clinical reasoning calls the installed `gemma4:e2b` LLM. It selects bounded
-catalog/evidence IDs; Python restores exact excerpts, validates citations,
-calculates measurements and composes the report. The CT
-companion uses pretrained MONAI 3D RetinaNet; it has no LLM agents. Development
-coding subagents helped earlier reviews but are not part of either app's runtime.
-[Architecture and agent implementation](docs/ARCHITECTURE.md).
-
-![LOVISA technical architecture, illustrated under its former MHCRA AI name](docs/images/mhcra-ai-technical-flow-v1.png)
-
-Streamlit supplies the interface; SQLite preserves original sources separately
-from extracted facts; LangGraph coordinates specialist steps and human interrupts.
-Ollama runs on loopback. Completion/export recheck safety, source integrity and
-approval. The detailed [picture guide](docs/ILLUSTRATIONS.md) explains the diagrams
-and the CT connection.
-
-## Real-image demo and concise reviews
-
-Select **Jordan — real-image research composite** after login. Its fictional
-history can include a real LIDC-IDRI CT excerpt and a real Kvasir-SEG endoscopy
-image. They come from **unrelated research subjects**, not one real patient.
-Both imaging views use **Upload → Analyze**. Upload the CT review ZIP or an
-endoscopy JPG/PNG/review ZIP, then Analyze. A ZIP opens its included results; a
-permitted JPG/PNG runs the installed local polyp model. For a prepared example,
-choose **Local research example** under **Model / example** and Analyze with no
-upload. You can re-run the polyp model on three supplied research JPGs. [Prepare files, data terms and exact commands](docs/RESEARCH_IMAGES.md).
-
-Adding images after a report starts creates a fresh, unreviewed context; include
-the images and repeat the safety check. Saved reports remain intact. Errors appear
-beside Analyze, with retry available.
-
-Imaging panels show source, annotations and inspected results. Model scores,
-checkpoint identifiers and verbose provenance stay out of the main presentation.
-The short report includes CT/endoscopy results, essential uncertainty and an
-optional clinician note; exact evidence remains bound separately.
-
-Confirmations start checked and green; they submit **nothing automatically**.
-Pause/corrections choices are yellow and allow/approve choices green. Notes may
-be blank. Every candidate still needs an explicit include/exclude decision, and
-safety, imaging and final approval each require their own submit action.
-
-Actual endoscopy CPU training used 24 epochs and the frozen grouped split;
-168 positive test images gave exploratory mean Dice **0.544**. There were no
-negative examinations and patient independence is unknown. Real CT was tested
-with the pretrained detector; **full CT training was not run** because this PC
-has no CUDA GPU. Full-scan CPU inference is offline preparation and can take
-several minutes; prepared evidence opens directly. Interactive workers retain
-the 110-second stop. [Evidence and limitations](EVALUATION.md).
-
-## Endoscopy image companion
-
-LOVISA also supports the [image-first polyp research assistant](https://github.com/LilyC2024/AI-MedImg-Endo). Inspect artificial or permitted public RGB images, review candidate regions and include the accepted result and images in the combined report. CT remains a separate modality. The initial endoscopy model is an exploratory baseline, not a validated screening or cancer detector. [Setup, workflow and evidence boundaries](docs/ENDOSCOPY.md).
-
-## Run LOVISA
-
-Use Python **3.10+** and an installed local Ollama service with `gemma4:e2b`.
-Reuse `.venv` if present. For a fresh Linux/macOS checkout:
+Use Python 3.10+ and local Ollama with **`gemma4:e2b`**. Reuse an existing `.venv`;
+for a fresh Linux checkout:
 
 ```bash
 git clone https://github.com/LilyC2024/Medical-AI.git
@@ -143,44 +34,46 @@ python3 -m venv .venv
 .venv/bin/python -m streamlit run app.py
 ```
 
-Open [localhost:8501](http://127.0.0.1:8501), sign in, and select **Taylor Synthetic — checklist
-case**. The app seeds fictional examples automatically. Its missing blood pressure
-and warning screening intentionally trigger review. [Complete setup](docs/SETUP.md)
-includes local Ollama configuration, local-demo account setup and Windows paths;
-[first-case instructions](docs/WORKFLOWS.md) explain every approval.
+Open [localhost:8501](http://127.0.0.1:8501), sign in and choose one patient.
+[Complete setup](docs/SETUP.md) covers Ollama, Windows, companion discovery and
+explicit local-demo account creation. No account/password is bundled in source.
 
-Five additional complex fictional cases cover medicines/dizziness, cough/CT,
-fatigue/mixed evidence, a warning-sign stop and conflicting follow-up doses. They
-are available in the patient menu after login. Only the selected patient's data
-is displayed. Tests are separate from live model inference.
-[Cases and expected behavior](docs/DEMO_CASES.md).
+## Use the workspace
 
-Install CT separately with Python **3.12**. The integration supports nodule-v2 and
-legacy tissue-mask bundles within a synthetic limit of **64 slices ×256×256**.
-Full-size CT processing and training remain standalone companion features. Public source-mapped CT excerpts use a separate research-v3 format; research endoscopy uses v2, while the old synthetic formats remain supported.
-Existing `mhcra-*` formats and `MHCRA_CT_*` settings are stable integration names.
-[Naming and compatibility](docs/NAMING.md) · [CT setup](docs/IMAGING.md).
+1. Read **Patient overview** and original sources; only the selected case appears.
+2. Optionally **Upload → Analyze** in CT or Endoscopy review. ZIPs open included
+   results; permitted research-kit endoscopy JPG/PNG files run the installed model.
+3. Inspect candidates and explicitly include or discard each pending study.
+4. Complete **Safety check**, then **Generate draft for clinician review**.
+5. Read the short summary/images, optionally preview a clinician note, and
+   explicitly approve before a reviewed report can be exported.
+
+The right-hand guide links directly to actions. Errors are visible and retryable.
+Adding images after report preparation starts a fresh unreviewed context and
+requires safety again; saved reports remain unchanged. [Detailed workflow](docs/WORKFLOWS.md).
+
+## Agents and models
+
+One LangGraph `MedicalHistoryOrchestrator` coordinates history, medication,
+reasoning and safety roles. **Only reasoning uses the local LLM**; extraction,
+evidence checks and versioned safety routing run in Python. CT/endo use separate
+CV models and bounded Python adapters. Images and image notes never enter Ollama.
+Development review agents are separate from the application's runtime.
+[Implementation and data structures](docs/ARCHITECTURE.md).
 
 ## Documentation and evidence
 
 | Read next | Purpose |
 | --- | --- |
-| [Documentation index](docs/README.md) | Choose a guide by task |
-| [Architecture](docs/ARCHITECTURE.md) | Specialists, storage, models and trust boundaries |
-| [Reports and example](docs/REPORTS.md) | Concise combined output, clinician-note preview and image downloads |
-| [Records](docs/RECORDS.md) | Synthetic JSON, sources and local references |
-| [Real research images](docs/RESEARCH_IMAGES.md) | Public datasets, local upload kit, composite case and actual experiments |
-| [Imaging](docs/IMAGING.md) | Connect, inspect, measure and accept CT results |
-| [Code reference](docs/CODE_REFERENCE.md) | Modules, functions and folders |
-| [Validation](docs/VALIDATION.md) / [Evaluation](EVALUATION.md) | Reproduce checks; distinguish tests from actual inference |
-| [Release history](docs/RELEASE.md) | Changes, naming and migration |
+| [Documentation index](docs/README.md) | Setup, UI, records, reports and integration guides |
+| [Real-image demo](docs/RESEARCH_IMAGES.md) | Permitted sources, upload kit and composite-case limitations |
+| [Code reference](docs/CODE_REFERENCE.md) | Folders, APIs, functions and subfunctions |
+| [Validation](docs/VALIDATION.md) / [Evaluation](EVALUATION.md) | Reproduce checks; distinguish scripted tests from actual local inference |
+| [Expert review](docs/REVIEW.md) | Reproduced defects, repairs and remaining assumptions |
 
-Current software checks, actual local model timings and publication checks are
-recorded in [EVALUATION.md](EVALUATION.md). Scripted tests and live inference are
-reported separately.
-
-Operation uses no paid APIs, cloud inference or remote tracing. Setup may download
-packages and weights explicitly. Keep both apps local; pending work is in memory
-and disk storage is not encrypted. [Security](SECURITY.md) ·
-[Contributing](CONTRIBUTING.md). LOVISA has no selected project-wide redistribution
-license; [vendored CT components retain MIT terms](third_party/README.md).
+**Educational and experimental, not a diagnostic device.** Clinical records,
+automatic medical decisions, paid APIs, cloud inference and remote tracing are
+unsupported. Missing information never proves safety. Local login does not verify
+clinical qualifications. [Security](SECURITY.md) · [Contributing](CONTRIBUTING.md).
+No project-wide redistribution license has been selected; preserve
+[third-party notices](third_party/README.md).

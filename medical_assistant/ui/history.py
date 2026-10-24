@@ -11,6 +11,7 @@ from medical_assistant.history_import import HistoryManagement
 from medical_assistant.models import PatientRecord
 from medical_assistant.ui.clinical import make_review
 from medical_assistant.ui.components import timeline
+from medical_assistant.ui.errors import error_message
 
 
 def history_ui(path, auth, token, user, record):
@@ -40,7 +41,7 @@ def history_ui(path, auth, token, user, record):
                 )
                 replace_proposal((proposal_id, proposal))
             except (ValueError, OSError, LookupError) as error:
-                st.error(f"Import rejected: {error}")
+                st.error("Import rejected: " + error_message(error))
         with st.form("symptom_form"):
             symptom = st.text_area(
                 "Synthetic symptoms / history to add", key="symptoms"
@@ -105,7 +106,7 @@ def history_ui(path, auth, token, user, record):
                     manager.prepare(json.dumps(data), "synthetic-observation.json")
                 )
             except ValueError as error:
-                st.error(f"Observation proposal rejected: {error}")
+                st.error("Observation proposal rejected: " + error_message(error))
     if "proposal" in st.session_state:
         proposal_id, proposal = st.session_state.proposal
         st.subheader("Pending history import — no database update yet")
@@ -132,7 +133,7 @@ def history_ui(path, auth, token, user, record):
                 del st.session_state.proposal
                 st.rerun()
             except (ValueError, PermissionError, LookupError) as error:
-                st.error(f"Import approval rejected: {error}")
+                st.error("Import approval rejected: " + error_message(error))
         if st.button("Discard import proposal", key="discard_import"):
             manager.pending.pop(proposal_id, None)
             del st.session_state.proposal

@@ -81,3 +81,18 @@ repository path is `Medical-AI`; the app is named LOVISA.
 ## Image-first endoscopy extension
 
 The endoscopy companion uses its own `.venv`; no Torch/OpenVINO is added to LOVISA. See [Endoscopy setup](ENDOSCOPY.md) for sibling discovery and explicit backend selection.
+
+## Local service and environment map
+
+| Service | Environment / address | Setup responsibility |
+| --- | --- | --- |
+| LOVISA UI | Own `.venv`; loopback 8501 | Locked lightweight dependencies, fictional fixtures and explicit reviewer account |
+| Ollama | Local daemon; 127.0.0.1:11434 | Installed `gemma4:e2b`, cloud disabled on daemon |
+| CT companion | Separate Python 3.12 `.venv`; optional standalone 8502 | Registered MONAI model; volume preparation outside LOVISA |
+| Endoscopy companion | Separate validated ML `.venv`; optional standalone 8503 | Trained/exported polyp model and explicit backend |
+
+An existing checkout should not reinstall all packages to solve an input error.
+Inspect the displayed reason, service availability and `pip check` first. Worker
+capacity exhaustion is retryable; wait for a slot rather than bypass safety.
+Restart clears pending sessions, so sign in and repeat unfinished assessments.
+[Full checks](VALIDATION.md) · [Three-project sketch](ILLUSTRATIONS.md).

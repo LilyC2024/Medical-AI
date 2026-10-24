@@ -4,6 +4,7 @@ import streamlit as st
 
 from medical_assistant.imaging_actions import analyze, blocker, failure_detail
 from medical_assistant.report import inline_text
+from medical_assistant.ui.errors import error_message
 
 
 def image_actions(modality, store, auth, token, record):
@@ -90,14 +91,14 @@ def image_actions(modality, store, auth, token, record):
                 st.session_state.pop(modality + "_action_notice", None)
         error = st.session_state.get(modality + "_action_error")
         if error:
-            st.error(inline_text(error))
+            st.error(error_message(error))
         elif st.session_state.get(modality + "_action_notice"):
             st.success(st.session_state[modality + "_action_notice"])
         if job and job.status() not in ("running", "complete"):
-            st.error(inline_text(failure_detail(job)))
+            st.error(error_message(failure_detail(job)))
         if job and getattr(job, "validation_error", None) and not error:
             st.error(
-                "Result could not be verified: " + inline_text(job.validation_error)
+                "Result could not be verified: " + error_message(job.validation_error)
             )
         if (
             job

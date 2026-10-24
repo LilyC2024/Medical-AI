@@ -14,7 +14,7 @@
 | LocalEvidenceCollection.retrieve / local_search | Query → at most three approved local hash-checked excerpts ranked by word overlap |
 | SpecialistAgent reasoning | Source snapshot and approved references → schema/catalog-constrained hypotheses with exact excerpts |
 | compact_reasoning.prepare / expand | Same record/catalog → bounded ID schema → exact excerpts and fully revalidated Assessment; invalid/duplicate IDs fail |
-| jobs.Budget / WorkTask / BudgetInference | Finite local operation → staged progress or terminal stop; cancellation/deadline prevents late result publication |
+| jobs.Budget / WorkTask / BudgetInference | Finite local operation → staged progress or terminal stop; cancellation/deadline prevents late publication; saturated capacity raises recoverable WorkStopped |
 | ui.components / ui.history / ui.clinical | Escaped display, explicit import/review forms and background actions; workers never write Streamlit state |
 | ui.navigation.clear_patient / ensure_patient | Cancel abandoned work, discard unaccepted proposals and clear widgets; reject mismatched patient snapshots before display |
 | ui.navigation.go_to / anchor / focus_pending | Allowlisted app destination → selected view and local scroll; no record/model input or approval |
@@ -42,3 +42,12 @@
 Model facts are not free-text edits. A failed constraint blocks the affected
 operation. No model call follows final approval. All helper signatures, including
 internal UI functions, are indexed in [Callables](CALLABLES.md).
+
+## Dynamic errors and source isolation
+
+`ui.errors.error_message` provides a 600-character literal explanation, summarizing
+at most three structured validation issues without original input values/help
+URLs. Source records stay in their own view. Clinical launch controls catch
+`WorkStopped` without losing a prior safety assessment; stopped tasks show their
+actual bounded reason. These presentation changes grant no new policy exception
+or report approval. [Regressions and scope](../REVIEW.md).

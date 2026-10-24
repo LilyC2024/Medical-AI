@@ -59,3 +59,15 @@ source-plane distances inside a candidate box, not confirmed lesion diameters.
 - Review notes may be blank; preselected confirmations require explicit submit.
 
 [Commands, sources and limits](../RESEARCH_IMAGES.md).
+
+## Independent producer and consumer checks
+
+The current expert review leaves all shared wire contracts unchanged. CT rejects
+invalid numeric labels/source pixels before coercion or persistence; endoscopy
+rechecks provenance/export against workspace and strict registration/split input.
+LOVISA still verifies each received archive independently. No producer test or
+local review substitutes for authenticated image acceptance and final approval.
+
+Dynamic image/import errors now use the bounded literal `ui.errors.error_message`
+formatter. Full evidence remains in immutable sources, not echoed into errors.
+[Review details](../REVIEW.md).

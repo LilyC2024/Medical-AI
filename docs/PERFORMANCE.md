@@ -72,3 +72,17 @@ The interface opens prepared, bounded real CT evidence instead of running a whol
 scan synchronously. Research endoscopy uploads run in the bounded local worker;
 progress/cancellation/110-second termination remain. Real-image inference timing
 is distinct from setup/training and is recorded in [evaluation](../EVALUATION.md).
+
+## Failure and measurement interpretation
+
+Worker-slot exhaustion is now caught at safety preparation, assessment submission
+and draft generation. It preserves the existing safety context and shows a
+retryable explanation. Stopped jobs expose a bounded literal reason; invalid
+source input is never echoed as active Markdown. New input/settings/patient
+transitions cannot publish an old task's late result.
+
+Do not compare a warmed model's predict-only timing with Upload-to-visible-result
+or full-volume latency. Current smoke outcomes identify what was timed, input
+shape/scope, backend and whether reviews were simulated. Training and full-scan
+preparation remain offline; the interactive deadline is not a clinical turnaround
+guarantee. [Expert review](REVIEW.md) · [Current evidence](../EVALUATION.md).

@@ -43,3 +43,15 @@ packages/weights explicitly and executes models on runner CPU; the app uses no
 cloud inference service. It uploads no clinical reports or patient records.
 LOVISA has no selected project-wide redistribution license; preserve notices for
 [vendored CT code](third_party/README.md).
+
+## Documentation and expert review
+
+Keep the root README as a short installation/workflow map. Put operational and
+schema detail in linked subject guides; preserve historical results as dated
+measurements, not current capability claims. Regenerate source API references
+with `scripts/generate_api_docs.py --write`, then run `--check` and the Markdown
+file/anchor checker. Update every affected guide in both producer and receiver.
+
+Three independent expert coding reviewers audited LOVISA, CT and endoscopy in the
+current pass. Their regressions are software evidence and are separate from
+clinician review and actual model inference. [Findings](docs/REVIEW.md).

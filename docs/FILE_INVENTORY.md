@@ -1,8 +1,10 @@
-# LOVISA maintained-file inventory
+# Maintained-file inventory
 
-[Overview](../README.md) · [Module guide](CODE_REFERENCE.md) · [Real research images](RESEARCH_IMAGES.md)
+[Overview](../README.md) · [Module/API guide](CODE_REFERENCE.md) · [Review](REVIEW.md)
 
-Code, fictional fixtures, configuration and guides. Credentials, datasets, weights, runtime image stores and generated reports are ignored.
+Source, fictional fixtures, local configuration and documentation are listed below.
+Runtime databases, images, weights, accounts and generated reviews are ignored.
+The callable inventory is generated separately from AST; this is the publication map.
 
 - [.github/workflows/tests.yml](../.github/workflows/tests.yml)
 - [.gitignore](../.gitignore)
@@ -43,6 +45,7 @@ Code, fictional fixtures, configuration and guides. Credentials, datasets, weigh
 - [docs/RELEASE.md](../docs/RELEASE.md)
 - [docs/REPORTS.md](../docs/REPORTS.md)
 - [docs/RESEARCH_IMAGES.md](../docs/RESEARCH_IMAGES.md)
+- [docs/REVIEW.md](../docs/REVIEW.md)
 - [docs/SETUP.md](../docs/SETUP.md)
 - [docs/VALIDATION.md](../docs/VALIDATION.md)
 - [docs/WORKFLOWS.md](../docs/WORKFLOWS.md)
@@ -53,6 +56,7 @@ Code, fictional fixtures, configuration and guides. Credentials, datasets, weigh
 - [docs/images/lovisa-ct-pretrained-results.jpg](../docs/images/lovisa-ct-pretrained-results.jpg)
 - [docs/images/lovisa-ct-review.jpg](../docs/images/lovisa-ct-review.jpg)
 - [docs/images/lovisa-safety-first.jpg](../docs/images/lovisa-safety-first.jpg)
+- [docs/images/lovisa-system.svg](../docs/images/lovisa-system.svg)
 - [docs/images/lovisa-workspace-overview.jpg](../docs/images/lovisa-workspace-overview.jpg)
 - [docs/images/lung-research-workflow.png](../docs/images/lung-research-workflow.png)
 - [docs/images/mhcra-ai-technical-flow-v1.mmd](../docs/images/mhcra-ai-technical-flow-v1.mmd)
@@ -103,6 +107,7 @@ Code, fictional fixtures, configuration and guides. Credentials, datasets, weigh
 - [medical_assistant/ui/__init__.py](../medical_assistant/ui/__init__.py)
 - [medical_assistant/ui/clinical.py](../medical_assistant/ui/clinical.py)
 - [medical_assistant/ui/components.py](../medical_assistant/ui/components.py)
+- [medical_assistant/ui/errors.py](../medical_assistant/ui/errors.py)
 - [medical_assistant/ui/history.py](../medical_assistant/ui/history.py)
 - [medical_assistant/ui/imaging_actions.py](../medical_assistant/ui/imaging_actions.py)
 - [medical_assistant/ui/navigation.py](../medical_assistant/ui/navigation.py)
@@ -112,6 +117,7 @@ Code, fictional fixtures, configuration and guides. Credentials, datasets, weigh
 - [requirements.lock.txt](../requirements.lock.txt)
 - [scripts/check_docs.py](../scripts/check_docs.py)
 - [scripts/check_ollama.py](../scripts/check_ollama.py)
+- [scripts/generate_api_docs.py](../scripts/generate_api_docs.py)
 - [scripts/prepare_research_demo.py](../scripts/prepare_research_demo.py)
 - [scripts/smoke_endoscopy.py](../scripts/smoke_endoscopy.py)
 - [scripts/smoke_imaging.py](../scripts/smoke_imaging.py)
@@ -122,11 +128,13 @@ Code, fictional fixtures, configuration and guides. Credentials, datasets, weigh
 - [scripts/sync_endo_contracts.py](../scripts/sync_endo_contracts.py)
 - [tests/conftest.py](../tests/conftest.py)
 - [tests/test_agents.py](../tests/test_agents.py)
+- [tests/test_clinical_failures.py](../tests/test_clinical_failures.py)
 - [tests/test_combined_report.py](../tests/test_combined_report.py)
 - [tests/test_combined_report_ui.py](../tests/test_combined_report_ui.py)
 - [tests/test_compact_reasoning.py](../tests/test_compact_reasoning.py)
 - [tests/test_ct_worker.py](../tests/test_ct_worker.py)
 - [tests/test_database.py](../tests/test_database.py)
+- [tests/test_documentation.py](../tests/test_documentation.py)
 - [tests/test_endo_worker.py](../tests/test_endo_worker.py)
 - [tests/test_endoscopy.py](../tests/test_endoscopy.py)
 - [tests/test_endoscopy_ui.py](../tests/test_endoscopy_ui.py)

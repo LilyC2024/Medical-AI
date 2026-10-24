@@ -36,6 +36,13 @@ measurements require review. [Architecture](ARCHITECTURE.md).
 
 `research-composite-demo` has a fictional tiredness/shift-work history with missing
 dates and current safety observations. Real LIDC-IDRI CT and Kvasir-SEG images are
-from unrelated research subjects. Its research-evidence buttons leave inspection
-pending. CT protocol/coverage and endoscopy physical size/histology stay uncertain.
+from unrelated research subjects. Its Upload/Analyze or local-example choice leaves inspection pending. CT protocol/coverage and endoscopy physical size/histology stay uncertain.
 [Prepare/upload examples](RESEARCH_IMAGES.md).
+
+## Demonstration review discipline
+
+Use these cases to check source attribution, stale-state cleanup, safety holds and
+report composition; do not infer clinical generalization from their complexity.
+A scripted test reviewer is not a clinician approval. Jordan's unrelated image
+subjects must never be described as one real patient or a disease explanation.
+[Implemented acceptance tests](ACCEPTANCE.md).

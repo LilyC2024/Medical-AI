@@ -13,7 +13,7 @@ These checks concern synthetic software behavior, not clinical validation.
 | Report identifies unavailable BP and relevant missing history | Report tests assert missing measurements, symptom timing, syncope/falls and fluid-intake questions. Observation UI tests verify unselected placeholder measurements are not stored. |
 | Safety follows the defined policy and the model cannot bypass it | `test_safety_policy.py`, `test_review_safety.py`, workflow/UI tests: missing/stale/unknown data pauses before inference; explicit warning flags stop; forged receipts and changed policy fail closed. Rules are in `config/safety_policy.json`, a procedural review policy, not a clinical triage protocol. |
 | Clinical-record claims link to actual record sources | Original JSON hashes and extracted facts are checked; factual text/ID/attribution are bound together in the generation schema and revalidated. Medication and dose-change values must match cited orders. Markdown injection is rendered literally. |
-| Clinician approval precedes reviewed status | Workflow/UI tests require authenticated, case-bound, hash-bound review, attestation and notes. Rejection remains pending. No final download or save is allowed before valid approval. |
+| Clinician approval precedes reviewed status | Workflow/UI tests require authenticated, case-bound, hash-bound review, attestation and optional notes. Rejection remains pending. No final download or save is allowed before valid approval. |
 
 The current report uses one concise section. Full exact quotations, source IDs,
 filenames/dates and model evidence selections remain in the JSON evidence package;
@@ -25,3 +25,11 @@ extend the original checklist. [Report details](REPORTS.md).
 ## Image-first endoscopy extension
 
 Endoscopy adds explicit candidate review, source/overlay reconstruction checks, separate artificial/public-research import schemas, patient-switch cleanup and combined report/export binding. Tests use scripted reviewers; real worker smokes stop before approval. [Scope](ENDOSCOPY.md).
+
+## Review and usability regressions
+
+The 24 October review adds bounded literal error rendering, clinical worker-capacity
+retries and actual-cause display. Active clinical work cancelled by a valid CT
+upload cannot publish a late draft; a completed other-modality result waits while
+another proposal is reviewed. Source/approval/safety checks remain mandatory.
+[Reproduced defects](REVIEW.md) · [Current test outcomes](../EVALUATION.md).

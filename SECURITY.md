@@ -68,3 +68,12 @@ Original data/weights/accounts remain outside Git. Hashes are consistency checks
 not proof of permission or model execution. Review confirmations start selected,
 but no approval exists until an authenticated user explicitly submits the exact
 decision. Notes can be blank; the attestation and content binding remain mandatory.
+
+## Error and task lifecycle hardening
+
+Dynamic import, imaging and clinical errors render as bounded literal Markdown;
+structured validation omits original input values and automatic help URLs. An
+uploaded image/link expression cannot become a browser resource through an error
+message. Actual source content remains in its source view. Worker saturation is
+recoverable without clearing or fabricating an assessment. Cancelled work cannot
+publish a late draft after patient/input changes. [Audit](docs/REVIEW.md).

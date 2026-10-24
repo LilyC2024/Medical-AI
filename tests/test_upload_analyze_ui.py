@@ -111,3 +111,68 @@ def test_wrong_section_file_reports_error_without_candidate_or_source_leak(ui):
     app.button(key="ct_generate").click().run()
     assert any("other imaging section" in e.value for e in app.error)
     assert not app.image and not app.session_state.imaging_store.pending
+
+
+def test_upload_cancels_running_clinical_analysis_without_publishing_late_report(ui, monkeypatch):
+    """A source change retires an in-flight draft; its late model answer stays private."""
+    import threading
+
+    app, _, _, inference = ui
+    login(app)
+    prepare_safety(app)
+    entered, release = threading.Event(), threading.Event()
+    original = inference.assess
+
+    def blocked(*args, **kwargs):
+        entered.set()
+        assert release.wait(30)
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(inference, "assess", blocked)
+    app.button(key="generate").click().run()
+    task = app.session_state.analysis_task
+    old_flow, old_case = app.session_state.workflow, app.session_state.case_id
+    try:
+        assert entered.wait(1)
+        app.button(key="guide_ct-review").click().run()
+        upload(app, "ct.zip", nodule_bytes(patient="fictional-001"))
+        app.button(key="ct_generate").click().run()
+        assert not app.exception and len(app.image) == 2
+        assert "analysis_task" not in app.session_state and "case_id" not in app.session_state
+        assert task.snapshot()["state"] == "cancelled"
+    finally:
+        release.set()
+        task._thread.join(timeout=2)
+    assert not task._thread.is_alive()
+    app.run()
+    assert "case_id" not in app.session_state and "imaging_proposal" in app.session_state
+    assert not old_flow.state(old_case).get("draft") and not app.get("download_button")
+    app.button(key="guide_safety-check").click().run()
+    assert app.button(key="generate").disabled
+
+
+def test_other_completed_modality_reappears_after_pending_upload_is_discarded(ui, tmp_path):
+    app, _, _, _ = ui
+    login(app)
+    app.button(key="guide_ct-review").click().run()
+    upload(app, "ct.zip", nodule_bytes(patient="fictional-001"))
+    app.button(key="ct_generate").click().run()
+    path = tmp_path / "completed.endo.zip"
+    path.write_bytes(endo_bytes(patient="fictional-001"))
+    completed = SimpleNamespace(
+        patient_id="fictional-001",
+        study_id="endo-test",
+        bundle_path=path,
+        status=lambda: "complete",
+    )
+    app.session_state.endo_job = completed
+    app.button(key="guide_endoscopy-review").click().run()
+    assert not getattr(completed, "inspection_ready", False)
+    app.button(key="endo_open_ct").click().run()
+    app.button(key="imaging_discard").click().run()
+    app.button(key="guide_endoscopy-review").click().run()
+    assert not app.exception and len(app.image) == 2
+    assert completed.inspection_ready
+    assert app.session_state.imaging_proposal[1]["manifest"]["study_id"] == "endo-test"
+    assert len(app.session_state.imaging_store.pending) == 1
+    assert not app.session_state.imaging_store.snapshots("fictional-001")

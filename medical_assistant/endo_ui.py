@@ -12,6 +12,7 @@ from medical_assistant.imaging_actions import collect
 from medical_assistant.ui.imaging_actions import image_actions
 from medical_assistant.models import Review
 from medical_assistant.nodule_support import imaging_acceptance_digest
+from medical_assistant.ui.errors import error_message
 from medical_assistant.ui.navigation import go_to
 
 
@@ -192,7 +193,8 @@ def endoscopy_ui(path, auth, token, user, record, *, locked=False, case_imaging=
                 st.rerun()
         except (ValueError, OSError, PermissionError) as error:
             st.error(
-                f"Image review could not be saved: {error}. Choose include or exclude for every candidate and keep the confirmation selected; notes are optional."
+                "Image review could not be saved: " + error_message(error)
+                + ". Choose include or exclude for every candidate and keep the confirmation selected; notes are optional."
             )
         if st.button("Discard endoscopy proposal", key="endo_discard"):
             store.discard(key)

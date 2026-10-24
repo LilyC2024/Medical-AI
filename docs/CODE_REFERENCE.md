@@ -65,3 +65,16 @@ and [complete callable/subfunction signatures](reference/CALLABLES.md).
 
 `scripts/smoke_uploads.py` exercises real CT ZIP/endoscopy ZIP/JPG uploads and actual
 local polyp inference through Streamlit in a temporary database, issuing no reviews.
+
+## Error and documentation services
+
+`ui/errors.py:error_message(error, limit=600)` renders literal, bounded explanations.
+Structured validation shows at most three locations/messages without echoing input
+values or help URLs. Clinical capacity errors preserve safety state and offer a
+recoverable retry; failed runs show their actual bounded reason.
+
+The [source API inventory](reference/CALLABLES.md) now includes class fields,
+exact signatures, nested helpers, direct calls, explicit raises and code-line links.
+Regenerate with `scripts/generate_api_docs.py --write`; `--check` detects drift.
+The inventory imports no model or application. Subject contracts remain the source
+for operational guarantees, not static call lists.

@@ -5,7 +5,6 @@ import streamlit as st
 from medical_assistant.endo_support import is_endoscopy
 from medical_assistant.imaging import ImagingStore
 from medical_assistant.imaging_actions import collect
-from medical_assistant.ui.imaging_actions import image_actions
 from medical_assistant.imaging_results import summarize
 from medical_assistant.models import Review
 from medical_assistant.nodule_support import imaging_acceptance_digest, is_nodule
@@ -15,6 +14,9 @@ from medical_assistant.nodule_ui import (
     nodule_viewer,
     preview_calipers,
 )
+
+from medical_assistant.ui.errors import error_message
+from medical_assistant.ui.imaging_actions import image_actions
 
 
 def _viewer(manifest, path_for, key, *, review=None):
@@ -130,7 +132,7 @@ def imaging_ui(path, auth, token, user, record, *, locked=False, case_imaging=No
                 review=snapshot.get("nodule_review"),
             )
     except (ValueError, OSError) as error:
-        st.error(f"Accepted imaging integrity check failed: {error}")
+        st.error("Accepted imaging integrity check failed: " + error_message(error))
     if not accepted and "imaging_proposal" not in st.session_state:
         st.info(
             "No CT result is attached to this report. Upload a review ZIP and click Analyze to add one."
@@ -211,7 +213,7 @@ def imaging_ui(path, auth, token, user, record, *, locked=False, case_imaging=No
                         st.session_state.pop("ct_job", None)
                     st.rerun()
             except (ValueError, OSError, PermissionError) as error:
-                st.error(f"Imaging acceptance blocked: {error}")
+                st.error("Imaging acceptance blocked: " + error_message(error))
         if st.button("Discard imaging proposal", key="imaging_discard"):
             store.discard(key)
             del st.session_state.imaging_proposal

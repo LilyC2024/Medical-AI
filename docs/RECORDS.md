@@ -19,14 +19,14 @@ is not proof of privacy: manually inspect every source.
 | Limits | 100 KB per JSON input; cumulative 100 facts and 24,000 text characters |
 
 SQLite at `data/medical_history.sqlite3` separates immutable original JSON/SHA-256
-from extracted facts. Each fact links to a source ID. Reports cite filename,
-known date or missing-date label, and entry ID. Writes are parameterized and
+from extracted facts. Each fact links to a source ID. The evidence package preserves filename, known date or explicit missing-date label,
+entry ID and exact source text; the short report avoids repeating technical IDs. Writes are parameterized and
 transactional; the model has no persistence tools. [Approval procedure](WORKFLOWS.md).
 
 ## Local reference evidence
 
-The reference collection at `data/evidence/` is empty by default. LOVISA discloses
-that no approved reference support was retrieved. It performs no web search or
+The reference collection at `data/evidence/` is empty by default. No references are retrieved from an empty manifest; the JSON `evidence` list
+remains empty. The short prose does not add a separate missing-reference sentence. It performs no web search or
 automatic literature download.
 
 A human may add permitted `.txt`/`.md` excerpts and explicitly approve their IDs,
@@ -48,10 +48,17 @@ These are demonstration eligibility rules, not diagnostic evidence.
 | Add local references | Evidence manifest | Permissions, approval and exact content hash |
 | Extend hypotheses | reasoning_constraints.py, agents.py | Eligibility/source checks and clinician review |
 | Change safety | Versioned policy, safety.py | Python routing and attempted-bypass tests |
-| Extend CT | Shared contract, imaging services | Synthetic boundary and separate final approval |
+| Extend imaging | Shared modality contract, imaging services | Distinct synthetic/public provenance, immutable evidence and separate final approval |
 
 Keep source corrections explicit and start a new case after importing. The model
 has a stricter prompt/schema budget than history storage and may reject a long
 valid record. Tests establish consistency, not clinical correctness. LOVISA has
 no selected project-wide redistribution license; CT-vendored files have separate
 [MIT terms](../third_party/README.md).
+
+## Validation errors are not source views
+
+Import errors identify failed fields without rendering uploaded markup or dumping
+Pydantic input values. The original immutable record remains accessible only in
+its dedicated source view. A formatting/error-message change cannot authorize an
+unsupported diagnosis, order or measurement. [Error handling review](REVIEW.md).

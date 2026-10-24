@@ -13,3 +13,9 @@
 **Clinician note.** scripted.reviewer\: AUTOMATED INTEGRATION TEST ONLY — no clinician reviewed these images or conclusions.
 
 Educational, experimental synthetic case. Not a diagnostic device; clinician verification required.
+
+---
+
+*Documentation fixture: fictional history, artificial CT and scripted model/reviewer.
+This static example is not a report on a real patient or a new clinician approval.
+[Current combined-report workflow](../REPORTS.md).*

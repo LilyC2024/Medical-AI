@@ -126,3 +126,18 @@ producer execution or model accuracy. The exporter verifies original byte hashes
 the consumer cannot inspect original full-scan/JPEG files absent from a bundle.
 
 Research CT additionally binds `inference_region_zyx` (origin Z/Y/X then depth/height/width). The consumer rejects crops/predictions outside the declared analysed region. No claim of full-scan inference is inferred from full-source metadata.
+
+## Recheck after code updates
+
+Run the actual local upload smoke to exercise CT ZIP, endoscopy ZIP and raw JPG
+through Streamlit in disposable SQLite:
+
+```bash
+.venv/bin/python scripts/smoke_uploads.py --kit data/research-demo
+```
+
+This uses actual source files and installed CV inference but issues no image,
+safety or final approval. The separate paired-report smoke uses scripted reviews
+in a temporary database and must be labelled accordingly. Stronger producer
+workspace and frozen-manifest checks do not turn the same display images/test
+split into new independent model-validation data. [Current audit](REVIEW.md).

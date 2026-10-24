@@ -1,163 +1,109 @@
-# LOVISA architecture and agents
+# LOVISA architecture, agents and data flow
 
-[Overview](../README.md) · [Illustrations](ILLUSTRATIONS.md) · [Code reference](CODE_REFERENCE.md)
+[Overview](../README.md) · [Code reference](CODE_REFERENCE.md) · [Clinical contracts](reference/CLINICAL.md)
 
-LOVISA organizes synthetic history and prepares a clinician-reviewed report. The
-CT companion detects image candidates in its own process/environment. Both CT and endoscopy provide validated, human-accepted artificial research studies to the clinical report. Each uses its own environment.
+![Three local projects and explicit human-review boundaries](images/lovisa-system.svg)
 
-## Clinical workflow
+## Runtime components
+
+| Component | Implementation | Responsibility |
+| --- | --- | --- |
+| Orchestrator | `MedicalHistoryOrchestrator`, LangGraph `StateGraph` | Fixed case snapshot, sequential roles, human interrupts, composition and guarded completion |
+| History specialist | Python `MedicalHistoryAgent` | Chronology, known/unknown dates and documented/reported attribution |
+| Medication specialist | Python `MedicationAgent` | Source-supplied orders, discrepancies and dated changes; never prescribe |
+| Reasoning specialist | `SpecialistAgent("reasoning", inference)` with local Ollama | Select eligible hypothesis/evidence IDs under a constrained schema |
+| Safety specialist | Python `SafetyAgent` and versioned local JSON policy | Urgent stop, uncertainty hold and repeated safety checks |
+| Local retrieval | `LocalEvidenceCollection` | At most three explicitly approved/hash-verified local excerpts; empty by default |
+| CT adapter | `LocalCTJob` | Separate bounded companion process; fixture/pretrained/legacy modes |
+| Endoscopy adapter | `LocalEndoscopyJob` | Separate bounded CV process; installed local backend and exact source/provenance |
+
+The specialists are software roles, not four independent LLM conversations.
+LangChain runnables wrap deterministic extraction/retrieval; only reasoning calls
+`gemma4:e2b`. Imaging adapters do not have database or approval tools. Expert coding
+review agents are development collaborators, not shipped runtime components.
+
+## Clinical graph
 
 ```mermaid
 flowchart TD
-    DB[Validated SQLite source snapshot] --> S[Python Safety Agent]
-    S -->|Urgent| U[Human assessment: no reasoning continuation]
-    S -->|Uncertain| H[Authenticated safety-review interrupt]
-    S -->|Eligible| G[Prepared snapshot; explicit Generate click]
-    H -->|Explicit matching assessment| G
-    G --> A[History Agent]
-    H -->|Stop| X[Stopped case]
-    A --> M[Medication Agent]
-    M --> E[Approved local reference retrieval]
-    E --> R[Local Ollama reasoning]
-    R --> V[Validate hypotheses and exact source excerpts]
-    V --> F[Recheck safety]
-    F --> D[Compose concise combined summary]
-    D --> C[Authenticated final clinician review]
-    C -->|Preview brief note| N[Recompose signed note and require fresh approval]
-    N --> C
+    S[Immutable case snapshot] --> P[Python safety policy]
+    P -->|Urgent / human stop| STOP[Reasoning blocked]
+    P -->|Uncertain| H[Authenticated human safety assessment]
+    H -->|Pause| STOP
+    H -->|Explicit continuation| E[History + medication extraction]
+    P -->|Ordinary eligible| E
+    E --> R[Approved local evidence retrieval]
+    R --> M[Local LLM selects bounded IDs]
+    M --> V[Restore exact excerpts and validate hypotheses]
+    V --> Q[Python safety and imaging recheck]
+    Q --> D[Compose one-section draft + evidence index]
+    I[Accepted CT / endoscopy snapshots] --> D
+    D --> C[Explicit clinician review]
     C -->|Corrections| C
-    C -->|Approve exact draft| P[Recheck safety, artifacts and receipt; export]
+    C -->|Exact content approval| F[Verified completion and export]
 ```
 
-`MedicalHistoryOrchestrator` creates `StateGraph(CaseState)` and runs specialist
-steps sequentially. `InMemorySaver` holds pending state; `interrupt()` and
-`Command(resume=...)` implement human pauses. The UI uses `safety_only=True` to
-pause before `history`; authenticated safety acknowledgment also stops there.
-`continue_analysis()` rechecks safety/receipts/artifacts and resumes only when the
-user clicks Generate. Existing programmatic defaults retain the sequential graph.
-No model call follows final approval.
+The UI first prepares safety without running the LLM. A separate Generate action
+continues reasoning only when the same snapshot remains eligible. Urgent routing
+precedes optional image checks. An uncertain case cannot infer safety from missing
+blood pressure or screening. The model cannot change the Python route.
 
-## Four specialist implementations
+## Schemas and persistence
 
-| Specialist | Class/node | How it works |
-| --- | --- | --- |
-| History | `MedicalHistoryAgent.run()` | Python chronology and attribution; unknown dates remain unknown |
-| Medication | `MedicationAgent.run()` | Python extraction of supplied structured orders; only dated documented orders establish a dose change |
-| Reasoning | `SpecialistAgent("reasoning", inference)` | Local Ollama selects catalog/evidence IDs; Python restores source excerpts and validates schema/catalog/grounding |
-| Safety | `SafetyAgent.evaluate()` | Versioned local Python policy; model output cannot lower escalation |
-
-LangChain `RunnableLambda` wraps history, medication and local reference retrieval.
-Only the reasoning specialist calls an LLM. Generic role prompts remain in the
-source, but the runtime graph uses inference only for reasoning. These specialists
-are bounded classes/nodes, not independent chat services or autonomous tool users.
-
-## Sources and reasoning
-
-SQLite keeps original JSON and SHA-256 separately from extracted facts. Exact
-repeated imports are idempotent; conflicting immutable IDs fail transactionally.
-Record-derived text requires real source IDs, exact excerpts and matching
-patient-reported/documented attribution. Missing dates and measurements are never
-filled by inference.
-
-Reasoning uses a small synthetic hypothesis catalog. A medication entry allows a
-medication-related possibility; a whole-word mention of sleep allows a sleep-related
-possibility, including negated text. These are demonstration eligibility rules,
-not diagnostic criteria. Unknown labels, invented references, unsupported excerpts
-or invalid JSON block the draft. Approved local references may be empty.
-
-The Ollama adapter is fixed to `127.0.0.1:11434`, disables proxies/redirects and
-rejects remote-backed models. Generation requests JSON Schema, temperature zero
-and a 16,384-token context. An 11,000-byte combined prompt/schema budget rejects
-oversized requests. The model has no database, filesystem, shell or approval tools.
-
-The compact reasoning protocol reduces repeated output: the model selects eligible
-hypothesis/support/conflict/reference IDs. Python copies original text and
-attribution and applies the same full assessment checks. It cannot invent prose,
-orders or clinical conclusions. [Implementation/budgets](PERFORMANCE.md).
-
-The interface runs clinical generation/resumption in bounded background tasks and
-polls progress once per second. Cancellation or deadline rejects late publication.
-Shared `imaging_actions.py` routes authenticated uploads and collects worker
-results; `ui/imaging_actions.py` renders the common Upload/Analyze controls and
-errors. ZIPs open validated existing results; permitted raw endoscopy images use
-the actual CV worker. Successful Analyze releases an old report context without
-editing it and clears safety/final-review choices. Input failures preserve it.
-UI components, imports and clinical controls live in separate `ui/` modules; only
-the selected view renders. Patient selection is explicit. Switching cancels pending
-work and clears patient-specific widgets/proposals; scope guards run before and
-after collecting a completed task. Fixed, allowlisted guide destinations choose a
-view and scroll to its action without issuing any review. Source/model content
-never enters the scroll helper's JavaScript. The CT worker uses its own process/watchdog. Native
-Streamlit controls and local CSS form the [design system](INTERFACE.md).
-
-## Safety and review
-
-Any supplied structured warning marked present triggers an urgent stop, even when
-historical. Missing/uncertain current screening or blood pressure requires a
-matching authenticated assessment before reasoning. Ordinary eligibility is not a
-statement of clinical safety. Safety is rechecked after reasoning and at export.
-
-Imports, safety continuation and final approval bind the authenticated account,
-case/content hash, notes and attestation. Rejection stays pending. Corrections to
-facts require an approved new source and a new case. Active cases retain their
-original source/imaging snapshot; later database imports are not silently included.
-
-## CT boundary
-
-The separate CT worker runs a non-ML fixture, installed pretrained detector or
-legacy demo. LOVISA dispatches nodule-v2 and legacy mask-v1 to separate validators.
-Nodule source HU, every preview, typed candidates and canonical producer report
-must agree. Uploaded hashes establish consistency, not execution authenticity.
-
-LOVISA requires its own authenticated candidate/caliper review. The acceptance
-hash covers the original bundle and exact choices. Python adds an escaped,
-source-bound CT inspection paragraph after clinical reasoning. Verified source/
-annotation pictures appear in the report and portable HTML. Images and imaging
-notes never enter the LLM or expand its hypothesis catalog. Final approval covers
-the combined content; completion/export/persistence recheck artifacts. Urgent routing
-precedes optional image checks. [Contract details](IMAGING.md).
-
-## Persistence
-
-| Persistent on local disk | Process/session memory |
+| Structure/store | Contract |
 | --- | --- |
-| SQLite sources/facts, accounts and audit | Pending graph checkpoints and proposals |
-| Accepted original CT ZIP/HU/previews | Active CT job handles |
-| Saved reviewed report exports | Login sessions and receipt verification keys |
+| `PatientRecord`, `Entry`, `SourceDocument` | Fictional identity, exact supplied dates/attribution/fields, immutable original JSON and source links |
+| `Assessment` | Typed findings, structured orders and bounded hypothetical explanations |
+| `Review` | Authenticated actor, explicit attestation/decision, optional notes and exact draft digest |
+| `ReportNote` | Authenticated case-bound commentary; never an imported clinical fact |
+| `CaseState` | Frozen record, assessments, safety decisions, evidence, accepted imaging and review receipts |
+| SQLite | Parameterized transactional originals, extracted facts, accounts, accepted imaging and audit records |
+| Local image directories | Original ZIP/artifacts and immutable accepted snapshots |
+| In-memory graph/session | Pending checkpoints, proposals, worker handles, session tokens and receipt key |
 
-Restarting loses pending work. Storage is not encrypted; process/filesystem/database
-administrators remain trusted. Local authentication does not verify professional
-credentials. [Security](../SECURITY.md).
+Original sources are separate from extraction. Unsupported fields/excerpts fail
+closed. SQLite is local and unencrypted; restarting loses pending graph/session
+state. Historical exports are not silently revised or reapproved.
 
-## Concise report and reviewer comments
+## LLM protocol and grounding
 
-`report.summary_parts` supplies one short section for Markdown/HTML. Exact source
-excerpts and model support/counterevidence links remain in `report_evidence`, with
-originals and full CT metadata retained. `report_assets` renders verified
-representative pictures, including reviewer calipers; HTML embeds them locally.
-`storage.validate_reviewed_report` gates every final export.
+The adapter connects only to `127.0.0.1:11434`, disables proxies/redirects and
+rejects remote-backed models. It requests temperature zero, JSON Schema and a
+16,384-token context. Compact reasoning uses eligible catalog/evidence IDs, not
+free-form medical assertions. Python restores exact original text/attribution,
+expands the response and runs the full assessment checks. An 11,000-byte combined
+prompt/schema budget rejects oversized valid records rather than dropping facts.
+The model has no shell, filesystem, database or approval tools.
 
-`prepare_report_note` authenticates a comment author and signs the note against
-its case. It recomposes a pending draft and invalidates previous review state.
-No LLM call follows a note edit. A new explicit approval must bind the new draft
-hash. Notes remain labelled commentary; they cannot modify source facts or safety
-routing. [Report rules](REPORTS.md).
+The hypothesis catalog is deliberately small and educational. No image model,
+accepted study or reviewer note expands it into cancer diagnosis or general disease
+coverage. [Catalog and evidence rules](RECORDS.md).
 
-Approval also signs a content manifest covering the source records, model evidence,
-CT snapshots and clinician note. Even when two studies produce identical short
-text, substituting different images or source metadata invalidates the approval.
+## Imaging and report boundary
 
-## Image-first endoscopy extension
+A ZIP is independently validated against modality-specific source/geometry/
+probability/mask/annotation contracts. Public formats require provenance and a
+fictional composite case. Every candidate must be explicitly resolved before
+image acceptance. CT uses source z/y/x, physical LPS and optional manual calipers;
+endoscopy uses RGB pixels and half-open xyxy regions. They are not interchangeable.
 
-The endoscopy companion adds a local CV adapter, RGB-specific evidence validator and authenticated region review. It shares imaging persistence and final content binding; it does not send pixels to the LLM or change safety/hypothesis rules. [Full boundary](ENDOSCOPY.md).
+Python appends accepted observations and representative verified pictures after
+history reasoning. Neither pixels nor imaging notes enter Ollama. Final approval
+binds visible prose and a hidden content manifest containing sources, model
+selections, image snapshots and notes. Same prose with different evidence fails.
+[CT](IMAGING.md) · [Endoscopy](ENDOSCOPY.md) · [Reports](REPORTS.md).
 
-## Public-research evidence boundary
+## UI lifecycle and response budget
 
-Patient histories remain synthetic. CT research-v3 and endoscopy research-v2
-require explicit public provenance and a fictional composite case. Original
-research identities remain distinct; CT crop geometry/boxes map to its full-source
-metadata. `research_examples.py` verifies local example hashes and exact endoscopy
-image provenance. `endo_worker` runs permitted RGB inputs in the companion under
-the existing watchdog. No imaging pixels/notes enter the LLM, and no image result
-changes safety routing. Optional review notes and preselected confirmations do
-not replace authenticated, content-bound submission. [Exact formats](RESEARCH_IMAGES.md).
+Only the selected workspace renders. Switching patient/logout cancels work,
+discards pending proposals and clears patient-specific controls. Fixed guide
+anchors never use record/model text as executable content. Shared Upload/Analyze
+routing validates input before retiring an old report context; new context requires
+safety again. Pending studies cannot be overwritten silently.
+
+Clinical workers publish only inside a 110-second deadline; process workers have
+bounded cancellation. Saturated worker capacity is a recoverable UI error, not a
+crash or permission to skip checks. `ui.errors.error_message` renders bounded
+literal explanations, omitting uploaded Pydantic values and help URLs. Detailed
+sources remain in their dedicated view. [Performance](PERFORMANCE.md) ·
+[Expert repairs](REVIEW.md) · [Security](../SECURITY.md).

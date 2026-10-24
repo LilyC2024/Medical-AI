@@ -123,3 +123,19 @@ This separate smoke uploads actual research ZIP/JPG files through the UI and run
 actual local polyp inference. Only persistence is redirected to a disposable
 SQLite database; no image, safety or report approval is issued. It is not a
 browser visual check or clinical validation.
+
+## Expert-review and documentation checks
+
+`tests/test_clinical_failures.py` reproduces capacity exhaustion, error rendering
+and failure-cause visibility. Upload regressions cover cancellation of active
+reasoning by new CT and deferred cross-modality result collection. These use
+scripted models/reviewers, never a live clinical claim.
+
+```bash
+.venv/bin/python scripts/generate_api_docs.py --check
+```
+
+After intentional source/signature changes, regenerate with `--write`. The local
+Markdown checker now validates heading anchors as well as file paths, including
+encoded names and fenced examples. It is not a general Markdown parser and does
+not contact external URLs. [Review findings](REVIEW.md).

@@ -1,92 +1,59 @@
-# Development and review approach
+# Development method and agent implementation
 
 [Overview](../README.md) · [Architecture](ARCHITECTURE.md) · [Contributing](../CONTRIBUTING.md)
 
-## Runtime design
+## Runtime implementation
 
-LOVISA implements one LangGraph orchestrator and four specialist roles. History,
-medications and safety use Python; only clinical reasoning calls local Ollama.
-LangChain `RunnableLambda` wraps deterministic extraction/retrieval. Graph
-interrupts enforce authenticated human review. [Exact implementation](ARCHITECTURE.md).
+`MedicalHistoryOrchestrator` builds one LangGraph state machine with fixed stages
+and in-memory checkpoints. History and medication extraction and the safety policy
+are Python. Clinical reasoning uses one local Ollama model with constrained JSON/
+ID output. LangChain runnables wrap local extraction/retrieval. No specialist has
+arbitrary tools, a database connection or authority to approve output.
 
-The CT companion is a separate computer-vision application: pretrained MONAI
-RetinaNet plus Python geometry, measurements and deterministic reporting. It has
-no autonomous LLM agents and is not a fifth LOVISA specialist.
+The CT and endoscopy adapters launch separate bounded local processes. RetinaNet
+and U-Net are computer-vision models, not LLM agents. Python composes accepted
+observations after history reasoning; image pixels/notes never enter the LLM.
+[Schema/module contracts](CODE_REFERENCE.md).
 
-## Development agents and subagents
+## Expert code-review agents
 
-Earlier development used a primary coding agent and review subagents assigned to
-records/UI, safety/workflow and documentation/release. Their code inspections and
-adversarial tests found source-binding, approval-integrity, medication, import-limit,
-archive-allocation and rendering defects. These were software reviews, not clinical
-verification. Development subagents are not shipped in either runtime.
+The 24 October 2026 review used a primary integration/documentation agent and
+three independent coding reviewers:
 
-The lung compatibility pass traced worker commands, wire contracts, candidate
-review, persistence and report/export guards. Implementation followed producer
-checks, consumer checks and joint validation. The LOVISA documentation/branding
-pass uses source review and regression checks; it adds no new runtime agents.
+| Reviewer scope | Inspection and result |
+| --- | --- |
+| LOVISA | Safety/auth/source/content binding, UI jobs and errors; repaired saturation crashes, hidden failure reasons and Markdown injection |
+| CT | Geometry, training sources/labels, workspaces and legacy upload API; repaired cleanup ownership, ambiguous archives and invalid numeric data |
+| Endoscopy | Workspaces, provenance, frozen datasets, registrations and stale UI; repaired evidence mismatch, leakage checks and invalid metadata |
+| Primary agent | Cross-project protocol compatibility, documentation/commands, reusable figures, final regressions/smokes and publication |
 
-## Workspace release
+Coding agents are development collaborators, not deployed runtime subagents or
+clinical experts. Tests used temporary databases, manufactured inputs and scripted
+reviewers; actual model smokes were run separately. [Findings](REVIEW.md) ·
+[Evidence](../EVALUATION.md). Earlier historical passes used different review
+arrangements; no past use of agents is inferred from this one.
 
-The response-budget/UI work followed three separately tested phases: background
-workers and integrity-preserving preview access; reusable/lazy UI and right guide;
-actual browser/CT/Ollama verification and documentation. No development subagents
-were run for this release. Compact ID selection keeps runtime specialist roles
-unchanged while Python restores source excerpts. [Details](PERFORMANCE.md).
+## Phase discipline
 
-## Working method
+1. Read [AGENTS.md](../AGENTS.md), the current [PLAN](../PLAN.md) phase and contracts.
+2. Inspect/reuse installed environments; avoid gratuitous dependencies or rewrites.
+3. Reproduce material defects and test source repairs before changing docs/UI phases.
+4. Test source identity, rejected paths, cancellation and explicit review boundaries.
+5. Refresh concise overview plus linked implementation/operation guides.
+6. Run full suites, actual local model/interoperability checks and documentation
+   validation; distinguish mock, actual CPU and unexecuted accelerator evidence.
+7. Inspect all staged files, publish compatible producers, then update the receiver's
+   pinned producer commits and verify hosted results.
 
-1. Read [AGENTS.md](../AGENTS.md) and the relevant contract/guide.
-2. Reuse `.venv`; inspect versions before changing dependencies.
-3. Complete/test the current [PLAN phase](../PLAN.md) before beginning another.
-4. Test with temporary databases, scripted models and deliberately synthetic data.
-5. Run live Ollama/CT smokes separately when behavior changes; never label mocks live.
-6. Record actual results and unexecuted checks in [Evaluation](../EVALUATION.md).
+## Coordinated contracts and publication
 
-Keep UI, schemas, storage, extraction, retrieval, policy and coordination separate.
-A passing test cannot justify weakening source grounding, safety routing or human
-approval. Coordinated CT changes start in the producer contract; intentionally
-sync the consumer, run both suites and update its tested producer CI pin.
+CT's lightweight contracts/renderer are vendored with a controlled import rewrite;
+endoscopy's ML-free contract/worker are copied exactly. Sync checks detect drift.
+Do not fix only one side, change a schema label to bypass a check or add torch to
+LOVISA's lightweight environment. Preserve old supported evidence and explicit
+migration rules. UI simplification cannot remove approval/content verification.
 
-## Publication
-
-LOVISA is published at `LilyC2024/Medical-AI`; CT at
-`LilyC2024/ai-medimg-2.5D-CT`. Publishing source does not deploy a clinical service.
-Inspect the full staged diff and existing history. Commit code, documentation,
-config and deliberately fictional fixtures only. Keep credentials, databases,
-exports, local approvals, logs, data and weights ignored.
-
-[Validation commands](VALIDATION.md) · [Security](../SECURITY.md) · [Naming](NAMING.md).
-
-## Guided demonstration release
-
-The next pass separates safety preparation from model execution. Five explicitly
-authored fictional cases extend software coverage; they do not expand the medical
-hypothesis catalog. CT completion is prepared before empty-state rendering and
-results precede controls. The concise report quotes each source once and keeps
-full provenance in JSON. All development/review in this pass used the primary
-coding agent and automated tests; no additional runtime or coding subagents were
-introduced. [Operation](WORKFLOWS.md) · [Case expectations](DEMO_CASES.md).
-
-## Focused navigation release
-
-Patient-scope cleanup and fixed navigation targets were tested before UI
-integration. The interface then gained explicit selection, a dedicated Safety
-check view, actionable guide buttons and separate readable sources. Regression
-checks include switching during blocked scripted inference and discarding the
-previous patient's pending CT. Browser checks verify actual scrolling separately
-from scripted AppTest assertions. This pass uses the primary coding agent and
-automated tests; it introduces no subagents or runtime model changes.
-
-## Combined report release
-
-The primary coding agent implemented/tested summary services and signed note
-previews first, then report pictures/HTML and UI actions, followed by regression,
-actual local smokes and documentation. No coding subagents or additional runtime
-LLMs were introduced. History/medication/safety remain Python specialists; Ollama
-selects constrained history hypotheses. CT inspection/measurements are composed
-in Python and remain outside LLM inference. [Report contracts](REPORTS.md).
-
-## Image-first endoscopy extension
-
-Endoscopy remains a separate environment. Its ML-free contract and worker are copied exactly; run the sync check before changing either copy. Preserve CT tests and final approval/content binding. [Integration](ENDOSCOPY.md).
+Only source, fictional fixtures and permitted aggregate metadata belong in Git.
+Datasets, weights, local accounts, approvals, runtime image stores and generated
+reports remain ignored. Publishing code does not deploy a clinical service.
+[Validation](VALIDATION.md) · [Security](../SECURITY.md) · [Release record](RELEASE.md).
