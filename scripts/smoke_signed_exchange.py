@@ -26,6 +26,7 @@ def main():
         database = directory / "synthetic.sqlite3"
         seed(database)
         for name, repository in (("ct", args.ct_root), ("endo", args.endo_root)):
+            repository = repository.resolve()
             start = time.monotonic()
             key = directory / (name + ".key")
             public = generate_key(key)

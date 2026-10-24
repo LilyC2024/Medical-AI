@@ -211,6 +211,8 @@ class MedicalHistoryOrchestrator:
         }
 
     def _verify_safety_ack(self, state):
+        if state.get("database_identity") != str(self.auth.path.resolve()):
+            raise PermissionError("Saved workflow belongs to a different database")
         current = self.safety.evaluate(PatientRecord.model_validate(state["record"]))
         if current["decision_sha256"] != state["safety_decision"]["decision_sha256"]:
             raise ValueError(
@@ -531,6 +533,9 @@ class MedicalHistoryOrchestrator:
         if state.get("status") != "awaiting_clinician_review":
             raise ValueError("No report is awaiting clinician review")
         self._verify_report(state)
+        # Reject stale policies, changed keys or images before advancing a durable graph.
+        self._verify_safety_ack(state)
+        self._verify_imaging(state)
         response = self._response(case_id, review, token, "clinical-review")
         if review.draft_sha256 != digest(state["draft"]):
             raise ValueError("Stale review: inspect the current draft before approving")

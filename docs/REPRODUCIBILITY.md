@@ -4,8 +4,9 @@
 
 ## Supported environment
 
-LOVISA now requires Python 3.11+; CI targets 3.11/3.12. Pillow 13 fixes the known
-issues found in the previous 12.3 installation and does not support Python 3.10.
+LOVISA now requires Python 3.11+; CI targets 3.11/3.12. [Pillow 13](https://pillow.readthedocs.io/en/stable/releasenotes/13.0.0.html) fixes
+the known issues found in the previous 12.3 installation and requires Python
+3.11+ ([package metadata](https://pypi.org/pypi/Pillow/13.0.0/json)).
 The existing local Python 3.10 environment was preserved; validation and deployment
 use the separate `.venv-release` Python 3.12 environment. For a fresh installation,
 create `.venv` with Python 3.12 and install `requirements.lock.txt`. Do not copy

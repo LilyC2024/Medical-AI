@@ -10,11 +10,11 @@ Proposal test claims were not treated as current validation.
 
 | Actually executed | Outcome |
 | --- | --- |
-| Supported Python 3.12 LOVISA regression | **312 passed in 361.61s** |
-| LOVISA coverage | **87.55%**, configured 85% floor passed |
+| Supported Python 3.12 LOVISA regression | **312 passed in 205.67s** (final hardening rerun) |
+| Initial integration coverage | **87.55%**, configured 85% floor passed (361.61s run) |
 | CT regression | **121 passed in 85.12s**, 73.53% coverage |
 | Endoscopy regression | **90 passed**, 78.88% coverage run; final 10.30s suite |
-| Focused final trust/privacy/persistence checks | **25 passed in 32.14s** |
+| Focused trust/privacy/persistence checks | **25 passed in 32.14s**; final recovery hardening **23 passed in 13.88s** |
 | Lint, scoped function-body types, dependency consistency | Passed in all three environments |
 | Dependency audits | No known vulnerabilities in release lock / installed companion environments |
 | Documentation/API | 94 maintained documents pass file/heading checks; AST references regenerated |
@@ -22,7 +22,7 @@ Proposal test claims were not treated as current validation.
 | Actual gemma4:e2b | Ordinary synthetic case reaches clinician review; missing-data case pauses before reasoning; no approval issued |
 | Actual pretrained CT on generated phantom | **30.25s**, one candidate; unreviewed report blocked |
 | Actual installed endoscopy model transfer | **0.97s**, one candidate, four artifacts; no approval issued |
-| Actual signed producer CLI → pinned receiver | CT **3.76s/66 artifacts**, endoscopy **2.11s/four artifacts**; no approvals issued |
+| Actual signed producer CLI → pinned receiver | Final relative-path rerun: CT **2.94s/66 artifacts**, endoscopy **1.45s/four artifacts**; no approvals issued |
 | Actual research upload UI/service smoke | CT ZIP **0.65s**, endoscopy ZIP **0.50s**, raw JPG inference **2.24s**; all pending review |
 
 The local Python 3.10 environment was preserved, but is no longer supported for
@@ -37,13 +37,30 @@ exception payloads/resource detectors, and audit replay checks displayed decisio
 A paired public-image/local-LLM smoke timed out at the existing 90s model budget
 while full suites were consuming CPU. It failed closed without a final report;
 this is not a passing paired-report run. Response limits were not relaxed.
-The previous successful paired run below remains historical until a fresh retry
-is recorded. Local CT Docker rebuild was blocked by socket permissions; container
-validation is delegated to the configured hosted workflow. The proposed LOVISA
+A fresh retry with CPU free passed in **14.31s**, producing a **170-word** report
+with four embedded images. All reviews in that smoke were **scripted test actions
+in a disposable database, not clinician approval**. Local CT Docker rebuild was blocked by socket permissions; its hosted Linux
+container/pretrained and Windows workflows subsequently passed. The proposed LOVISA
 Compose stack and human-factors protocol are not executed/shipped. No clinical
 validation, independent human audit, GPU training or NPU execution is claimed.
 
-Hosted runs for this new release will be recorded after publication.
+An actual two-process restart smoke also passed: a fresh process restored and
+verified the pending review from SQLite, then completed a scripted temporary-DB
+review. Changed keys are rejected **before graph advancement**, preserving the
+pending case for recovery with the correct key. The preserved Python 3.10
+environment passed 312 tests in 267.21s before final hardening and 18 focused
+workflow/persistence checks after it; it remains unsupported for release.
+
+Final-source paired report with the observed Ollama digest explicitly pinned
+also passed in **26.55s**, 170 words and four embedded images; approvals were
+scripted and confined to a disposable database.
+
+CT and endoscopy hosted release/security checks passed (see their evaluation
+records). Initial LOVISA Python 3.11, CodeQL and secret scan passed; Python 3.12,
+dependency/SBOM and downstream producer checks were still running/queued at
+publication. The final recovery hardening triggers a new hosted run; no queued
+check is represented as passed. The local demo was restarted
+on Python 3.12; HTTP health returned 200 and the existing demo login verified.
 
 ## Previous release evidence
 

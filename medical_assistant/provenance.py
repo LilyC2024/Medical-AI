@@ -1,4 +1,4 @@
-"""Identify exactly which model, prompts and safety policy produced a draft.
+"""Record observed model identity, static prompts and safety policy for a draft.
 
 Recorded in the case state, bound into report approval and exported with the
 report. Identity is not validation: these fields make runs comparable, they do not
@@ -14,7 +14,7 @@ PROMPT_VERSION = "reasoning-prompt-v1"
 
 
 def prompt_sha256():
-    """Hash of every prompt text the reasoning step can send to the model."""
+    """Hash static prompt templates; per-case records/evidence are bound separately."""
     text = "\n\x00\n".join((COMMON, ROLES["reasoning"], PROMPT))
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 

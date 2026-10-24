@@ -2,10 +2,7 @@
 
 import streamlit as st
 
-UNSIGNED = (
-    "Unsigned producer archive. Hashes prove internal consistency only; anyone could "
-    "have created these candidates. Inspect every candidate yourself."
-)
+UNSIGNED = "Source not signed. Inspect each candidate before including this study."
 
 
 def signature_notice(proposal):
@@ -13,8 +10,7 @@ def signature_notice(proposal):
     check = proposal.get("producer_signature") or {"status": "unsigned"}
     if check["status"] == "verified":
         st.success(
-            f"Producer signature verified: {check['label']} "
-            f"(key {check['key_id'][:12]}…). This identifies the exporter, not model accuracy."
+            f"Source verified: {check['label']}. Review is still required."
         )
     elif check["status"] == "untrusted-key":
         st.warning(

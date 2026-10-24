@@ -182,4 +182,4 @@ software gates.
     defects and pass focused regressions before final validation. Status: passed — focused adversarial tests and cross-project signed transfer passed.
 41. **Validation and delivery** — full suites, documentation/contract checks, live
     local inference and producer/receiver smokes; record results and push to main.
-    Status: in progress.
+    Status: complete locally and published — 312 LOVISA / 121 CT / 90 endoscopy tests; pinned live report, actual signed transfers, process restart and documentation checks passed. CT/endo hosted workflows passed; final LOVISA hosted checks remain asynchronous, not claimed passed.

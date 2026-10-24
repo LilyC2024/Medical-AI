@@ -66,6 +66,11 @@ def test_changed_key_cannot_approve_persisted_review(
     with pytest.raises((PermissionError, ValueError)):
         flow.review(case, review_for(flow.state(case)), token)
     assert not flow.state(case).get("reviewed")
+    assert flow.state(case)["status"] == "awaiting_clinician_review"
+    monkeypatch.setenv("LOVISA_RECEIPT_KEY", KEY)
+    _, restored_token, restored = restart(path, inference)
+    restored.review(case, review_for(restored.state(case)), restored_token)
+    assert restored.export(case)["reviewed"] is True
 
 
 def test_ephemeral_key_keeps_workflows_in_memory(record, inference, tmp_path):
