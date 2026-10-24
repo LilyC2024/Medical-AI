@@ -19,3 +19,9 @@ selects a project-wide redistribution license for this new code. No model weight
 research images or third-party training code are vendored with it.
 [Endoscopy synchronization](../docs/ENDOSCOPY.md) and the CI producer pin identify
 the tested source. Dependency and dataset rights remain separate.
+
+## Shared producer-signature module
+
+`medical_assistant/producer_signature.py` is byte-identical to
+`src/lung_nodule/producer_signature.py` (CT) and
+`src/endo_contracts/producer_signature.py` (endoscopy). Both sync scripts check it.

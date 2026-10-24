@@ -38,6 +38,7 @@ logs/
 /data/reports/*
 !/data/reports/.gitkeep
 /data/imports/
+/data/trust/
 /data/uploads/
 /data/backups/
 /data/imaging/

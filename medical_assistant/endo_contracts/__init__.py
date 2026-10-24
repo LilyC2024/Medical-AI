@@ -367,9 +367,10 @@ def read_exchange(payload, patient_id):
     try:
         with zipfile.ZipFile(io.BytesIO(payload)) as archive:
             entries = archive.infolist()
+            # An optional producer signature is checked by producer_signature.
             if (
-                len(entries) != 5
-                or len({e.filename for e in entries}) != 5
+                len(entries) not in (5, 6)
+                or len({e.filename for e in entries}) != len(entries)
                 or sum(e.file_size for e in entries) > MAX_BYTES
             ):
                 raise ValueError("Duplicate/missing/oversized archive members")
@@ -389,7 +390,7 @@ def read_exchange(payload, patient_id):
                 raise ValueError("Synthetic archive exceeds original 16 MiB limit")
             if bundle.patient_id != patient_id:
                 raise ValueError("Endoscopy patient mismatch")
-            if set(archive.namelist()) != {
+            if set(archive.namelist()) - {"signature.json"} != {
                 "bundle.json",
                 *(a.path for a in bundle.artifacts),
             }:

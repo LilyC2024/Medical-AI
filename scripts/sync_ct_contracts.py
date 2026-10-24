@@ -11,6 +11,7 @@ def sync(ct_root, *, write=False):
     pairs = (
         ("contracts.py", "nodule_models.py"),
         ("exchange_contract.py", "nodule_exchange.py"),
+        ("producer_signature.py", "producer_signature.py"),
     )
     for source, destination in pairs:
         text = (Path(ct_root) / "src/lung_nodule" / source).read_text(encoding="utf-8")

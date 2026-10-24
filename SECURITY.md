@@ -31,7 +31,13 @@ Record imports, safety continuation, imaging acceptance and final report approva
 have explicit review gates. Models cannot lower deterministic escalation.
 
 CT ZIP/NPY/PNG/report validation checks bounds, paths, hashes and source/annotation
-consistency. Hashes do not independently prove origin or model execution. The
+consistency. Hashes do not independently prove origin or model execution: anyone
+can craft a ZIP with fabricated candidates and valid hashes. Producers can add an
+Ed25519 signature, verified against public keys pinned locally in
+`data/trust/producer_keys.json` (or `LOVISA_TRUSTED_PRODUCER_KEYS`). A bad
+signature is rejected; unsigned or unpinned archives are accepted with a visible
+warning unless `require_signature` is set. A signature identifies the key holder,
+not model correctness, data permission or clinical truth. The
 structured safety policy is not comprehensive free-text emergency recognition.
 
 ## Persistence and publication

@@ -308,7 +308,7 @@ def read_exchange(payload, patient_id):
         with zipfile.ZipFile(io.BytesIO(payload)) as z:
             items = z.infolist()
             if (
-                len(items) > 131
+                len(items) > 132
                 or len({i.filename for i in items}) != len(items)
                 or sum(i.file_size for i in items) > MAX_EXPANDED
             ):
@@ -330,7 +330,8 @@ def read_exchange(payload, patient_id):
                 raise ValueError(
                     "Nodule bundle belongs to a different synthetic patient"
                 )
-            if set(z.namelist()) != {
+            # An optional producer signature is checked by producer_signature.
+            if set(z.namelist()) - {"signature.json"} != {
                 "bundle.json",
                 *(a.path for a in bundle.artifacts),
             }:

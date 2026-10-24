@@ -79,7 +79,7 @@ def nodule_viewer(manifest, path_for, key, *, review=None):
     st.caption(f"Source slice {index} · original evidence is retained with this study.")
 
 
-def candidate_controls(manifest, key):
+def candidate_controls(manifest, key, *, false_positive=None):
     """Return typed local choices; nothing is persisted or approved by these controls."""
     bundle = NoduleBundle.model_validate(manifest)
     previous = (
@@ -90,6 +90,8 @@ def candidate_controls(manifest, key):
     decisions = []
     for c in bundle.study.candidates:
         st.write(f"Candidate {c.candidate_id}")
+        if false_positive:
+            st.caption(false_positive)
         old = previous.get(c.candidate_id)
         options = ["uncertain", "accept", "reject"]
         choice = st.radio(

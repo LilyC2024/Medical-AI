@@ -15,6 +15,7 @@ dependencies = [
   "streamlit>=1.65,<2",
   "numpy>=2,<3",
   "pillow>=10,<14",
+  "cryptography>=44,<51",
 ]
 
 [project.optional-dependencies]

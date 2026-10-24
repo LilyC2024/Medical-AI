@@ -14,6 +14,9 @@ def main():
         target = root / "medical_assistant/endo_contracts" / name
         if source.read_bytes() != target.read_bytes():
             raise ValueError("Endoscopy contract drift: " + name)
+    signature = Path(args.endo_root) / "src/endo_contracts/producer_signature.py"
+    if signature.read_bytes() != (root / "medical_assistant/producer_signature.py").read_bytes():
+        raise ValueError("Endoscopy contract drift: producer_signature.py")
     print("Endoscopy contracts and worker match exactly")
 
 

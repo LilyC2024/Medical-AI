@@ -133,10 +133,27 @@ controls but never replaces authenticated imaging acceptance or final approval.
 | All source/overlay PNGs | Exact dimensions and pixels recomputed from HU, boxes and producer calipers |
 | producer/report.md | Exact canonical report or fixed pending text; no arbitrary producer conclusions |
 | Manifest | Safe paths, role/index, byte sizes and SHA-256; reject duplicates/unlisted/encrypted/symlink entries |
+| signature.json (optional) | Ed25519 over bundle.json's SHA-256, producer and performance claim; verified against a pinned key, else shown as unsigned/unpinned |
 | LOVISA acceptance | Fully resolved candidate review, valid calipers, matching reviewer/study and content hash |
 
-Bounds: **64 slices ×256×256**, 64 MiB compressed, 128 MiB expanded, 131 members,
-400 KB manifest. Exchange uses the full bounded source snapshot, not truncation.
+Bounds: **64 slices ×256×256**, 64 MiB compressed, 128 MiB expanded, 131 members
+plus optional `signature.json`, 400 KB manifest.
+
+### Producer signatures and false-positive rates
+
+Pin each producer's public key once (printed by its `keygen` command):
+
+```bash
+.venv/bin/python -m medical_assistant.producer_trust --producer lovisa-ct --public-key <public_key_b64> --label "My CT workstation"
+```
+
+Keys live in ignored `data/trust/producer_keys.json`. Set `"require_signature":
+true` there to reject unsigned archives. The review screen shows the signature
+status and, beside **every candidate**, the false-positive rate from a verified
+producer claim: CT always reports *not measured*; endoscopy reports the measured
+share of unmatched candidate regions for the exact registered model when its
+evaluation was supplied. Unverified archives show *not available*. These figures
+come from small exploratory evaluations, not clinical performance. Exchange uses the full bounded source snapshot, not truncation.
 Wire previews use −1000 to 400 HU and a font-independent NumPy renderer.
 
 Shared ML-free contracts/report/renderer are vendored from CT with one import-path

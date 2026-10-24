@@ -1,5 +1,26 @@
 # LOVISA evaluation record
 
+## Producer-signature verification — 24 October 2026
+
+Trust-boundary change; no clinical logic, policy, catalog or model change. LOVISA
+verifies optional Ed25519 producer signatures against locally pinned keys, rejects
+bad signatures, warns on unsigned/unpinned archives (accepted unless
+`require_signature`), and shows the verified false-positive claim beside every
+candidate. CI now pins CT `eb0acc3` and endoscopy `f4e42d7` (feature branches).
+
+| Executed check | Actual outcome |
+| --- | --- |
+| `python -m pytest -q` (Python 3.13.17, local container) | **284 passed in 80.74s** (279 before + 5 new in `test_producer_trust.py`) |
+| `sync_ct_contracts.py` / `sync_endo_contracts.py` against both feature branches | Both match exactly, including `producer_signature.py` |
+| `smoke_imaging.py --mode lung-fixture` and `--mode legacy` | PASS (66 / 41 artifacts), approvals pending |
+| `smoke_endoscopy.py` (fixture) | PASS, 1 candidate, approvals pending |
+| Actual signed run: CT `keygen`, bridge with `LOVISA_SIGNING_KEY_FILE`, key pinned via `producer_trust` CLI, `ImagingStore.prepare` | `verified`; false-positive line "not measured" (keys in a scratch directory, not committed) |
+| `scripts/check_docs.py` / `generate_api_docs.py --check` / `pip check` / `compileall` | Passed / matches / no broken requirements / compiled |
+| `ruff check .` (ruff 0.17.2, default rules) | 93 findings vs 95 baseline: none introduced; two pre-existing import-order findings fixed in edited files |
+
+Not run: pretrained-weight CT smoke and installed endoscopy model smoke (weights
+not downloaded here), Python 3.10 and Windows, live Ollama, hosted CI.
+
 ## Expert review and joint release — 24 October 2026
 
 Three independent coding reviewers audited LOVISA, CT and endoscopy. Repairs

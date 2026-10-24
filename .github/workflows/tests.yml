@@ -62,7 +62,7 @@ jobs:
         uses: actions/checkout@v7
         with:
           repository: LilyC2024/ai-medimg-2.5D-CT
-          ref: 9a3cdfeb0dc71cb5a7e479e54d5a8430ddbe967c
+          ref: eb0acc37561ef2dbaad19d088b77ec367a0aaa62
           path: companion-ct
       - name: Set up Python
         uses: actions/setup-python@v7
@@ -105,7 +105,7 @@ jobs:
         uses: actions/checkout@v7
         with:
           repository: LilyC2024/AI-MedImg-Endo
-          ref: 9391192d2f68cc7e50ba21a1085b21d1b3af2664
+          ref: f4e42d78161a2cdf4f50181ed2f41ac237805a1f
           path: companion-endo
       - uses: actions/setup-python@v7
         with:

@@ -66,3 +66,9 @@ class FakeInference:
 @pytest.fixture
 def inference():
     return FakeInference()
+
+
+@pytest.fixture(autouse=True)
+def isolated_producer_trust(tmp_path, monkeypatch):
+    """Never read a developer's pinned producer keys during tests."""
+    monkeypatch.setenv("LOVISA_TRUSTED_PRODUCER_KEYS", str(tmp_path / "no-trust.json"))

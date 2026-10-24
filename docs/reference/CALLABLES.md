@@ -701,19 +701,19 @@ Static calls (including nested helper bodies): `Bundle.model_validate`, `checked
 
 Source-first endoscopy inspection; every candidate needs explicit human review.
 
-#### [image_results](../../medical_assistant/endo_ui.py#L19)
+#### [image_results](../../medical_assistant/endo_ui.py#L20)
 
 `image_results(manifest, path_for, review=None)`
 
 Static calls (including nested helper bodies): `summarize_endo`, `st.selectbox`, `str`, `st.columns`, `a.image`, `b.image`, `st.subheader`, `a.metric`, `b.metric`, `st.caption`, `path_for`, `next`, `max`, `st.dataframe` (additional calls in source).
 
-#### [endoscopy_ui](../../medical_assistant/endo_ui.py#L78)
+#### [endoscopy_ui](../../medical_assistant/endo_ui.py#L79)
 
 `endoscopy_ui(path, auth, token, user, record, *, locked=False, case_imaging=None)`
 
 Static calls (including nested helper bodies): `st.subheader`, `st.caption`, `collect`, `image_actions`, `st.session_state.get`, `ImagingStore`, `st.info`, `st.button`, `is_endoscopy`, `store.snapshots`, `store.verify`, `st.selectbox`, `next`, `image_results` (additional calls in source).
 
-#### [endoscopy_ui.preview](../../medical_assistant/endo_ui.py#L137)
+#### [endoscopy_ui.preview](../../medical_assistant/endo_ui.py#L138)
 
 `preview(role, index)`
 
@@ -883,35 +883,35 @@ Explicit raised conditions: `PermissionError`, `ValueError`. See source for trig
 
 Human-reviewed synthetic imaging storage, separate from clinical source facts.
 
-### [ImagingStore](../../medical_assistant/imaging.py#L22)
+### [ImagingStore](../../medical_assistant/imaging.py#L23)
 
 Class contract is defined by the fields and methods below.
 
-#### [ImagingStore.__init__](../../medical_assistant/imaging.py#L23)
+#### [ImagingStore.__init__](../../medical_assistant/imaging.py#L24)
 
-`__init__(self, path, auth=None)`
+`__init__(self, path, auth=None, trust=None)`
 
 Static calls (including nested helper bodies): `Path`, `connect`, `db.execute`.
 
-#### [ImagingStore.prepare](../../medical_assistant/imaging.py#L32)
+#### [ImagingStore.prepare](../../medical_assistant/imaging.py#L34)
 
 `prepare(self, payload, patient_id, *, study_id=None)`
 
-Static calls (including nested helper bodies): `get_history`, `validate_bundle`, `digest`, `directory.mkdir`, `json.dumps`, `ValueError`, `uuid4`, `bundle.model_dump`, `file_digest`, `(directory / 'bundle.json').write_bytes`, `(directory / 'source.mhcra.zip').write_bytes`, `artifacts.items`, `target.parent.mkdir`, `target.write_bytes` (additional calls in source).
+Static calls (including nested helper bodies): `get_history`, `validate_bundle`, `verify_producer`, `digest`, `directory.mkdir`, `json.dumps`, `ValueError`, `is_endoscopy`, `uuid4`, `bundle.model_dump`, `file_digest`, `signature.model_dump`, `(directory / 'bundle.json').write_bytes`, `(directory / 'source.mhcra.zip').write_bytes` (additional calls in source).
 
 Explicit raised conditions: `ValueError`. See source for triggers; called validators may raise additional exceptions.
 
-#### [ImagingStore.discard](../../medical_assistant/imaging.py#L59)
+#### [ImagingStore.discard](../../medical_assistant/imaging.py#L66)
 
 `discard(self, key)`
 
 Static calls (including nested helper bodies): `self.pending.pop`, `shutil.rmtree`.
 
-#### [ImagingStore._directory](../../medical_assistant/imaging.py#L63)
+#### [ImagingStore._directory](../../medical_assistant/imaging.py#L70)
 
 `_directory(self, patient_id, study_id)`
 
-#### [ImagingStore._verify_directory](../../medical_assistant/imaging.py#L67)
+#### [ImagingStore._verify_directory](../../medical_assistant/imaging.py#L74)
 
 `_verify_directory(directory, snapshot)`
 
@@ -919,7 +919,7 @@ Static calls (including nested helper bodies): `archive.read_bytes`, `validate_b
 
 Explicit raised conditions: `ValueError`. See source for triggers; called validators may raise additional exceptions.
 
-#### [ImagingStore.approve](../../medical_assistant/imaging.py#L88)
+#### [ImagingStore.approve](../../medical_assistant/imaging.py#L95)
 
 `approve(self, key, review, token=None, *, nodule_review=None, endo_review=None)`
 
@@ -927,13 +927,13 @@ Static calls (including nested helper bodies): `Review.model_validate`, `json.lo
 
 Explicit raised conditions: `PermissionError`, `ValueError`. See source for triggers; called validators may raise additional exceptions.
 
-#### [ImagingStore.snapshots](../../medical_assistant/imaging.py#L179)
+#### [ImagingStore.snapshots](../../medical_assistant/imaging.py#L186)
 
 `snapshots(self, patient_id)`
 
 Static calls (including nested helper bodies): `self.verify`, `connect`, `json.loads`, `db.execute`.
 
-#### [ImagingStore.verify](../../medical_assistant/imaging.py#L189)
+#### [ImagingStore.verify](../../medical_assistant/imaging.py#L196)
 
 `verify(self, snapshots)`
 
@@ -941,13 +941,13 @@ Static calls (including nested helper bodies): `verify_nodule_snapshot`, `self._
 
 Explicit raised conditions: `ValueError`. See source for triggers; called validators may raise additional exceptions.
 
-#### [ImagingStore.preview_path](../../medical_assistant/imaging.py#L205)
+#### [ImagingStore.preview_path](../../medical_assistant/imaging.py#L212)
 
 `preview_path(self, snapshot, role, index)`
 
 Static calls (including nested helper bodies): `self.verify`, `next`, `self._directory`.
 
-#### [ImagingStore.preview_resolver](../../medical_assistant/imaging.py#L218)
+#### [ImagingStore.preview_resolver](../../medical_assistant/imaging.py#L225)
 
 `preview_resolver(self, snapshot)`
 
@@ -960,7 +960,7 @@ Static calls (including nested helper bodies): `self.verify`, `self._directory`,
 
 Explicit raised conditions: `ValueError`. See source for triggers; called validators may raise additional exceptions.
 
-#### [ImagingStore.preview_resolver.resolve](../../medical_assistant/imaging.py#L232)
+#### [ImagingStore.preview_resolver.resolve](../../medical_assistant/imaging.py#L239)
 
 `resolve(role, index)`
 
@@ -1172,7 +1172,7 @@ Static calls (including nested helper bodies): `summarize`, `st.subheader`, `st.
 
 Static calls (including nested helper bodies): `st.subheader`, `st.caption`, `collect`, `image_actions`, `st.session_state.get`, `ImagingStore`, `is_endoscopy`, `st.info`, `st.button`, `store.snapshots`, `store.verify`, `st.selectbox`, `next`, `result_summary` (additional calls in source).
 
-#### [imaging_ui.preview](../../medical_assistant/imaging_ui.py#L159)
+#### [imaging_ui.preview](../../medical_assistant/imaging_ui.py#L160)
 
 `preview(role, index)`
 
@@ -1871,19 +1871,19 @@ Static calls (including nested helper bodies): `NoduleBundle.model_validate`, `s
 
 #### [candidate_controls](../../medical_assistant/nodule_ui.py#L82)
 
-`candidate_controls(manifest, key)`
+`candidate_controls(manifest, key, *, false_positive=None)`
 
 Return typed local choices; nothing is persisted or approved by these controls.
 
-Static calls (including nested helper bodies): `NoduleBundle.model_validate`, `st.write`, `previous.get`, `st.radio`, `st.checkbox`, `decisions.append`, `st.columns`, `columns[0].number_input`, `zip`, `Caliper`, `Decision`, `bool`, `values.append`, `options.index` (additional calls in source).
+Static calls (including nested helper bodies): `NoduleBundle.model_validate`, `st.write`, `previous.get`, `st.radio`, `st.checkbox`, `decisions.append`, `st.caption`, `st.columns`, `columns[0].number_input`, `zip`, `Caliper`, `Decision`, `bool`, `values.append` (additional calls in source).
 
-#### [build_nodule_review](../../medical_assistant/nodule_ui.py#L172)
+#### [build_nodule_review](../../medical_assistant/nodule_ui.py#L174)
 
 `build_nodule_review(manifest, decisions, reviewer, attested)`
 
 Static calls (including nested helper bodies): `NoduleBundle.model_validate`, `NoduleReview`, `value.verify`, `digest`.
 
-#### [preview_calipers](../../medical_assistant/nodule_ui.py#L185)
+#### [preview_calipers](../../medical_assistant/nodule_ui.py#L187)
 
 `preview_calipers(manifest, path_for, decisions)`
 
@@ -1934,6 +1934,251 @@ Explicit raised conditions: `ValueError`. See source for triggers; called valida
 Static calls (including nested helper bodies): `self.ensure_local`, `self._post`, `json.loads`, `Assessment.model_json_schema`, `output_schema.get`, `prepare`, `len`, `ValueError`, `time.monotonic`, `result.get`, `expand`, `Assessment.model_validate`, `(system + user + json.dumps(output_schema)).encode`, `json.dumps`.
 
 Explicit raised conditions: `ValueError`. See source for triggers; called validators may raise additional exceptions.
+
+## [medical_assistant/producer_signature.py](../../medical_assistant/producer_signature.py)
+
+Ed25519 producer signatures for LOVISA review ZIPs.
+
+This file is copied byte-for-byte into the CT companion, the endoscopy companion
+and LOVISA; keep it self-contained. A valid signature from a pinned key shows that
+the holder of that private key exported these exact ``bundle.json`` bytes, which
+in turn hash-bind every artifact. It does not prove model correctness, data
+permission, clinical truth or the signer's qualifications. Research use only.
+
+### [Record](../../medical_assistant/producer_signature.py#L30)
+
+Class contract is defined by the fields and methods below.
+
+### [Performance](../../medical_assistant/producer_signature.py#L34)
+
+Producer-declared evaluation of the exact model; shown beside candidates.
+
+| Declared field | Type | Default / constraint expression |
+| --- | --- | --- |
+| `measured` | `bool` | `required / supplied by caller` |
+| `metric` | `str` | `Field(min_length=1, max_length=200)` |
+| `false_positive_fraction` | `float \| None` | `Field(default=None, ge=0, le=1)` |
+| `test_images` | `int \| None` | `Field(default=None, ge=1, strict=True)` |
+| `negative_images` | `int \| None` | `Field(default=None, ge=0, strict=True)` |
+| `evaluation_sha256` | `str \| None` | `Field(default=None, pattern='^[a-f0-9]{64}$')` |
+| `limitations` | `str` | `Field(min_length=1, max_length=600)` |
+
+#### [Performance.complete](../../medical_assistant/producer_signature.py#L46)
+
+`complete(self)`
+
+Static calls (including nested helper bodies): `model_validator`, `any`, `ValueError`.
+
+Explicit raised conditions: `ValueError`. See source for triggers; called validators may raise additional exceptions.
+
+### [Claims](../../medical_assistant/producer_signature.py#L62)
+
+Class contract is defined by the fields and methods below.
+
+| Declared field | Type | Default / constraint expression |
+| --- | --- | --- |
+| `schema_version` | `Literal['lovisa-producer-signature-v1']` | `required / supplied by caller` |
+| `producer` | `Producer` | `required / supplied by caller` |
+| `bundle_sha256` | `str` | `Hex64` |
+| `key_id` | `str` | `Hex64` |
+| `signed_at` | `datetime` | `required / supplied by caller` |
+| `performance` | `Performance` | `required / supplied by caller` |
+
+### [Envelope](../../medical_assistant/producer_signature.py#L71)
+
+Class contract is defined by the fields and methods below.
+
+| Declared field | Type | Default / constraint expression |
+| --- | --- | --- |
+| `claims` | `Claims` | `required / supplied by caller` |
+| `signature_b64` | `str` | `Field(min_length=80, max_length=100)` |
+
+### [Check](../../medical_assistant/producer_signature.py#L76)
+
+Result of checking an archive against locally pinned producer keys.
+
+| Declared field | Type | Default / constraint expression |
+| --- | --- | --- |
+| `status` | `Literal['verified', 'unsigned', 'untrusted-key']` | `required / supplied by caller` |
+| `producer` | `Producer \| None` | `None` |
+| `key_id` | `str \| None` | `None` |
+| `label` | `str \| None` | `None` |
+| `performance` | `Performance \| None` | `None` |
+
+#### [canonical](../../medical_assistant/producer_signature.py#L86)
+
+`canonical(value) → bytes`
+
+Static calls (including nested helper bodies): `isinstance`, `value.model_dump`, `json.dumps`.
+
+#### [key_id](../../medical_assistant/producer_signature.py#L92)
+
+`key_id(public_raw: bytes) → str`
+
+Static calls (including nested helper bodies): `hashlib.sha256(public_raw).hexdigest`, `hashlib.sha256`.
+
+#### [_crypto](../../medical_assistant/producer_signature.py#L96)
+
+`_crypto()`
+
+Static calls (including nested helper bodies): `ValueError`.
+
+Explicit raised conditions: `ValueError`. See source for triggers; called validators may raise additional exceptions.
+
+#### [_public_raw](../../medical_assistant/producer_signature.py#L106)
+
+`_public_raw(public_key) → bytes`
+
+Static calls (including nested helper bodies): `_crypto`, `public_key.public_bytes`.
+
+#### [generate_key](../../medical_assistant/producer_signature.py#L113)
+
+`generate_key(path) → dict`
+
+Create a new owner-only PKCS8 private key file; never overwrite an existing one.
+
+Static calls (including nested helper bodies): `_crypto`, `ed25519.Ed25519PrivateKey.generate`, `private.private_bytes`, `Path`, `path.parent.mkdir`, `os.open`, `public_info`, `serialization.NoEncryption`, `os.fdopen`, `handle.write`, `private.public_key`.
+
+#### [public_info](../../medical_assistant/producer_signature.py#L130)
+
+`public_info(public_key) → dict`
+
+Static calls (including nested helper bodies): `_public_raw`, `key_id`, `base64.b64encode(raw).decode`, `base64.b64encode`.
+
+#### [load_private_key](../../medical_assistant/producer_signature.py#L135)
+
+`load_private_key(path)`
+
+Static calls (including nested helper bodies): `_crypto`, `Path`, `serialization.load_pem_private_key`, `ValueError`, `path.read_bytes`, `isinstance`, `TypeError`, `stat.S_IMODE`, `path.stat`.
+
+Explicit raised conditions: `TypeError`, `ValueError`. See source for triggers; called validators may raise additional exceptions.
+
+#### [sign_archive](../../medical_assistant/producer_signature.py#L146)
+
+`sign_archive(payload: bytes, private_key, producer, performance=NOT_MEASURED) → bytes`
+
+Return the same archive with an added signature over bundle.json and claims.
+
+Static calls (including nested helper bodies): `Claims`, `Envelope`, `io.BytesIO`, `stream.getvalue`, `zipfile.ZipFile`, `archive.infolist`, `dict`, `archive.writestr`, `archive.namelist`, `ValueError`, `entries.append`, `hashlib.sha256(bundle).hexdigest`, `datetime.now`, `Performance.model_validate` (additional calls in source).
+
+Explicit raised conditions: `ValueError`. See source for triggers; called validators may raise additional exceptions.
+
+#### [_unique](../../medical_assistant/producer_signature.py#L175)
+
+`_unique(pairs)`
+
+Static calls (including nested helper bodies): `ValueError`.
+
+Explicit raised conditions: `ValueError`. See source for triggers; called validators may raise additional exceptions.
+
+#### [check_archive](../../medical_assistant/producer_signature.py#L184)
+
+`check_archive(payload: bytes, trusted: dict) → Check`
+
+Check a signature against ``{key_id: {"producer", "public_key_b64", "label"}}``.
+
+Unsigned archives and signatures from unpinned keys are reported, not trusted;
+callers decide whether to accept them. A present signature that is malformed,
+does not match bundle.json, names the wrong producer or fails verification
+raises ValueError.
+
+Static calls (including nested helper bodies): `_crypto`, `trusted.get`, `base64.b64decode`, `Check`, `hashlib.sha256(bundle).hexdigest`, `ValueError`, `ed25519.Ed25519PublicKey.from_public_bytes(raw).verify`, `zipfile.ZipFile`, `archive.namelist`, `archive.getinfo`, `Envelope.model_validate`, `archive.read`, `key_id`, `canonical` (additional calls in source).
+
+Explicit raised conditions: `ValueError`. See source for triggers; called validators may raise additional exceptions.
+
+## [medical_assistant/producer_trust.py](../../medical_assistant/producer_trust.py)
+
+Locally pinned producer public keys and the signature acceptance policy.
+
+The trust file is local configuration outside Git (default
+``data/trust/producer_keys.json``, or ``LOVISA_TRUSTED_PRODUCER_KEYS``). Public
+keys are not secret, but pinning one is a decision to trust its holder. Research
+use only; a verified signature does not establish model accuracy.
+
+### [PinnedKey](../../medical_assistant/producer_trust.py#L24)
+
+Class contract is defined by the fields and methods below.
+
+| Declared field | Type | Default / constraint expression |
+| --- | --- | --- |
+| `producer` | `Literal['lovisa-ct', 'lovisa-endo']` | `required / supplied by caller` |
+| `public_key_b64` | `str` | `Field(min_length=40, max_length=60)` |
+| `label` | `str` | `Field(min_length=1, max_length=80)` |
+
+### [TrustConfig](../../medical_assistant/producer_trust.py#L31)
+
+Class contract is defined by the fields and methods below.
+
+| Declared field | Type | Default / constraint expression |
+| --- | --- | --- |
+| `require_signature` | `bool` | `False` |
+| `keys` | `list[PinnedKey]` | `Field(default_factory=list, max_length=32)` |
+
+#### [TrustConfig.trusted](../../medical_assistant/producer_trust.py#L36)
+
+`trusted(self) → dict`
+
+Static calls (including nested helper bodies): `base64.b64decode`, `key.model_dump`, `len`, `ValueError`, `key_id`.
+
+Explicit raised conditions: `ValueError`. See source for triggers; called validators may raise additional exceptions.
+
+#### [trust_path](../../medical_assistant/producer_trust.py#L46)
+
+`trust_path(path=None) → Path`
+
+Static calls (including nested helper bodies): `Path`, `os.environ.get`.
+
+#### [load_trust](../../medical_assistant/producer_trust.py#L50)
+
+`load_trust(path=None) → TrustConfig`
+
+Missing file means no pinned keys and signatures not required.
+
+Static calls (including nested helper bodies): `trust_path`, `TrustConfig.model_validate_json`, `path.exists`, `TrustConfig`, `path.read_text`.
+
+#### [verify_producer](../../medical_assistant/producer_trust.py#L58)
+
+`verify_producer(payload: bytes, config: TrustConfig) → Check`
+
+Fail closed on bad signatures; enforce ``require_signature`` when set.
+
+Static calls (including nested helper bodies): `check_archive`, `config.trusted`, `ValueError`.
+
+Explicit raised conditions: `ValueError`. See source for triggers; called validators may raise additional exceptions.
+
+#### [pin](../../medical_assistant/producer_trust.py#L68)
+
+`pin(path, producer, public_key_b64, label)`
+
+Static calls (including nested helper bodies): `trust_path`, `load_trust`, `PinnedKey`, `config.model_copy`, `updated.trusted`, `path.parent.mkdir`, `path.write_text`, `ValueError`, `updated.model_dump_json`.
+
+Explicit raised conditions: `ValueError`. See source for triggers; called validators may raise additional exceptions.
+
+#### [main](../../medical_assistant/producer_trust.py#L81)
+
+`main(argv=None)`
+
+Static calls (including nested helper bodies): `argparse.ArgumentParser`, `p.add_argument`, `p.parse_args`, `pin`, `print`, `len`, `trust_path`.
+
+## [medical_assistant/producer_ui.py](../../medical_assistant/producer_ui.py)
+
+Show producer-signature status and declared false-positive rates beside review controls.
+
+#### [signature_notice](../../medical_assistant/producer_ui.py#L11)
+
+`signature_notice(proposal)`
+
+Render the producer signature status recorded when the archive was prepared.
+
+Static calls (including nested helper bodies): `proposal.get`, `st.success`, `st.warning`.
+
+#### [false_positive_text](../../medical_assistant/producer_ui.py#L28)
+
+`false_positive_text(proposal)`
+
+Plain-language false-positive statement shown next to every candidate.
+
+Static calls (including nested helper bodies): `proposal.get`, `check.get`.
 
 ## [medical_assistant/reasoning_constraints.py](../../medical_assistant/reasoning_constraints.py)
 
@@ -2929,7 +3174,7 @@ Static calls (including nested helper bodies): `print`, `(Path(ct_root) / 'src/l
 
 Explicit raised conditions: `ValueError`. See source for triggers; called validators may raise additional exceptions.
 
-#### [main](../../scripts/sync_ct_contracts.py#L31)
+#### [main](../../scripts/sync_ct_contracts.py#L32)
 
 `main()`
 
@@ -2943,6 +3188,6 @@ Check exact ML-free endoscopy contract/worker equality with the companion.
 
 `main()`
 
-Static calls (including nested helper bodies): `argparse.ArgumentParser`, `p.add_argument`, `p.parse_args`, `print`, `Path(__file__).resolve`, `source.read_bytes`, `target.read_bytes`, `ValueError`, `Path`.
+Static calls (including nested helper bodies): `argparse.ArgumentParser`, `p.add_argument`, `p.parse_args`, `print`, `Path`, `signature.read_bytes`, `(root / 'medical_assistant/producer_signature.py').read_bytes`, `ValueError`, `Path(__file__).resolve`, `source.read_bytes`, `target.read_bytes`.
 
 Explicit raised conditions: `ValueError`. See source for triggers; called validators may raise additional exceptions.

@@ -16,12 +16,14 @@ from medical_assistant.nodule_support import (
     is_nodule,
     verify_nodule_snapshot,
 )
+from medical_assistant.producer_trust import load_trust, verify_producer
 from medical_assistant.report import digest
 
 
 class ImagingStore:
-    def __init__(self, path, auth=None):
+    def __init__(self, path, auth=None, trust=None):
         self.path, self.auth = Path(path), auth
+        self.trust = trust  # None: read local trust settings when preparing
         self.root = self.path.parent / "imaging"
         self.pending = {}
         with connect(self.path) as db:
@@ -34,11 +36,16 @@ class ImagingStore:
         bundle, raw, artifacts = validate_bundle(payload, patient_id)
         if study_id is not None and bundle.study_id != study_id:
             raise ValueError("Completed CT bundle does not match its requested study")
+        signature = verify_producer(payload, self.trust or load_trust())
+        expected = "lovisa-endo" if is_endoscopy(bundle.model_dump(mode="json")) else "lovisa-ct"
+        if signature.producer not in (None, expected):
+            raise ValueError("Producer signature names the wrong modality")
         key = uuid4().hex
         proposal = {
             "manifest": bundle.model_dump(mode="json"),
             "manifest_sha256": file_digest(raw),
             "archive_sha256": file_digest(payload),
+            "producer_signature": signature.model_dump(mode="json"),
         }
         proposal["sha256"] = digest(json.dumps(proposal, sort_keys=True))
         directory = self.root / "pending" / key
