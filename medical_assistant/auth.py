@@ -9,6 +9,7 @@ import time
 from pathlib import Path
 
 from medical_assistant.database import DATABASE_PATH, connect, initialize
+from medical_assistant.persistence import resolve_receipt_key
 
 
 class LocalAuth:
@@ -16,11 +17,16 @@ class LocalAuth:
         self.path = path
         initialize(path)
         self.sessions = {}
-        self._receipt_key = secrets.token_bytes(32)
+        self._receipt_key, self.receipt_key_source = resolve_receipt_key()
         with connect(path) as db:
             db.execute(
                 "CREATE TABLE IF NOT EXISTS clinicians (username TEXT PRIMARY KEY, salt TEXT NOT NULL, password_hash TEXT NOT NULL)"
             )
+
+    @property
+    def durable_receipts(self):
+        """True when receipts stay verifiable across restarts (env or keyring key)."""
+        return self.receipt_key_source != "ephemeral"
 
     def has_users(self):
         with connect(self.path) as db:

@@ -83,23 +83,29 @@ Explicit raised conditions: `ValueError`. See source for triggers; called valida
 
 Local password authentication and short-lived in-process clinician sessions.
 
-### [LocalAuth](../../medical_assistant/auth.py#L14)
+### [LocalAuth](../../medical_assistant/auth.py#L15)
 
 Class contract is defined by the fields and methods below.
 
-#### [LocalAuth.__init__](../../medical_assistant/auth.py#L15)
+#### [LocalAuth.__init__](../../medical_assistant/auth.py#L16)
 
 `__init__(self, path: Path=DATABASE_PATH)`
 
-Static calls (including nested helper bodies): `initialize`, `secrets.token_bytes`, `connect`, `db.execute`.
+Static calls (including nested helper bodies): `initialize`, `resolve_receipt_key`, `connect`, `db.execute`.
 
-#### [LocalAuth.has_users](../../medical_assistant/auth.py#L25)
+#### [LocalAuth.durable_receipts](../../medical_assistant/auth.py#L27)
+
+`durable_receipts(self)`
+
+True when receipts stay verifiable across restarts (env or keyring key).
+
+#### [LocalAuth.has_users](../../medical_assistant/auth.py#L31)
 
 `has_users(self)`
 
 Static calls (including nested helper bodies): `connect`, `bool`, `db.execute('SELECT COUNT(*) FROM clinicians').fetchone`, `db.execute`.
 
-#### [LocalAuth.create_clinician](../../medical_assistant/auth.py#L29)
+#### [LocalAuth.create_clinician](../../medical_assistant/auth.py#L35)
 
 `create_clinician(self, username: str, password: str, *, local_demo=False)`
 
@@ -107,7 +113,7 @@ Static calls (including nested helper bodies): `secrets.token_hex`, `ValueError`
 
 Explicit raised conditions: `ValueError`. See source for triggers; called validators may raise additional exceptions.
 
-#### [LocalAuth.login](../../medical_assistant/auth.py#L47)
+#### [LocalAuth.login](../../medical_assistant/auth.py#L53)
 
 `login(self, username: str, password: str)`
 
@@ -115,7 +121,7 @@ Static calls (including nested helper bodies): `secrets.token_urlsafe`, `connect
 
 Explicit raised conditions: `PermissionError`. See source for triggers; called validators may raise additional exceptions.
 
-#### [LocalAuth.require](../../medical_assistant/auth.py#L63)
+#### [LocalAuth.require](../../medical_assistant/auth.py#L69)
 
 `require(self, token)`
 
@@ -123,25 +129,25 @@ Static calls (including nested helper bodies): `self.sessions.get`, `PermissionE
 
 Explicit raised conditions: `PermissionError`. See source for triggers; called validators may raise additional exceptions.
 
-#### [LocalAuth.logout](../../medical_assistant/auth.py#L69)
+#### [LocalAuth.logout](../../medical_assistant/auth.py#L75)
 
 `logout(self, token)`
 
 Static calls (including nested helper bodies): `self.sessions.pop`.
 
-#### [LocalAuth.audit](../../medical_assistant/auth.py#L72)
+#### [LocalAuth.audit](../../medical_assistant/auth.py#L78)
 
 `audit(self, action, patient_id, token, payload)`
 
 Static calls (including nested helper bodies): `self.require`, `connect`, `db.execute`, `json.dumps`.
 
-#### [LocalAuth.receipt](../../medical_assistant/auth.py#L82)
+#### [LocalAuth.receipt](../../medical_assistant/auth.py#L88)
 
 `receipt(self, token, action, content_sha256)`
 
 Static calls (including nested helper bodies): `self.require`, `hmac.new(self._receipt_key, message.encode(), 'sha256').hexdigest`, `hmac.new`, `message.encode`.
 
-#### [LocalAuth.verify_receipt](../../medical_assistant/auth.py#L94)
+#### [LocalAuth.verify_receipt](../../medical_assistant/auth.py#L100)
 
 `verify_receipt(self, receipt, action, content_sha256)`
 
@@ -149,7 +155,7 @@ Static calls (including nested helper bodies): `hmac.new(self._receipt_key, mess
 
 Explicit raised conditions: `PermissionError`. See source for triggers; called validators may raise additional exceptions.
 
-#### [LocalAuth.record_receipt](../../medical_assistant/auth.py#L107)
+#### [LocalAuth.record_receipt](../../medical_assistant/auth.py#L113)
 
 `record_receipt(self, receipt, patient_id, payload)`
 
@@ -1935,6 +1941,61 @@ Static calls (including nested helper bodies): `self.ensure_local`, `self._post`
 
 Explicit raised conditions: `ValueError`. See source for triggers; called validators may raise additional exceptions.
 
+## [medical_assistant/persistence.py](../../medical_assistant/persistence.py)
+
+Durable receipt key and workflow checkpoints for restart-safe pending reviews.
+
+Pending graphs persist only when the receipt key is durable (``LOVISA_RECEIPT_KEY``
+or the OS keyring); with an ephemeral key, saved receipts could not be verified
+after a restart, so workflows stay in memory. SQLite files are not encrypted by
+LOVISA; keep the data directory on an encrypted disk.
+
+#### [_parse](../../medical_assistant/persistence.py#L25)
+
+`_parse(value, source)`
+
+Static calls (including nested helper bodies): `bytes.fromhex`, `len`, `ValueError`, `value.strip`.
+
+Explicit raised conditions: `ValueError`. See source for triggers; called validators may raise additional exceptions.
+
+#### [_keyring_value](../../medical_assistant/persistence.py#L35)
+
+`_keyring_value()`
+
+Static calls (including nested helper bodies): `keyring.get_password`.
+
+#### [resolve_receipt_key](../../medical_assistant/persistence.py#L44)
+
+`resolve_receipt_key()`
+
+Return ``(key, source)``; source is ``env``, ``keyring`` or ``ephemeral``.
+
+Static calls (including nested helper bodies): `os.environ.get`, `_keyring_value`, `secrets.token_bytes`, `_parse`.
+
+#### [workflow_checkpointer](../../medical_assistant/persistence.py#L55)
+
+`workflow_checkpointer(database_path, durable)`
+
+One shared SQLite saver per database when durable, else a private memory saver.
+
+Static calls (including nested helper bodies): `Path(database_path).resolve().with_name`, `InMemorySaver`, `Path(database_path).resolve`, `sqlite3.connect`, `SqliteSaver`, `Path`.
+
+#### [resumable_cases](../../medical_assistant/persistence.py#L69)
+
+`resumable_cases(checkpointer, patient_id)`
+
+Latest checkpoint per pending case for this patient, newest first.
+
+Static calls (including nested helper bodies): `checkpointer.list`, `sorted`, `set`, `seen.add`, `item.checkpoint.get`, `values.get`, `cases.append`, `record.get`.
+
+#### [main](../../medical_assistant/persistence.py#L86)
+
+`main(argv=None)`
+
+Static calls (including nested helper bodies): `argparse.ArgumentParser`, `p.add_argument`, `p.parse_args`, `secrets.token_hex`, `keyring.get_password`, `keyring.set_password`, `print`, `SystemExit`.
+
+Explicit raised conditions: `SystemExit`. See source for triggers; called validators may raise additional exceptions.
+
 ## [medical_assistant/reasoning_constraints.py](../../medical_assistant/reasoning_constraints.py)
 
 Limited synthetic hypothesis selection, not general clinical reasoning.
@@ -2215,37 +2276,37 @@ Local LOVISA design system and review interfaces; no inference in components.
 
 Responsive clinical UI; only explicit human actions issue review receipts.
 
-#### [make_review](../../medical_assistant/ui/clinical.py#L30)
+#### [make_review](../../medical_assistant/ui/clinical.py#L31)
 
 `make_review(approved, user, checked, notes, sha256)`
 
 Static calls (including nested helper bodies): `Review`.
 
-#### [start_task](../../medical_assistant/ui/clinical.py#L40)
+#### [start_task](../../medical_assistant/ui/clinical.py#L41)
 
 `start_task(path, auth, patient_id, model, *, review=None, token=None)`
 
 Static calls (including nested helper bodies): `WorkTask`, `ollama_client.OllamaClient`, `MedicalHistoryOrchestrator`, `BudgetInference`, `progress`, `workflow.start_patient`, `budget.check`, `workflow.acknowledge_safety`, `client.close`, `next`.
 
-#### [start_task.run](../../medical_assistant/ui/clinical.py#L41)
+#### [start_task.run](../../medical_assistant/ui/clinical.py#L42)
 
 `run(progress, budget)`
 
 Static calls (including nested helper bodies): `ollama_client.OllamaClient`, `MedicalHistoryOrchestrator`, `BudgetInference`, `progress`, `workflow.start_patient`, `budget.check`, `workflow.acknowledge_safety`, `client.close`, `next`.
 
-#### [resume_task](../../medical_assistant/ui/clinical.py#L69)
+#### [resume_task](../../medical_assistant/ui/clinical.py#L70)
 
 `resume_task(workflow, case, review, token)`
 
 Static calls (including nested helper bodies): `WorkTask`, `BudgetInference`, `progress`, `workflow.acknowledge_safety`, `budget.check`, `budget.stopped.is_set`, `original.close`.
 
-#### [resume_task.run](../../medical_assistant/ui/clinical.py#L70)
+#### [resume_task.run](../../medical_assistant/ui/clinical.py#L71)
 
 `run(progress, budget)`
 
 Static calls (including nested helper bodies): `BudgetInference`, `progress`, `workflow.acknowledge_safety`, `budget.check`, `budget.stopped.is_set`, `original.close`.
 
-#### [collect_task](../../medical_assistant/ui/clinical.py#L86)
+#### [collect_task](../../medical_assistant/ui/clinical.py#L87)
 
 `collect_task()`
 
@@ -2253,13 +2314,13 @@ Publish only a completed, in-budget result into this Streamlit session.
 
 Static calls (including nested helper bodies): `st.session_state.get`, `task.snapshot`, `round`, `task.result`, `st.session_state.pop`, `workflow.state`.
 
-#### [task_progress](../../medical_assistant/ui/clinical.py#L108)
+#### [task_progress](../../medical_assistant/ui/clinical.py#L109)
 
 `task_progress()`
 
 Static calls (including nested helper bodies): `st.fragment`, `st.session_state.get`, `task.snapshot`, `st.info`, `st.caption`, `st.button`, `st.rerun`, `task.cancel`.
 
-#### [background_progress](../../medical_assistant/ui/clinical.py#L125)
+#### [background_progress](../../medical_assistant/ui/clinical.py#L126)
 
 `background_progress()`
 
@@ -2267,39 +2328,47 @@ Keep completion responsive when the reviewer opens a different view.
 
 Static calls (including nested helper bodies): `st.fragment`, `st.session_state.get`, `st.caption`, `st.rerun`, `task.snapshot`.
 
-#### [generate_task](../../medical_assistant/ui/clinical.py#L136)
+#### [generate_task](../../medical_assistant/ui/clinical.py#L137)
 
 `generate_task(workflow, case, token)`
 
 Static calls (including nested helper bodies): `WorkTask`, `BudgetInference`, `progress`, `workflow.continue_analysis`, `budget.check`, `budget.stopped.is_set`, `original.close`.
 
-#### [generate_task.run](../../medical_assistant/ui/clinical.py#L137)
+#### [generate_task.run](../../medical_assistant/ui/clinical.py#L138)
 
 `run(progress, budget)`
 
 Static calls (including nested helper bodies): `BudgetInference`, `progress`, `workflow.continue_analysis`, `budget.check`, `budget.stopped.is_set`, `original.close`.
 
-#### [bottom_actions](../../medical_assistant/ui/clinical.py#L153)
+#### [resume_saved_review](../../medical_assistant/ui/clinical.py#L154)
+
+`resume_saved_review(auth, record, model, token)`
+
+Offer the newest pending review saved before a restart (durable key only).
+
+Static calls (including nested helper bodies): `resumable_cases`, `st.info`, `st.button`, `workflow_checkpointer`, `MedicalHistoryOrchestrator`, `st.rerun`, `ollama_client.OllamaClient`, `latest['status'].replace`, `latest['saved_at'][:16].replace`.
+
+#### [bottom_actions](../../medical_assistant/ui/clinical.py#L175)
 
 `bottom_actions(path, auth, record, model, token, user, decision)`
 
 Safety first, then one explicit bottom-of-page generation action.
 
-Static calls (including nested helper bodies): `st.subheader`, `st.caption`, `st.session_state.get`, `state.get`, `bool`, `st.button`, `st.session_state.workflow.state`, `job_pending`, `task_progress`, `st.error`, `auth.require`, `generate_task`, `st.rerun`, `failure` (additional calls in source).
+Static calls (including nested helper bodies): `st.subheader`, `st.caption`, `st.session_state.get`, `state.get`, `bool`, `st.button`, `st.session_state.workflow.state`, `job_pending`, `resume_saved_review`, `task_progress`, `st.error`, `auth.require`, `generate_task`, `st.rerun` (additional calls in source).
 
-#### [failure](../../medical_assistant/ui/clinical.py#L311)
+#### [failure](../../medical_assistant/ui/clinical.py#L335)
 
 `failure()`
 
 Static calls (including nested helper bodies): `st.error`, `st.session_state.get`, `st.caption`, `error_message`.
 
-#### [new_report_with_ct](../../medical_assistant/ui/clinical.py#L323)
+#### [new_report_with_ct](../../medical_assistant/ui/clinical.py#L347)
 
 `new_report_with_ct()`
 
 Static calls (including nested helper bodies): `clear_patient`, `go_to`.
 
-#### [report_content](../../medical_assistant/ui/clinical.py#L328)
+#### [report_content](../../medical_assistant/ui/clinical.py#L352)
 
 `report_content(state, workflow)`
 
@@ -2307,7 +2376,7 @@ Short summary and verified representative CT images, with optional readable evid
 
 Static calls (including nested helper bodies): `st.container`, `st.markdown`, `inspection_figures`, `state.get`, `st.button`, `st.expander`, `st.caption`, `st.columns`, `left.image`, `right.image`, `len`, `st.text`, `entry['source_type'].replace`.
 
-#### [report_panel](../../medical_assistant/ui/clinical.py#L369)
+#### [report_panel](../../medical_assistant/ui/clinical.py#L393)
 
 `report_panel(auth, token, user, record, *, urgent=False)`
 
@@ -2542,23 +2611,31 @@ Class contract is defined by the fields and methods below.
 
 #### [MedicalHistoryOrchestrator.__init__](../../medical_assistant/workflow.py#L55)
 
-`__init__(self, inference: Inference, evidence_collection=None, *, auth=None, safety=None)`
+`__init__(self, inference: Inference, evidence_collection=None, *, auth=None, safety=None, checkpointer=None)`
 
-Static calls (including nested helper bodies): `ImagingStore`, `StateGraph`, `builder.add_node`, `builder.add_edge`, `builder.add_conditional_edges`, `zip`, `builder.compile`, `LocalAuth`, `SafetyAgent`, `LocalEvidenceCollection`, `MedicalHistoryAgent`, `MedicationAgent`, `extractor.run`, `InMemorySaver` (additional calls in source).
+Static calls (including nested helper bodies): `ImagingStore`, `StateGraph`, `builder.add_node`, `builder.add_edge`, `builder.add_conditional_edges`, `zip`, `builder.compile`, `LocalAuth`, `SafetyAgent`, `LocalEvidenceCollection`, `MedicalHistoryAgent`, `MedicationAgent`, `extractor.run`, `PatientRecord.model_validate` (additional calls in source).
 
-#### [MedicalHistoryOrchestrator.__init__.extract](../../medical_assistant/workflow.py#L73)
+#### [MedicalHistoryOrchestrator.__init__.extract](../../medical_assistant/workflow.py#L79)
 
 `extract(state, role=role, extractor=extractor)`
 
 Static calls (including nested helper bodies): `extractor.run`, `PatientRecord.model_validate`, `result.model_dump`.
 
-#### [MedicalHistoryOrchestrator._initial_safety](../../medical_assistant/workflow.py#L123)
+#### [MedicalHistoryOrchestrator.resumable_cases](../../medical_assistant/workflow.py#L132)
+
+`resumable_cases(self, patient_id)`
+
+Pending saved reviews for this patient (durable receipt key only).
+
+Static calls (including nested helper bodies): `resumable_cases`.
+
+#### [MedicalHistoryOrchestrator._initial_safety](../../medical_assistant/workflow.py#L136)
 
 `_initial_safety(self, state)`
 
 Static calls (including nested helper bodies): `self.safety.evaluate`, `PatientRecord.model_validate`.
 
-#### [MedicalHistoryOrchestrator._checked_review](../../medical_assistant/workflow.py#L133)
+#### [MedicalHistoryOrchestrator._checked_review](../../medical_assistant/workflow.py#L146)
 
 `_checked_review(self, state, response, action)`
 
@@ -2566,7 +2643,7 @@ Static calls (including nested helper bodies): `Review.model_validate`, `self.au
 
 Explicit raised conditions: `PermissionError`. See source for triggers; called validators may raise additional exceptions.
 
-#### [MedicalHistoryOrchestrator._safety_review](../../medical_assistant/workflow.py#L144)
+#### [MedicalHistoryOrchestrator._safety_review](../../medical_assistant/workflow.py#L157)
 
 `_safety_review(self, state)`
 
@@ -2574,19 +2651,19 @@ Static calls (including nested helper bodies): `interrupt`, `self._checked_revie
 
 Explicit raised conditions: `ValueError`. See source for triggers; called validators may raise additional exceptions.
 
-#### [MedicalHistoryOrchestrator._retrieve_evidence](../../medical_assistant/workflow.py#L169)
+#### [MedicalHistoryOrchestrator._retrieve_evidence](../../medical_assistant/workflow.py#L182)
 
 `_retrieve_evidence(self, state)`
 
 Static calls (including nested helper bodies): `PatientRecord.model_validate`, `' '.join`, `self.evidence_collection.retrieve`.
 
-#### [MedicalHistoryOrchestrator._reasoning](../../medical_assistant/workflow.py#L178)
+#### [MedicalHistoryOrchestrator._reasoning](../../medical_assistant/workflow.py#L191)
 
 `_reasoning(self, state)`
 
 Static calls (including nested helper bodies): `self._verify_safety_ack`, `SpecialistAgent('reasoning', self.inference).run`, `PatientRecord.model_validate`, `SpecialistAgent`.
 
-#### [MedicalHistoryOrchestrator._verify_safety_ack](../../medical_assistant/workflow.py#L187)
+#### [MedicalHistoryOrchestrator._verify_safety_ack](../../medical_assistant/workflow.py#L200)
 
 `_verify_safety_ack(self, state)`
 
@@ -2594,13 +2671,13 @@ Static calls (including nested helper bodies): `self.safety.evaluate`, `PatientR
 
 Explicit raised conditions: `ValueError`. See source for triggers; called validators may raise additional exceptions.
 
-#### [MedicalHistoryOrchestrator._final_safety](../../medical_assistant/workflow.py#L210)
+#### [MedicalHistoryOrchestrator._final_safety](../../medical_assistant/workflow.py#L223)
 
 `_final_safety(self, state)`
 
 Static calls (including nested helper bodies): `self._verify_safety_ack`.
 
-#### [MedicalHistoryOrchestrator._verify_imaging](../../medical_assistant/workflow.py#L213)
+#### [MedicalHistoryOrchestrator._verify_imaging](../../medical_assistant/workflow.py#L226)
 
 `_verify_imaging(self, state)`
 
@@ -2608,13 +2685,13 @@ Static calls (including nested helper bodies): `state.get`, `any`, `self.imaging
 
 Explicit raised conditions: `ValueError`. See source for triggers; called validators may raise additional exceptions.
 
-#### [MedicalHistoryOrchestrator._compose](../../medical_assistant/workflow.py#L222)
+#### [MedicalHistoryOrchestrator._compose](../../medical_assistant/workflow.py#L235)
 
 `_compose(self, state)`
 
 Static calls (including nested helper bodies): `self._verify_imaging`, `compose`, `PatientRecord.model_validate`, `state.get`, `evidence_index`.
 
-#### [MedicalHistoryOrchestrator._verify_report](../../medical_assistant/workflow.py#L242)
+#### [MedicalHistoryOrchestrator._verify_report](../../medical_assistant/workflow.py#L255)
 
 `_verify_report(self, state)`
 
@@ -2622,7 +2699,7 @@ Static calls (including nested helper bodies): `verify_note`, `validate_record_g
 
 Explicit raised conditions: `ValueError`. See source for triggers; called validators may raise additional exceptions.
 
-#### [MedicalHistoryOrchestrator._review](../../medical_assistant/workflow.py#L264)
+#### [MedicalHistoryOrchestrator._review](../../medical_assistant/workflow.py#L277)
 
 `_review(self, state)`
 
@@ -2630,7 +2707,7 @@ Static calls (including nested helper bodies): `self._verify_report`, `interrupt
 
 Explicit raised conditions: `ValueError`. See source for triggers; called validators may raise additional exceptions.
 
-#### [MedicalHistoryOrchestrator._complete](../../medical_assistant/workflow.py#L298)
+#### [MedicalHistoryOrchestrator._complete](../../medical_assistant/workflow.py#L311)
 
 `_complete(self, state)`
 
@@ -2638,17 +2715,17 @@ Static calls (including nested helper bodies): `self._verify_safety_ack`, `self.
 
 Explicit raised conditions: `ValueError`. See source for triggers; called validators may raise additional exceptions.
 
-#### [MedicalHistoryOrchestrator.config](../../medical_assistant/workflow.py#L321)
+#### [MedicalHistoryOrchestrator.config](../../medical_assistant/workflow.py#L334)
 
 `config(case_id)`
 
-#### [MedicalHistoryOrchestrator.start](../../medical_assistant/workflow.py#L324)
+#### [MedicalHistoryOrchestrator.start](../../medical_assistant/workflow.py#L337)
 
 `start(self, record: PatientRecord, source_file: str, *, imaging=None, safety_only=False)`
 
 Static calls (including nested helper bodies): `validate_record_grounding`, `uuid4`, `self.graph.stream`, `self.config`, `record.model_dump`.
 
-#### [MedicalHistoryOrchestrator.start_patient](../../medical_assistant/workflow.py#L351)
+#### [MedicalHistoryOrchestrator.start_patient](../../medical_assistant/workflow.py#L364)
 
 `start_patient(self, patient_id, path, *, safety_only=False)`
 
@@ -2656,13 +2733,13 @@ Static calls (including nested helper bodies): `get_history`, `self.start`, `Pat
 
 Explicit raised conditions: `ValueError`. See source for triggers; called validators may raise additional exceptions.
 
-#### [MedicalHistoryOrchestrator.state](../../medical_assistant/workflow.py#L368)
+#### [MedicalHistoryOrchestrator.state](../../medical_assistant/workflow.py#L381)
 
 `state(self, case_id)`
 
 Static calls (including nested helper bodies): `self.graph.get_state`, `self.config`.
 
-#### [MedicalHistoryOrchestrator._response](../../medical_assistant/workflow.py#L371)
+#### [MedicalHistoryOrchestrator._response](../../medical_assistant/workflow.py#L384)
 
 `_response(self, case_id, review, token, action)`
 
@@ -2670,7 +2747,7 @@ Static calls (including nested helper bodies): `Review.model_validate`, `self.au
 
 Explicit raised conditions: `PermissionError`. See source for triggers; called validators may raise additional exceptions.
 
-#### [MedicalHistoryOrchestrator.acknowledge_safety](../../medical_assistant/workflow.py#L393)
+#### [MedicalHistoryOrchestrator.acknowledge_safety](../../medical_assistant/workflow.py#L406)
 
 `acknowledge_safety(self, case_id, review: Review, token=None, *, safety_only=False)`
 
@@ -2678,7 +2755,7 @@ Static calls (including nested helper bodies): `self.state`, `self._response`, `
 
 Explicit raised conditions: `ValueError`. See source for triggers; called validators may raise additional exceptions.
 
-#### [MedicalHistoryOrchestrator.ready_for_analysis](../../medical_assistant/workflow.py#L410)
+#### [MedicalHistoryOrchestrator.ready_for_analysis](../../medical_assistant/workflow.py#L423)
 
 `ready_for_analysis(self, case_id, token=None)`
 
@@ -2688,13 +2765,13 @@ Static calls (including nested helper bodies): `self.auth.require`, `self.graph.
 
 Explicit raised conditions: `ValueError`. See source for triggers; called validators may raise additional exceptions.
 
-#### [MedicalHistoryOrchestrator.continue_analysis](../../medical_assistant/workflow.py#L423)
+#### [MedicalHistoryOrchestrator.continue_analysis](../../medical_assistant/workflow.py#L436)
 
 `continue_analysis(self, case_id, token=None)`
 
 Static calls (including nested helper bodies): `self.ready_for_analysis`, `self.graph.invoke`, `self.config`.
 
-#### [MedicalHistoryOrchestrator.revise](../../medical_assistant/workflow.py#L427)
+#### [MedicalHistoryOrchestrator.revise](../../medical_assistant/workflow.py#L440)
 
 `revise(self, case_id, draft: str, token=None)`
 
@@ -2702,7 +2779,7 @@ Static calls (including nested helper bodies): `self.auth.require`, `self.state`
 
 Explicit raised conditions: `ValueError`. See source for triggers; called validators may raise additional exceptions.
 
-#### [MedicalHistoryOrchestrator.prepare_report_note](../../medical_assistant/workflow.py#L458)
+#### [MedicalHistoryOrchestrator.prepare_report_note](../../medical_assistant/workflow.py#L471)
 
 `prepare_report_note(self, case_id, text, token=None)`
 
@@ -2712,7 +2789,7 @@ Static calls (including nested helper bodies): `self.auth.require`, `self.state`
 
 Explicit raised conditions: `ValueError`. See source for triggers; called validators may raise additional exceptions.
 
-#### [MedicalHistoryOrchestrator.review](../../medical_assistant/workflow.py#L498)
+#### [MedicalHistoryOrchestrator.review](../../medical_assistant/workflow.py#L511)
 
 `review(self, case_id, review: Review, token=None)`
 
@@ -2720,7 +2797,7 @@ Static calls (including nested helper bodies): `self.state`, `self._verify_repor
 
 Explicit raised conditions: `ValueError`. See source for triggers; called validators may raise additional exceptions.
 
-#### [MedicalHistoryOrchestrator.export](../../medical_assistant/workflow.py#L508)
+#### [MedicalHistoryOrchestrator.export](../../medical_assistant/workflow.py#L521)
 
 `export(self, case_id)`
 

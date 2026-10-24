@@ -1,5 +1,21 @@
 # LOVISA evaluation record
 
+## Durable pending reviews — 24 October 2026
+
+Persistence change; no clinical logic, policy, catalog, model or approval rule
+changed. With `LOVISA_RECEIPT_KEY` (or a keyring key) pending graphs use a LangGraph
+SQLite checkpointer and can be resumed; without one, behaviour is unchanged.
+
+| Executed check | Actual outcome |
+| --- | --- |
+| `python -m pytest -q` (Python 3.13.17, local container) | **284 passed in 79.66s** (279 before + 5 new in `test_persistence.py`) |
+| New persistence tests | Key sources/validation; resume and approve after simulated restart; rotated key cannot approve; ephemeral key writes no checkpoint file; UI **Resume saved review** after session loss |
+| `scripts/check_docs.py` / `generate_api_docs.py --check` / `pip check` / `compileall` | Passed / matches / no broken requirements / compiled |
+| `ruff check .` (ruff 0.17.2, default rules) | 95 findings, identical set to baseline |
+
+Not run: OS keyring backends (no keyring package/backend here), an actual Streamlit
+process restart in a browser, Python 3.10/Windows, live Ollama, hosted CI.
+
 ## Expert review and joint release — 24 October 2026
 
 Three independent coding reviewers audited LOVISA, CT and endoscopy. Repairs

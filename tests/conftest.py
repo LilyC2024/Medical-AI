@@ -66,3 +66,12 @@ class FakeInference:
 @pytest.fixture
 def inference():
     return FakeInference()
+
+
+@pytest.fixture(autouse=True)
+def ephemeral_receipt_key(monkeypatch):
+    """Tests default to the in-memory key unless a test sets LOVISA_RECEIPT_KEY."""
+    from medical_assistant import persistence
+
+    monkeypatch.delenv("LOVISA_RECEIPT_KEY", raising=False)
+    monkeypatch.setattr(persistence, "_keyring_value", lambda: None)

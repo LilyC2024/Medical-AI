@@ -36,9 +36,18 @@ structured safety policy is not comprehensive free-text emergency recognition.
 
 ## Persistence and publication
 
-Pending graphs, proposals, sessions and receipt keys live in memory. Restarting
-loses pending work. Local databases, accepted images and exports are not encrypted
-by the app. Audit records are not a tamper-proof legal audit system.
+The receipt key comes from `LOVISA_RECEIPT_KEY` (64+ hex characters, created by
+`python -m medical_assistant.persistence`) or the OS keyring (optional `keyring`
+extra, `--store-keyring`); otherwise it is random per process. With a durable key,
+pending review graphs are checkpointed to `data/workflow_checkpoints.sqlite3` and
+can be resumed after a restart; their receipts are rechecked and a rotated key
+makes them unapprovable (fail closed). Without one, graphs stay in memory and a
+restart loses pending work. Sessions and pending imaging proposals always live in
+memory. Treat the key like a password: anyone holding it and the database can mint
+receipts. Local databases, checkpoints, accepted images and exports are **not
+encrypted by the app**; keep `data/` on a full-disk-encrypted volume (BitLocker,
+FileVault or LUKS) and restrict it to your OS account. Audit records are not a
+tamper-proof legal audit system.
 
 Publish deliberately fictional fixtures only. Exclude databases, account hashes,
 credentials, exports, local approvals, logs, weights and real images. Inspect the

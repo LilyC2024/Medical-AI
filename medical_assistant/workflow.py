@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import TypedDict
 from uuid import uuid4
 
-from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.graph import END, START, StateGraph
 from langgraph.types import Command, interrupt
 
@@ -17,6 +16,7 @@ from medical_assistant.grounding import validate_record_grounding
 from medical_assistant.history import MedicalHistoryAgent, MedicationAgent
 from medical_assistant.imaging import ImagingStore
 from medical_assistant.models import PatientRecord, ReportNote, Review
+from medical_assistant.persistence import resumable_cases, workflow_checkpointer
 from medical_assistant.report import compose, digest, evidence_index
 from medical_assistant.report_binding import content_digest, verify_content_binding
 from medical_assistant.report_notes import verify_note
@@ -53,7 +53,13 @@ class CaseState(TypedDict, total=False):
 
 class MedicalHistoryOrchestrator:
     def __init__(
-        self, inference: Inference, evidence_collection=None, *, auth=None, safety=None
+        self,
+        inference: Inference,
+        evidence_collection=None,
+        *,
+        auth=None,
+        safety=None,
+        checkpointer=None,
     ):
         self.inference = inference
         self.auth = auth or LocalAuth()
@@ -118,7 +124,14 @@ class MedicalHistoryOrchestrator:
             {"complete": "complete_report", "review": "clinician_review"},
         )
         builder.add_edge("complete_report", END)
-        self.graph = builder.compile(checkpointer=InMemorySaver())
+        self.graph = builder.compile(
+            checkpointer=checkpointer
+            or workflow_checkpointer(self.auth.path, self.auth.durable_receipts)
+        )
+
+    def resumable_cases(self, patient_id):
+        """Pending saved reviews for this patient (durable receipt key only)."""
+        return resumable_cases(self.graph.checkpointer, patient_id)
 
     def _initial_safety(self, state):
         decision = self.safety.evaluate(PatientRecord.model_validate(state["record"]))

@@ -94,5 +94,19 @@ The endoscopy companion uses its own `.venv`; no Torch/OpenVINO is added to LOVI
 An existing checkout should not reinstall all packages to solve an input error.
 Inspect the displayed reason, service availability and `pip check` first. Worker
 capacity exhaustion is retryable; wait for a slot rather than bypass safety.
-Restart clears pending sessions, so sign in and repeat unfinished assessments.
+Restart clears sign-in sessions. Unfinished reviews survive a restart only with a
+durable receipt key (below); otherwise repeat them.
+
+### Durable pending reviews (optional)
+
+```bash
+.venv/bin/python -m medical_assistant.persistence          # prints a new key once
+export LOVISA_RECEIPT_KEY=<printed value>                  # keep it secret, out of Git
+# or: pip install keyring && .venv/bin/python -m medical_assistant.persistence --store-keyring
+```
+
+With a durable key, **Safety check** offers **Resume saved review** for the selected
+patient after a restart. Checkpoints are stored unencrypted in
+`data/workflow_checkpoints.sqlite3`; keep `data/` on an encrypted disk. Changing
+the key makes earlier saved reviews unapprovable, so start a new review.
 [Full checks](VALIDATION.md) · [Three-project sketch](ILLUSTRATIONS.md).
