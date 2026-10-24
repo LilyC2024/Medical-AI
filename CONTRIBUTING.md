@@ -41,8 +41,8 @@ New fictional fixtures need deliberate review and an explicit `.gitignore` excep
 Hosted CI runs Python 3.10/3.12 regression and pinned CT smokes. It downloads setup
 packages/weights explicitly and executes models on runner CPU; the app uses no
 cloud inference service. It uploads no clinical reports or patient records.
-LOVISA has no selected project-wide redistribution license; preserve notices for
-[vendored CT code](third_party/README.md).
+LOVISA source is [MIT licensed](LICENSE); dataset and weight terms are separate
+([DATA_TERMS](DATA_TERMS.md)). Preserve notices for [vendored code](third_party/README.md).
 
 ## Documentation and expert review
 

@@ -75,5 +75,5 @@ Development review agents are separate from the application's runtime.
 automatic medical decisions, paid APIs, cloud inference and remote tracing are
 unsupported. Missing information never proves safety. Local login does not verify
 clinical qualifications. [Security](SECURITY.md) · [Contributing](CONTRIBUTING.md).
-No project-wide redistribution license has been selected; preserve
-[third-party notices](third_party/README.md).
+Source code is [MIT licensed](LICENSE); datasets and weights keep their own
+[terms](DATA_TERMS.md). Preserve [third-party notices](third_party/README.md).

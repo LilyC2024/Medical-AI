@@ -52,9 +52,9 @@ These are demonstration eligibility rules, not diagnostic evidence.
 
 Keep source corrections explicit and start a new case after importing. The model
 has a stricter prompt/schema budget than history storage and may reject a long
-valid record. Tests establish consistency, not clinical correctness. LOVISA has
-no selected project-wide redistribution license; CT-vendored files have separate
-[MIT terms](../third_party/README.md).
+valid record. Tests establish consistency, not clinical correctness. LOVISA source
+is [MIT licensed](../LICENSE); CT-vendored files keep their own
+[MIT notice](../third_party/README.md) and datasets their own [terms](../DATA_TERMS.md).
 
 ## Validation errors are not source views
 

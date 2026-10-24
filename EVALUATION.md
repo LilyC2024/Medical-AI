@@ -1,5 +1,19 @@
 # LOVISA evaluation record
 
+## MIT license and dataset terms — 24 October 2026
+
+Licensing/documentation only: `LICENSE` (MIT) and `DATA_TERMS.md` added; the
+package declares `license = "MIT"`. No source, policy, catalog, model or test changed.
+
+| Executed check | Actual outcome |
+| --- | --- |
+| `python -m pytest -q` (Python 3.13.17, local container) | **279 passed in 76.45s** |
+| `scripts/check_docs.py` / `generate_api_docs.py --check` | Passed: 36 documents; API reference matches |
+| `python -m pip check` | No broken requirements found |
+| `pip wheel --no-deps .` metadata | Built; `License-Expression: MIT`, both license files included |
+
+Not run: live Ollama, joint CT/endoscopy smokes, hosted CI.
+
 ## Expert review and joint release — 24 October 2026
 
 Three independent coding reviewers audited LOVISA, CT and endoscopy. Repairs
