@@ -1,5 +1,21 @@
 # LOVISA evaluation record
 
+## Pillow security update — 24 October 2026
+
+Dependency-only change: Pillow 12.3.0 → 13.0.0 and Streamlit 1.65.0 → 1.66.1 in
+`requirements.lock.txt`. No source, policy, catalog or model change. Both releases
+are recent (13.0.0: 16 Oct 2026; 1.66.1: 21 Oct 2026).
+
+| Executed check | Actual outcome |
+| --- | --- |
+| `pip-audit -r requirements.lock.txt` before / after | 37 known vulnerabilities in pillow 12.3.0 / **No known vulnerabilities found** |
+| Clean venv from lockfile (`pip install -r`, `pip check`, `pip freeze` diff) | No broken requirements; installed set equals the lockfile exactly |
+| `python -m pytest -q` (Python 3.13.17) | **279 passed in 80.62s** |
+| Actual `streamlit run app.py` (headless, loopback) | `/_stcore/health` ok; page HTTP 200; Chromium rendered the LOVISA page with no error text |
+
+Not run: manual click-through of every page, Python 3.10/Windows, live Ollama,
+hosted CI.
+
 ## Expert review and joint release — 24 October 2026
 
 Three independent coding reviewers audited LOVISA, CT and endoscopy. Repairs
