@@ -12,6 +12,7 @@ filenames, source IDs and hashes stay in the evidence package.
 | Endoscopy inspection, when included | Accepted artificial/permitted public RGB studies, proposed/accepted region counts and limitations; pixel areas remain in views/evidence |
 | Essential gaps | Versioned safety rules and source-bound missing information |
 | Clinician note | Authenticated, previewed reviewer comment; up to 600 characters |
+| Model provenance | Model name and Ollama digest, reasoning prompt version/hash and safety policy version/hash; approval-bound, in JSON and as an HTML footer |
 | Representative pictures | Verified source and annotation pairs from up to three studies |
 
 The LLM analyzes history, not imaging pixels. Imaging paragraphs are composed in

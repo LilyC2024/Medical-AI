@@ -8,7 +8,11 @@ are unsupported. [CT boundary](docs/IMAGING.md).
 
 ## Local operation
 
-Keep Streamlit and Ollama on loopback. The adapter calls only `127.0.0.1:11434`,
+Keep Streamlit and Ollama on loopback. Set `LOVISA_OLLAMA_MODEL_DIGEST` to refuse
+any model build other than the pinned digest; drafts record the digest, prompt
+and policy versions. The optional Docker Compose stack keeps LOVISA on Ollama's
+loopback and publishes the UI on host loopback only, but the shared namespace has
+internet access for model pulls. The adapter calls only `127.0.0.1:11434`,
 disables proxies/redirects and rejects remote-backed models. Tracing switches are
 disabled; set `OLLAMA_NO_CLOUD=1` on the daemon too. These checks are not a network
 sandbox. The operating system and local process administrator remain trusted.

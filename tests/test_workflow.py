@@ -211,3 +211,24 @@ def test_cases_and_authenticated_receipts_are_isolated(record, inference, auth_s
         auth_session[0].verify_receipt(
             receipt, "clinical-review:" + second, receipt["content_sha256"]
         )
+
+
+def test_provenance_names_model_prompt_and_policy_and_is_approval_bound(
+    record, inference, auth_session, tmp_path
+):
+    from medical_assistant.provenance import PROMPT_VERSION, prompt_sha256
+
+    inference.model_digest = "f" * 64
+    orchestrator, case_id, token = pending_draft(record, inference, auth_session)
+    state = orchestrator.state(case_id)
+    value = state["model_provenance"]
+    assert value["model"] == inference.model and value["model_digest"] == "f" * 64
+    assert value["prompt_version"] == PROMPT_VERSION
+    assert value["prompt_sha256"] == prompt_sha256()
+    assert value["policy_version"] == state["safety_decision"]["policy_version"]
+    orchestrator.review(case_id, review_for(state), token)
+    payload = orchestrator.export(case_id)
+    assert payload["model_provenance"] == value
+    payload["model_provenance"] = dict(value, model_digest="0" * 64)
+    with pytest.raises((ValueError, PermissionError)):
+        save_report(payload, tmp_path, auth=orchestrator.auth, safety=orchestrator.safety)

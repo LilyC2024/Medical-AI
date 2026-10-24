@@ -87,6 +87,10 @@ def test_bad_compact_output_fails_closed(record, issue):
 
 def test_real_adapter_uses_compact_wire_then_same_grounding_checks(record):
     def handler(request):
+        if request.url.path == "/api/tags":
+            return httpx.Response(
+                200, json={"models": [{"name": "gemma4:e2b", "digest": "d" * 64}]}
+            )
         body = json.loads(request.content)
         if request.url.path == "/api/show":
             return httpx.Response(200, json={"details": {"parameter_size": "2B"}})
@@ -112,6 +116,10 @@ def test_larger_demo_validates_actual_wire_budget_without_truncating_records(tmp
     record = get_history("demo-05", path)
 
     def handler(request):
+        if request.url.path == "/api/tags":
+            return httpx.Response(
+                200, json={"models": [{"name": "gemma4:e2b", "digest": "d" * 64}]}
+            )
         body = json.loads(request.content)
         if request.url.path == "/api/show":
             return httpx.Response(200, json={"details": {"parameter_size": "2B"}})

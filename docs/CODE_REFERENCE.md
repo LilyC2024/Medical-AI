@@ -23,6 +23,7 @@ and [complete callable/subfunction signatures](reference/CALLABLES.md).
 | Imaging actions | imaging_actions.py, ui/imaging_actions.py | Authenticated upload/example routing, fresh report context, shared Upload/Analyze, visible worker errors and retries |
 | CT execution | ct_worker.py | Separate interpreter, mode/device, cancellation and watchdog |
 | CT validation/storage | imaging_contract.py, imaging.py | Version dispatch, pending originals and immutable accepted snapshots |
+| Provenance | provenance.py, ollama_client.py | Model digest (optionally pinned), prompt version/hash and policy version recorded per draft |
 | Nodule contract | nodule_models.py, nodule_exchange.py | Vendored typed geometry/review, canonical report and wire renderer |
 | Nodule review/UI | nodule_support.py, nodule_ui.py, imaging_ui.py | Candidate/caliper controls, actor/hash binding and local inspection |
 

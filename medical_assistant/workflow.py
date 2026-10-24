@@ -17,6 +17,7 @@ from medical_assistant.grounding import validate_record_grounding
 from medical_assistant.history import MedicalHistoryAgent, MedicationAgent
 from medical_assistant.imaging import ImagingStore
 from medical_assistant.models import PatientRecord, ReportNote, Review
+from medical_assistant.provenance import inference_provenance
 from medical_assistant.report import compose, digest, evidence_index
 from medical_assistant.report_binding import content_digest, verify_content_binding
 from medical_assistant.report_notes import verify_note
@@ -29,6 +30,7 @@ class CaseState(TypedDict, total=False):
     record: dict
     source_file: str
     model: str
+    model_provenance: dict
     assessments: dict
     evidence: list[dict]
     safety_decision: dict
@@ -182,7 +184,12 @@ class MedicalHistoryOrchestrator:
             state["assessments"],
             state["evidence"],
         )
-        return {"assessments": {**state["assessments"], "reasoning": result}}
+        return {
+            "assessments": {**state["assessments"], "reasoning": result},
+            "model_provenance": inference_provenance(
+                self.inference, state["safety_decision"]
+            ),
+        }
 
     def _verify_safety_ack(self, state):
         current = self.safety.evaluate(PatientRecord.model_validate(state["record"]))

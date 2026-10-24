@@ -1,0 +1,34 @@
+# One local stack: Ollama + LOVISA sharing a network namespace so LOVISA still
+# talks only to 127.0.0.1:11434. The UI is published on the host's loopback only.
+# CT/endoscopy producers run outside this stack and exchange review ZIPs.
+name: lovisa
+
+services:
+  ollama:
+    image: ollama/ollama:0.40.3@sha256:adca95a12c2b386a8f9a995e7fa0600e187e3323b5e5522f5a6c3b1ec73eff99
+    environment:
+      OLLAMA_NO_CLOUD: "1"
+      OLLAMA_HOST: 127.0.0.1:11434
+    volumes:
+      - ollama-models:/root/.ollama
+    ports:
+      - "127.0.0.1:8501:8501"
+    restart: unless-stopped
+
+  lovisa:
+    build: .
+    network_mode: service:ollama
+    depends_on:
+      - ollama
+    environment:
+      # Pin the reasoning model by digest (see docs/SETUP.md); empty means unpinned.
+      LOVISA_OLLAMA_MODEL_DIGEST: ${LOVISA_OLLAMA_MODEL_DIGEST:-}
+      # Durable receipts/resumable reviews; keep in an untracked .env file.
+      LOVISA_RECEIPT_KEY: ${LOVISA_RECEIPT_KEY:-}
+    volumes:
+      - lovisa-data:/app/data
+    restart: unless-stopped
+
+volumes:
+  ollama-models:
+  lovisa-data:

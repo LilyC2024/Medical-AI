@@ -7,10 +7,14 @@ Runtime databases, images, weights, accounts and generated reviews are ignored.
 The callable inventory is generated separately from AST; this is the publication map.
 
 - [.github/workflows/tests.yml](../.github/workflows/tests.yml)
+- [.dockerignore](../.dockerignore)
 - [.gitignore](../.gitignore)
 - [.streamlit/config.toml](../.streamlit/config.toml)
 - [AGENTS.md](../AGENTS.md)
+- [CHANGELOG.md](../CHANGELOG.md)
 - [CONTRIBUTING.md](../CONTRIBUTING.md)
+- [Dockerfile](../Dockerfile)
+- [docker-compose.yml](../docker-compose.yml)
 - [EVALUATION.md](../EVALUATION.md)
 - [PLAN.md](../PLAN.md)
 - [README.md](../README.md)
@@ -95,6 +99,7 @@ The callable inventory is generated separately from AST; this is the publication
 - [medical_assistant/nodule_support.py](../medical_assistant/nodule_support.py)
 - [medical_assistant/nodule_ui.py](../medical_assistant/nodule_ui.py)
 - [medical_assistant/ollama_client.py](../medical_assistant/ollama_client.py)
+- [medical_assistant/provenance.py](../medical_assistant/provenance.py)
 - [medical_assistant/reasoning_constraints.py](../medical_assistant/reasoning_constraints.py)
 - [medical_assistant/report.py](../medical_assistant/report.py)
 - [medical_assistant/report_assets.py](../medical_assistant/report_assets.py)

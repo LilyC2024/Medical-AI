@@ -133,6 +133,10 @@ class BudgetInference:
         self.inference, self.budget = inference, budget
         self.model = inference.model
 
+    @property
+    def model_digest(self):
+        return getattr(self.inference, "model_digest", None)
+
     def assess(self, *args, **kwargs):
         self.budget.check()
         result = self.inference.assess(*args, **kwargs)

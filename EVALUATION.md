@@ -1,5 +1,21 @@
 # LOVISA evaluation record
 
+## Inference provenance, model pin and Compose stack — 24 October 2026
+
+No clinical logic, prompt text, catalog or policy change: drafts now record which
+model digest, prompt version/hash and policy version/hash produced them.
+
+| Executed check | Actual outcome |
+| --- | --- |
+| `python -m pytest -q` (Python 3.13.17) | **283 passed in 83.80s** (279 before + 4 new: digest pin mismatch/missing ×2, approval-bound provenance, escaped HTML footer); 4 existing mocks gained an `/api/tags` reply |
+| `docker compose config -q` | Valid |
+| `scripts/check_docs.py` / `generate_api_docs.py --check` / `pip check` / `compileall` | Passed / matches / no broken requirements / compiled |
+| `ruff check .` (default rules) | 95 findings, identical set to baseline |
+
+Not run: building or starting the containers (no Docker daemon in this
+environment), a live `/api/tags` digest from real Ollama, hosted CI. Compatibility
+of Ollama image 0.40.3 with `gemma4:e2b` is unverified.
+
 ## Expert review and joint release — 24 October 2026
 
 Three independent coding reviewers audited LOVISA, CT and endoscopy. Repairs

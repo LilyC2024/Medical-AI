@@ -82,6 +82,36 @@ repository path is `Medical-AI`; the app is named LOVISA.
 
 The endoscopy companion uses its own `.venv`; no Torch/OpenVINO is added to LOVISA. See [Endoscopy setup](ENDOSCOPY.md) for sibling discovery and explicit backend selection.
 
+## Pin the model and run with Docker Compose (optional)
+
+Record the installed model's digest and pin it; LOVISA then refuses to reason with
+any other build of `gemma4:e2b`:
+
+```bash
+curl -s http://127.0.0.1:11434/api/tags   # copy the "digest" of gemma4:e2b
+export LOVISA_OLLAMA_MODEL_DIGEST=<digest>
+```
+
+Every draft records the model name and digest, the reasoning prompt version/hash
+and the safety policy version/hash in `model_provenance`; approval binds it and the
+JSON/HTML exports show it.
+
+`docker-compose.yml` runs Ollama (image pinned by digest) and LOVISA in one network
+namespace, so LOVISA still calls only `127.0.0.1:11434`; the UI is published on the
+host's `127.0.0.1:8501` only. Put `LOVISA_OLLAMA_MODEL_DIGEST` and
+`LOVISA_RECEIPT_KEY` in an untracked `.env` file.
+
+```bash
+docker compose up -d ollama
+docker compose exec ollama ollama pull gemma4:e2b
+docker compose run --rm lovisa python -m medical_assistant.auth
+docker compose up -d lovisa
+```
+
+The Ollama container can reach the internet to pull models, and LOVISA shares its
+network namespace. CT/endoscopy producers are not in this stack: run them in their
+own environments and upload their review ZIPs. Data volumes are unencrypted.
+
 ## Local service and environment map
 
 | Service | Environment / address | Setup responsibility |

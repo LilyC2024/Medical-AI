@@ -22,6 +22,10 @@ def test_only_loopback_schema_and_no_streaming(monkeypatch):
     def handler(request):
         requests.append(request)
         assert str(request.url).startswith(BASE_URL + "/api/")
+        if request.url.path == "/api/tags":
+            return httpx.Response(
+                200, json={"models": [{"name": "gemma4:e2b", "digest": "d" * 64}]}
+            )
         body = json.loads(request.content)
         if request.url.path == "/api/show":
             return httpx.Response(200, json={"details": {"parameter_size": "7B"}})
@@ -32,7 +36,8 @@ def test_only_loopback_schema_and_no_streaming(monkeypatch):
 
     client = OllamaClient(transport=httpx.MockTransport(handler))
     assert client.assess("system", "user").findings == []
-    assert len(requests) == 2
+    assert [r.url.path for r in requests] == ["/api/show", "/api/tags", "/api/chat"]
+    assert client.model_digest == "d" * 64
     client.close()
 
 
@@ -115,6 +120,10 @@ def test_oversize_prompt_stops_before_any_http_request():
 def test_requests_are_bounded_and_model_kept_warm():
     def handler(request):
         assert request.extensions["timeout"]["read"] <= 90
+        if request.url.path == "/api/tags":
+            return httpx.Response(
+                200, json={"models": [{"name": "gemma4:e2b", "digest": "d" * 64}]}
+            )
         body = json.loads(request.content)
         if request.url.path == "/api/show":
             assert request.extensions["timeout"]["read"] <= 5
@@ -135,4 +144,23 @@ def test_local_model_timeout_does_not_produce_assessment():
     client = OllamaClient(transport=httpx.MockTransport(handler))
     with pytest.raises(TimeoutError, match="did not respond"):
         client.assess("system", "user")
+    client.close()
+
+
+@pytest.mark.parametrize("installed", ["e" * 64, None])
+def test_pinned_digest_mismatch_or_missing_fails_before_chat(monkeypatch, installed):
+    monkeypatch.setenv("LOVISA_OLLAMA_MODEL_DIGEST", "d" * 64)
+    paths = []
+
+    def handler(request):
+        paths.append(request.url.path)
+        if request.url.path == "/api/tags":
+            models = [{"name": "gemma4:e2b", "digest": installed}] if installed else []
+            return httpx.Response(200, json={"models": models})
+        return httpx.Response(200, json={"details": {"parameter_size": "7B"}})
+
+    client = OllamaClient(transport=httpx.MockTransport(handler))
+    with pytest.raises(ValueError, match="pinned digest"):
+        client.assess("system", "user")
+    assert paths == ["/api/show", "/api/tags"]
     client.close()

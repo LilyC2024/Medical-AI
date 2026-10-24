@@ -99,6 +99,19 @@ def inspection_figures(state, store):
     return figures
 
 
+def provenance_note(value):
+    """Small escaped footer naming the model digest, prompt and policy versions."""
+    if not value:
+        return ""
+    digest = value.get("model_digest") or "not reported"
+    text = (
+        f"Generated with {value['model']} (digest {digest[:19]}), prompt "
+        f"{value['prompt_version']} ({value['prompt_sha256'][:12]}), safety policy "
+        f"{value['policy_version']} ({value['policy_sha256'][:12]})."
+    )
+    return '<p class="notice">' + html.escape(text) + "</p>"
+
+
 def portable_html(payload, *, auth, safety=None):
     """Final download with embedded verified CT pictures; no scripts, external assets or draft export."""
     record = validate_reviewed_report(payload, auth=auth, safety=safety)
@@ -150,6 +163,7 @@ body{font:15px/1.55 system-ui,sans-serif;color:#172d3b;background:#f5f7fa;margin
 </style></head><body><main><h1>Clinical summary</h1>"""
         + paragraphs
         + "".join(images)
+        + provenance_note(payload.get("model_provenance"))
         + '<p class="notice">'
         + html.escape(NOTICE)
         + "</p></main></body></html>"
