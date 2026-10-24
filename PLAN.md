@@ -148,7 +148,7 @@ software gates.
     delivery — 267 offline tests, actual CT/endo ZIP uploads, actual raw-image
     polyp inference and live Ollama passed. Guides updated; tested source published
     as aa06c9e; localhost restarted and demo login verified. Hosted workflow
-    40019579036 is running independently; its result is not claimed as passed.
+    40019579036 subsequently passed; confirmed on 24 October 2026.
 
 ## Three-repository expert review — 24 October 2026
 
@@ -166,6 +166,8 @@ software gates.
 38. **Joint validation and publication** — full regressions in existing environments,
     actual local model/interoperability smokes, reproducible documentation checks,
     evidence records, compatible producer pins and publication of all three repos.
-    Status: local validation passed — 279 LOVISA / 105 CT / 72 endoscopy tests,
-    actual gemma4:e2b, registered CV and all imaging transfers passed; real paired
-    report 66.48s with scripted reviews in temporary SQLite. Publication pending.
+    Status: complete — 279 LOVISA / 105 CT / 72 endoscopy local tests; actual
+    gemma4:e2b, registered CV, all imaging transfers and 66.48s paired-report
+    smoke passed. All three repos published. Hosted 40099153159, 40099064726 and
+    40099084727 passed; local demo health/sign-in verified. No clinical approval
+    issued in the app; CUDA/NPU/full CT training remains unexecuted.

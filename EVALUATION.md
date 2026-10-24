@@ -496,3 +496,22 @@ and endoscopy source [9391192](https://github.com/LilyC2024/AI-MedImg-Endo/commi
 are published. LOVISA's integration CI now pins those exact producer commits.
 Shared contracts are unchanged and exact sync plus all local producer/consumer
 smokes passed. No hosted outcome is inferred from a local result.
+
+## Publication and hosted verification — 24 October 2026
+
+Tested source [4567b17](https://github.com/LilyC2024/Medical-AI/commit/4567b1711ba6cc4b0482d7831ceed63af8d79d56) is published.
+[Hosted workflow 40099153159](https://github.com/LilyC2024/Medical-AI/actions/runs/40099153159)
+completed successfully. Python 3.10/3.12 tests, exact pinned endoscopy
+producer/consumer and fixture/pretrained/legacy CT transfers all passed. The CT
+[hosted release](https://github.com/LilyC2024/ai-medimg-2.5D-CT/actions/runs/40099064726)
+and endoscopy [Linux/Windows release](https://github.com/LilyC2024/AI-MedImg-Endo/actions/runs/40099084727)
+also passed. All 456 local tests and actual local smokes above remain separate
+from these hosted software checks.
+
+The local demo was started on loopback 127.0.0.1:8501; HTTP health and the existing
+demo-account sign-in passed. No actual-app import, image/safety/final approval or
+clinical-record modification was issued. New manual browser QA is not claimed.
+
+Final follow-up changes only phase/evaluation Markdown records; tested runtime,
+models, protocols and generated source references are unchanged. Local branch
+and publication trees are checked for equality before synchronization.
