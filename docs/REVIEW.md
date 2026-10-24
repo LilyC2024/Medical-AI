@@ -1,11 +1,13 @@
-# Three-project expert code review — 24 October 2026
+# Three-project AI-agent code review — 24 October 2026
 
 [Overview](../README.md) · [Checks](VALIDATION.md) · [Evidence](../EVALUATION.md)
 
-Three independent reviewers inspected LOVISA, CT and endoscopy source, tests and
-runtime boundaries. The primary agent checked integrations, documentation and
-publication. Each material defect received a regression or rejected-input test.
-This is a software audit, not clinician review or exhaustive security assurance.
+Three AI coding-agent reviewers (separate sessions, one per repository) inspected
+LOVISA, CT and endoscopy source, tests and runtime boundaries. The primary agent
+checked integrations, documentation and publication. Each material defect received
+a regression or rejected-input test. This is an AI-assisted self-audit under the
+same single author: it is not independent human review, clinician review or
+exhaustive security assurance.
 
 ## LOVISA findings
 

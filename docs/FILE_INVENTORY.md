@@ -10,6 +10,7 @@ The callable inventory is generated separately from AST; this is the publication
 - [.gitignore](../.gitignore)
 - [.streamlit/config.toml](../.streamlit/config.toml)
 - [AGENTS.md](../AGENTS.md)
+- [CHANGELOG.md](../CHANGELOG.md)
 - [CONTRIBUTING.md](../CONTRIBUTING.md)
 - [EVALUATION.md](../EVALUATION.md)
 - [PLAN.md](../PLAN.md)

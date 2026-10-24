@@ -17,7 +17,9 @@
 | CT adapter | `LocalCTJob` | Separate bounded companion process; fixture/pretrained/legacy modes |
 | Endoscopy adapter | `LocalEndoscopyJob` | Separate bounded CV process; installed local backend and exact source/provenance |
 
-The specialists are software roles, not four independent LLM conversations.
+The specialists are software roles, not four independent LLM conversations: the
+system is a deterministic workflow with one constrained LLM step, not a
+multi-agent system.
 LangChain runnables wrap deterministic extraction/retrieval; only reasoning calls
 `gemma4:e2b`. Imaging adapters do not have database or approval tools. Expert coding
 review agents are development collaborators, not shipped runtime components.

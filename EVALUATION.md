@@ -1,8 +1,23 @@
 # LOVISA evaluation record
 
+## Review-process wording correction — 24 October 2026
+
+Documentation only: the agent review is now described as an AI-assisted self-audit,
+not independent review, and LOVISA as a deterministic workflow with one constrained
+LLM step. No source, policy, catalog, model or test changed.
+
+| Executed check | Actual outcome |
+| --- | --- |
+| `python -m pytest -q` (Python 3.13.17, local container) | **279 passed in 78.32s**; scripted inference, temporary databases |
+| `scripts/check_docs.py` / `generate_api_docs.py --check` | Passed: links/anchors valid in 35 documents; API reference matches |
+| `python -m pip check` | No broken requirements found |
+| `ruff check .` (ruff 0.17.2, no repo config, default rules) | 95 findings, unchanged from the pre-change baseline (CI does not run ruff; tracked for the CI-hardening change) |
+
+Not run: live Ollama smoke, CT/endoscopy joint smokes (no source change), hosted CI.
+
 ## Expert review and joint release — 24 October 2026
 
-Three independent coding reviewers audited LOVISA, CT and endoscopy. Repairs
+Three AI coding-agent reviewers (a self-audit, not independent human review) audited LOVISA, CT and endoscopy. Repairs
 were tested before the documentation phase. Root READMEs are now concise; linked
 subject guides and generated source/class/function references carry the detail.
 [Reproduced findings](docs/REVIEW.md) · [Development agents](docs/DEVELOPMENT.md).

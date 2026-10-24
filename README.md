@@ -52,13 +52,15 @@ The right-hand guide links directly to actions. Errors are visible and retryable
 Adding images after report preparation starts a fresh unreviewed context and
 requires safety again; saved reports remain unchanged. [Detailed workflow](docs/WORKFLOWS.md).
 
-## Agents and models
+## Workflow and models
 
-One LangGraph `MedicalHistoryOrchestrator` coordinates history, medication,
-reasoning and safety roles. **Only reasoning uses the local LLM**; extraction,
+LOVISA is a deterministic workflow with one constrained LLM step, not a
+multi-agent system. One LangGraph `MedicalHistoryOrchestrator` coordinates
+history, medication, reasoning and safety roles. **Only reasoning uses the local LLM**; extraction,
 evidence checks and versioned safety routing run in Python. CT/endo use separate
 CV models and bounded Python adapters. Images and image notes never enter Ollama.
-Development review agents are separate from the application's runtime.
+Development is AI-assisted; review agents are separate from the application's
+runtime and their audits are not independent human review.
 [Implementation and data structures](docs/ARCHITECTURE.md).
 
 ## Documentation and evidence

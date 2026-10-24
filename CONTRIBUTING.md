@@ -52,6 +52,8 @@ measurements, not current capability claims. Regenerate source API references
 with `scripts/generate_api_docs.py --write`, then run `--check` and the Markdown
 file/anchor checker. Update every affected guide in both producer and receiver.
 
-Three independent expert coding reviewers audited LOVISA, CT and endoscopy in the
-current pass. Their regressions are software evidence and are separate from
-clinician review and actual model inference. [Findings](docs/REVIEW.md).
+Development is AI-assisted: AI coding agents write and review code under one
+human author. Three AI coding-agent reviewers audited LOVISA, CT and endoscopy in
+the 24 October 2026 pass. That is a self-audit, not independent human review; its
+regressions are software evidence, separate from clinician review, security review
+and actual model inference. [Findings](docs/REVIEW.md).

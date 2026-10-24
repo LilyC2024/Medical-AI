@@ -15,10 +15,10 @@ and U-Net are computer-vision models, not LLM agents. Python composes accepted
 observations after history reasoning; image pixels/notes never enter the LLM.
 [Schema/module contracts](CODE_REFERENCE.md).
 
-## Expert code-review agents
+## AI coding-agent review
 
 The 24 October 2026 review used a primary integration/documentation agent and
-three independent coding reviewers:
+three AI coding-agent reviewers, each in a separate session:
 
 | Reviewer scope | Inspection and result |
 | --- | --- |
@@ -28,7 +28,9 @@ three independent coding reviewers:
 | Primary agent | Cross-project protocol compatibility, documentation/commands, reusable figures, final regressions/smokes and publication |
 
 Coding agents are development collaborators, not deployed runtime subagents or
-clinical experts. Tests used temporary databases, manufactured inputs and scripted
+clinical experts. Because the agents and the single human author share the same
+project context, this is a self-audit, not independent review; no independent
+human code, security or clinician review has taken place. Tests used temporary databases, manufactured inputs and scripted
 reviewers; actual model smokes were run separately. [Findings](REVIEW.md) ·
 [Evidence](../EVALUATION.md). Earlier historical passes used different review
 arrangements; no past use of agents is inferred from this one.

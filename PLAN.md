@@ -152,7 +152,7 @@ software gates.
 
 ## Three-repository expert review — 24 October 2026
 
-36. **Expert source review and repairs** — independent reviewers inspect LOVISA,
+36. **Expert source review and repairs** — AI coding-agent reviewers inspect LOVISA,
     CT and endoscopy, reproduce material defects and test repairs. Audit contracts,
     trust boundaries, job lifecycle, source/model identity and CLI workflows before
     changing documentation. Status: passed — LOVISA 279 tests/163.05s, CT 101
